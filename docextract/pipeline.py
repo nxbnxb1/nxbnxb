@@ -35,8 +35,9 @@ from .models import (
 )
 from .preprocessing import image as imgmod
 from .preprocessing import pdf as pdfmod
-from .preprocessing.docx import DocxReader, convert_doc_to_docx
+from .preprocessing.docx import DocxReader
 from .preprocessing.loader import detect_format
+from .preprocessing.office import convert, office_target
 from .router import RuleBasedRouter
 
 log = logging.getLogger(__name__)
@@ -93,8 +94,10 @@ class DocumentPipeline:
         run = _Run(settings, engines, executor, filename)
 
         fmt = detect_format(data, filename)
-        if fmt == "doc":
-            data, fmt = convert_doc_to_docx(data), "docx"
+        original = None
+        if fmt == "office":  # one converter for every other format
+            target = office_target(filename)
+            data, fmt, original = convert(data, filename, target), target, Path(filename).suffix.lower()
         if fmt == "pdf":
             pages, page_count = run.pdf(data, options.pages)
         elif fmt == "image":
@@ -109,6 +112,7 @@ class DocumentPipeline:
                 size_bytes=len(data),
                 format=fmt,
                 page_count=page_count,
+                converted_from=original,
             ),
             pages=pages,
             engines={**engines.describe(), "product": settings.product, "router": router.name, "docextract": __version__},

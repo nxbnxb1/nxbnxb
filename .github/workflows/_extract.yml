@@ -4,10 +4,11 @@ name: _extract (reusable)
 # <name>.json and <name>_assets/*.png (pictures text cannot replace), committed back to the branch
 # and attached as an artifact. Called by "Việt + Anh · Extract" and "Việt + Anh + Nhật · Extract".
 #
-# Optional repository settings:
-#   secrets.DOCEXTRACT_VLM_BASE_URL / secrets.DOCEXTRACT_VLM_API_KEY / vars.DOCEXTRACT_VLM_MODEL
-#     OpenAI-compatible endpoint of a Qwen-VL model for pictures, charts and difficult tables.
-#     Without it everything else still runs (text is always OCR / PDF text layer; pictures are kept).
+# VLM (pictures, charts, difficult tables), input "vlm":
+#   local (default)  free: open-source Qwen2.5-VL 3B served by Ollama on the runner itself
+#   api              an OpenAI-compatible endpoint from secrets.DOCEXTRACT_VLM_BASE_URL /
+#                    secrets.DOCEXTRACT_VLM_API_KEY / vars.DOCEXTRACT_VLM_MODEL
+#   none             no VLM: pictures are kept as image files (text is always OCR / PDF text layer)
 
 on:
   workflow_call:
@@ -27,6 +28,9 @@ on:
       demo:
         type: boolean
         default: false
+      vlm:
+        type: string
+        default: local
 
 permissions:
   contents: write
@@ -51,7 +55,7 @@ jobs:
         id: files
         run: |
           if [ "${{ inputs.demo }}" = "true" ]; then
-            printf '%s\n' samples/bao_cao_digital.pdf samples/bao_cao_scan.pdf samples/bao_cao.docx > files.txt
+            printf '%s\n' samples/bao_cao_digital.pdf samples/bao_cao_scan.pdf samples/bao_cao.docx samples/hinh_anh.pdf > files.txt
             if [ "$PRODUCT" = "vi_en_ja" ]; then
               printf '%s\n' samples/houkoku_digital.pdf samples/houkoku_scan.pdf >> files.txt
             fi
@@ -59,7 +63,7 @@ jobs:
             target="${{ inputs.path }}"
             target="${target:-inputs/$PRODUCT}"
             if [ -d "$target" ]; then
-              find "$target" -type f \( -iname '*.pdf' -o -iname '*.docx' -o -iname '*.doc' -o -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.tif' -o -iname '*.tiff' \) > files.txt
+              find "$target" -type f ! -name '.gitkeep' > files.txt
             else
               echo "$target" > files.txt
             fi
@@ -70,7 +74,7 @@ jobs:
             else
               git diff --name-only --diff-filter=AM "$before" "${{ github.sha }}" -- "inputs/$PRODUCT" > files.txt
             fi
-            grep -iE '\.(pdf|docx|doc|png|jpe?g|tiff?)$' files.txt > filtered.txt || true
+            grep -v '/\.gitkeep$' files.txt > filtered.txt || true
             mv filtered.txt files.txt
           fi
           echo "Files:"; cat files.txt
@@ -86,8 +90,10 @@ jobs:
         if: steps.files.outputs.count != '0'
         run: |
           pip install -e ".[paddle]"
-          if grep -qiE '\.doc$' files.txt; then
-            sudo apt-get update -qq && sudo apt-get install -y -qq libreoffice-writer-nogui >/dev/null
+          # any non-PDF/DOCX/image format is converted by LibreOffice
+          if grep -qviE '\.(pdf|docx|png|jpe?g|tiff?|bmp|webp)$' files.txt; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq libreoffice-writer-nogui libreoffice-calc-nogui libreoffice-impress-nogui >/dev/null
           fi
 
       - name: Demo documents
@@ -101,6 +107,18 @@ jobs:
           path: ~/.paddlex/official_models
           key: paddlex-models-${{ runner.os }}-v1
 
+      - name: Cache local VLM
+        if: steps.files.outputs.count != '0' && inputs.vlm == 'local'
+        uses: actions/cache@v4
+        with:
+          path: ~/.ollama/models
+          key: ollama-${{ vars.DOCEXTRACT_LOCAL_VLM || 'qwen2.5vl:3b' }}-v1
+
+      - name: Free local VLM (Ollama)
+        if: steps.files.outputs.count != '0' && inputs.vlm == 'local'
+        continue-on-error: true  # without a VLM pictures are simply kept
+        run: scripts/start_local_vlm.sh "${{ vars.DOCEXTRACT_LOCAL_VLM || 'qwen2.5vl:3b' }}"
+
       - name: OCR model of the product from Releases
         if: steps.files.outputs.count != '0'
         env:
@@ -110,9 +128,9 @@ jobs:
       - name: Convert
         if: steps.files.outputs.count != '0'
         env:
-          DOCEXTRACT_VLM_BASE_URL: ${{ secrets.DOCEXTRACT_VLM_BASE_URL }}
-          DOCEXTRACT_VLM_API_KEY: ${{ secrets.DOCEXTRACT_VLM_API_KEY }}
-          DOCEXTRACT_VLM_MODEL: ${{ vars.DOCEXTRACT_VLM_MODEL || 'Qwen/Qwen2.5-VL-7B-Instruct' }}
+          DOCEXTRACT_VLM_BASE_URL: ${{ inputs.vlm == 'api' && secrets.DOCEXTRACT_VLM_BASE_URL || env.DOCEXTRACT_VLM_BASE_URL }}
+          DOCEXTRACT_VLM_API_KEY: ${{ inputs.vlm == 'api' && secrets.DOCEXTRACT_VLM_API_KEY || '' }}
+          DOCEXTRACT_VLM_MODEL: ${{ inputs.vlm == 'api' && (vars.DOCEXTRACT_VLM_MODEL || 'Qwen/Qwen2.5-VL-7B-Instruct') || env.DOCEXTRACT_VLM_MODEL }}
           DOCEXTRACT_CACHE_DIR: ${{ github.workspace }}/.docextract_cache
           DOCEXTRACT_ROUTE_LOG_PATH: ${{ github.workspace }}/${{ env.OUT }}/route_log.jsonl
         run: |

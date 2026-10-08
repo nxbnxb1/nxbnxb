@@ -8,9 +8,9 @@ from typing import Literal
 
 from PIL import Image
 
-Format = Literal["pdf", "docx", "doc", "image"]
+from .office import office_target
 
-_OLE_MAGIC = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"
+Format = Literal["pdf", "docx", "image", "office"]
 
 
 class UnsupportedFormatError(ValueError):
@@ -28,13 +28,14 @@ def detect_format(data: bytes, filename: str = "") -> Format:
                     return "docx"
         except zipfile.BadZipFile:
             pass
-        raise UnsupportedFormatError(f"{filename or 'file'}: ZIP container that is not a Word document")
-    if data[:8] == _OLE_MAGIC and name.endswith(".doc"):
-        return "doc"
+    if office_target(name):
+        return "office"  # converted by LibreOffice (preprocessing/office.py)
     try:
         with Image.open(io.BytesIO(data)) as image:
             image.verify()
         return "image"
     except Exception:
         pass
-    raise UnsupportedFormatError(f"{filename or 'file'}: unsupported format (expected PDF, DOCX or an image)")
+    raise UnsupportedFormatError(
+        f"{filename or 'file'}: unsupported format (PDF, Word, office documents, HTML, text or images)"
+    )

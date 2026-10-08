@@ -5,11 +5,7 @@ from __future__ import annotations
 import io
 import logging
 import re
-import shutil
-import subprocess
-import tempfile
 from dataclasses import dataclass
-from pathlib import Path
 
 from docx import Document
 from docx.oxml.ns import nsmap, qn
@@ -41,23 +37,6 @@ class DocxBlock:
     table: Table | None = None
     image: Image.Image | None = None
     locator: str = ""
-
-
-def convert_doc_to_docx(data: bytes) -> bytes:
-    """Legacy .doc → .docx through LibreOffice, when it is installed."""
-    soffice = shutil.which("soffice") or shutil.which("libreoffice")
-    if not soffice:
-        raise ValueError("Legacy .doc files need LibreOffice (soffice) for conversion; please save as .docx")
-    with tempfile.TemporaryDirectory() as tmp:
-        src = Path(tmp) / "input.doc"
-        src.write_bytes(data)
-        subprocess.run(
-            [soffice, "--headless", "--convert-to", "docx", "--outdir", tmp, str(src)],
-            check=True,
-            capture_output=True,
-            timeout=300,
-        )
-        return (Path(tmp) / "input.docx").read_bytes()
 
 
 class DocxReader:

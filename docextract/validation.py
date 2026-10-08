@@ -84,6 +84,9 @@ def _text_checks(text: str, method: Method, settings: Settings, ext: Extraction)
                 f"Vietnamese letters missing ({dropout:.0%} of words without vowels): "
                 "use the Vietnamese recognition model (ocr_rec_model_dir)"
             )
+        agreement = (ext.data or {}).get("agreement")
+        if agreement is not None and agreement < settings.ocr_min_agreement:
+            issues.append(f"two OCR readings disagree ({agreement:.0%} similar)")
         if ext.confidence is not None and ext.confidence < settings.ocr_min_confidence:
             issues.append(f"low OCR confidence ({ext.confidence:.2f})")
         scores = (ext.data or {}).get("line_scores") or []

@@ -8,7 +8,9 @@ import logging
 import sys
 from pathlib import Path
 
-SUPPORTED = {".pdf", ".docx", ".doc", ".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp", ".webp"}
+from .preprocessing.office import OFFICE_EXTENSIONS
+
+SUPPORTED = {".pdf", ".docx", ".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp", ".webp"} | OFFICE_EXTENSIONS
 
 
 def write_outputs(result, out_dir: Path, stem: str, formats: set[str]) -> list[Path]:

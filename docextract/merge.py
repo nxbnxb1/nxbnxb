@@ -7,8 +7,8 @@ import unicodedata
 
 from .config import Settings
 from .models import FURNITURE_TYPES, DocumentResult, Region, RegionType, ValidationStatus
-from .tables import parse_html_table
-from .textutil import is_list_item, strip_bullet
+from .tables import Table, parse_html_table
+from .textutil import is_cjk, is_list_item, join_inline, strip_bullet
 
 LABELS = {
     "vi": {"image": "Hình ảnh", "chart": "Biểu đồ", "seal": "Con dấu", "page": "Trang", "review": "cần kiểm tra",
@@ -122,8 +122,79 @@ def _region_body(region: Region, settings: Settings, text: str) -> str:
     return text
 
 
+_TERMINAL = tuple(".!?:;。！？」』)）…")
+_OPENING = set("「『（(［[・-–—•")
+
+
+def _continues(prev: str, cur: str) -> bool:
+    """Does ``cur`` continue the sentence ``prev`` was cut in (column or page break)?"""
+    prev, cur = prev.rstrip(), cur.lstrip()
+    if not prev or not cur or prev.endswith(_TERMINAL):
+        return False
+    if cur[0].islower():
+        return True
+    return is_cjk(prev[-1]) and is_cjk(cur[0]) and cur[0] not in _OPENING
+
+
+def link_continuations(result: DocumentResult) -> None:
+    """Mark paragraphs/tables split across columns or pages (``meta.continues`` / ``continued_by``).
+
+    General rules only: a paragraph continues when the previous one stops mid-sentence (no
+    terminal punctuation) and the next starts in lower case (or both are CJK); a table continues
+    on the next page when it is the next content block and has the same number of columns.
+    """
+    sequence = [
+        r
+        for page in result.pages
+        for r in sorted(page.regions, key=lambda r: r.order)
+        if r.type not in FURNITURE_TYPES and r.type != RegionType.FOOTNOTE and r.status != ValidationStatus.SKIPPED
+    ]
+    for prev, cur in zip(sequence, sequence[1:]):
+        joined = False
+        if prev.type == RegionType.TEXT and cur.type == RegionType.TEXT:
+            joined = _continues(prev.content, cur.content)
+        elif prev.type == RegionType.TABLE and cur.type == RegionType.TABLE and prev.page and cur.page == prev.page + 1:
+            a, b = parse_html_table(prev.html or ""), parse_html_table(cur.html or "")
+            joined = a is not None and b is not None and a.n_cols == b.n_cols
+        if joined:
+            prev.meta["continued_by"] = cur.id
+            cur.meta["continues"] = prev.id
+
+
+def _chain(start: Region, by_id: dict[str, Region]) -> list[Region]:
+    chain = [start]
+    while chain[-1].meta.get("continued_by") in by_id:
+        chain.append(by_id[chain[-1].meta["continued_by"]])
+    return chain
+
+
+def _merged(chain: list[Region], settings: Settings) -> Region:
+    """One region carrying the content of a whole continuation chain (for rendering only)."""
+    first = chain[0]
+    if first.type == RegionType.TABLE:
+        tables = [parse_html_table(r.html or "") for r in chain]
+        rows = list(tables[0].rows)
+        header = [c.text for c in tables[0].rows[0]] if tables[0].rows else []
+        for table in tables[1:]:
+            body = table.rows[1:] if table.rows and [c.text for c in table.rows[0]] == header else table.rows
+            rows.extend(body)
+        merged = Table(rows)
+        return first.model_copy(update={"html": merged.to_html(), "content": merged.render(settings.table_format)})
+    text = ""
+    for region in chain:
+        part = region.content.strip()
+        if text.endswith("-") and part[:1].islower():
+            text = text[:-1] + part
+        else:
+            text = join_inline(text, part)
+    return first.model_copy(update={"content": text})
+
+
 def render_markdown(result: DocumentResult, settings: Settings) -> str:
     labels = LABELS[settings.output_locale]
+    if settings.join_continuations:
+        link_continuations(result)
+    by_id = {r.id: r for r in result.iter_regions()}
     parts: list[str] = []
     for page in result.pages:
         if settings.markdown_page_markers and page.number is not None:
@@ -133,11 +204,20 @@ def render_markdown(result: DocumentResult, settings: Settings) -> str:
                 continue
             if region.status == ValidationStatus.SKIPPED and not region.content.strip() and not region.figure:
                 continue
-            body = region_markdown(region, settings)
+            if settings.join_continuations and region.meta.get("continues") in by_id:
+                continue  # rendered with the region it continues
+            chain = _chain(region, by_id) if settings.join_continuations else [region]
+            shown = _merged(chain, settings) if len(chain) > 1 else region
+            body = region_markdown(shown, settings)
+            for extra in chain[1:]:
+                if extra.figure:
+                    body += f"\n\n![{labels['original']}]({extra.figure})"
             if not body:
                 continue
-            if settings.markdown_review_markers and region.status == ValidationStatus.NEEDS_REVIEW:
-                reason = "; ".join(region.issues)[:300].replace("--", "-")
-                parts.append(f"<!-- {labels['review']}: {region.id} ({region.method.value}): {reason} -->")
+            if settings.markdown_review_markers:
+                for member in chain:
+                    if member.status == ValidationStatus.NEEDS_REVIEW:
+                        reason = "; ".join(member.issues)[:300].replace("--", "-")
+                        parts.append(f"<!-- {labels['review']}: {member.id} ({member.method.value}): {reason} -->")
             parts.append(body)
     return "\n\n".join(parts).strip() + "\n"

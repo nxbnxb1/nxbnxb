@@ -21,6 +21,11 @@ on:
         description: Convert the generated demo documents instead
         type: boolean
         default: false
+      vlm:
+        description: "VLM for pictures: local (free, on the runner), api (secrets), none (keep pictures)"
+        type: choice
+        options: [local, api, none]
+        default: local
 
 permissions:
   contents: write
@@ -34,4 +39,5 @@ jobs:
       pages: ${{ inputs.pages || '' }}
       model_tag: ${{ inputs.model_tag || '' }}
       demo: ${{ inputs.demo == true }}
+      vlm: ${{ inputs.vlm || 'local' }}
     secrets: inherit

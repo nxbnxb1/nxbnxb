@@ -15,8 +15,9 @@ A picture may be replaced by text only if ALL of these hold:
 5. for charts: a data table was extracted, no value is marked as estimated (~), and every
    number in it appears in the text read from the picture.
 
-Seals/stamps are always kept (their look is the evidence). Tables and formulas whose
-structure could not be recovered (``needs_review``) also keep their picture.
+Seals/stamps are always kept (their look is the evidence). Any region whose result is
+uncertain (``needs_review``: unrecovered table structure, OCR readings that disagree,
+handwriting, ...) also keeps its original picture next to the extracted text.
 """
 
 from __future__ import annotations
@@ -43,14 +44,12 @@ def keep_figure(region: Region, settings: Settings) -> tuple[bool, str]:
         return True, "figure_policy=always"
     if settings.figure_policy == "never":
         return False, "figure_policy=never"
-    if region.type in (RegionType.TABLE, RegionType.FORMULA):
-        if region.status == ValidationStatus.NEEDS_REVIEW:
-            return True, f"{region.type.value} structure not recovered"
-        return False, "structure recovered"
+    if region.status == ValidationStatus.NEEDS_REVIEW:
+        return True, "uncertain result: original kept for review"
     if region.type == RegionType.SEAL:
         return True, "seal/stamp: the picture is the evidence"
     if region.type not in FIGURE_TYPES:
-        return False, "text region"
+        return False, "extracted content is verified"
     if region.status == ValidationStatus.SKIPPED:
         return False, "decorative image"
 

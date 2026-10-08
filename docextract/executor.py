@@ -25,6 +25,7 @@ from .config import Settings
 from .engines.base import Engines, VlmRequest
 from .engines.vlm import PROMPTS
 from .figures import FIGURE_TYPES, keep_figure
+from .metrics import normalized_distance
 from .models import Attempt, BBox, Method, PageKind, Region, RegionType, ValidationStatus
 from .preprocessing import pdf as pdfmod
 from .router import RouteFeatures, RuleBasedRouter
@@ -307,10 +308,9 @@ class Executor:
     def _keep_figures(self, tasks: list[RegionTask]) -> None:
         for task in tasks:
             region = task.region
-            if region.type not in FIGURE_TYPES and region.type not in (RegionType.TABLE, RegionType.FORMULA):
-                continue
             keep, reason = keep_figure(region, self.settings)
-            region.meta["figure_decision"] = reason
+            if region.type in FIGURE_TYPES or keep:
+                region.meta["figure_decision"] = reason
             if not keep:
                 continue
             image = task.crop()
@@ -372,6 +372,8 @@ class Executor:
         region.status = report.status
         region.issues = list(report.issues)
         data = {k: v for k, v in (ext.data or {}).items() if k not in ("trusted_text", "line_scores")}
+        if "agreement" in data:
+            region.meta["ocr_agreement"] = data.pop("agreement")
         region.data = data or None
         task.done = True
 
@@ -451,22 +453,26 @@ class Executor:
         assert engine is not None
 
         def compute(batch: list[RegionTask]) -> list[Extraction]:
-            results = engine.recognize([t.crop() for t in batch])
+            crops = [t.crop() for t in batch]
+            results = engine.recognize(crops)
+            # Test-time agreement: a second reading at another scale. Stable text reads the same; blur,
+            # unknown glyphs or handwriting change between readings. Works for every language.
+            second = engine.recognize([_rescaled(c) for c in crops]) if self.settings.ocr_agreement_check else None
             out = []
-            for result in results:
+            for i, result in enumerate(results):
                 trusted = " ".join(ln.text for ln in result.lines if ln.score >= 0.9)
+                data = {"trusted_text": trusted, "line_scores": [round(ln.score, 4) for ln in result.lines]}
+                if second is not None:
+                    data["agreement"] = round(text_agreement(result.text, second[i].text), 4)
                 out.append(
                     Extraction(
-                        method=Method.OCR,
-                        engine=engine.name,
-                        content=result.text,
-                        confidence=result.confidence,
-                        data={"trusted_text": trusted, "line_scores": [round(ln.score, 4) for ln in result.lines]},
+                        method=Method.OCR, engine=engine.name, content=result.text, confidence=result.confidence, data=data
                     )
                 )
             return out
 
-        return self._batched(Method.OCR, engine.name, tasks, compute)
+        agree = "agree" if self.settings.ocr_agreement_check else ""
+        return self._batched(Method.OCR, engine.name, tasks, compute, lambda t: agree)
 
     def _table_recognition(self, tasks: list[RegionTask]) -> list[Extraction]:
         engine = self.engines.table
@@ -586,6 +592,20 @@ class Executor:
                     task.evidence["trusted_text"] = ext.data["trusted_text"]
         except Exception as exc:  # evidence is optional
             log.warning("OCR evidence collection failed: %s", exc)
+
+
+def _rescaled(image: Image.Image) -> Image.Image:
+    factor = 0.75 if max(image.size) > 2000 else 1.5
+    size = (max(1, round(image.width * factor)), max(1, round(image.height * factor)))
+    return image.resize(size, Image.Resampling.BICUBIC)
+
+
+def text_agreement(a: str, b: str) -> float:
+    """Similarity of two readings, ignoring whitespace (1 = identical)."""
+    a, b = "".join(a.split()), "".join(b.split())
+    if not a and not b:
+        return 1.0
+    return 1.0 - normalized_distance(a, b)
 
 
 def chart_markdown(data: dict | None, raw: str) -> str:

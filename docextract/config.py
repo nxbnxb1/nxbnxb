@@ -84,11 +84,17 @@ class Settings(BaseModel):
     min_figure_area_ratio: float = Field(0.002, description="Smaller images are decoration and are dropped")
     figure_policy: Literal["auto", "always", "never"] = Field(
         "auto",
-        description="auto: keep the image file whenever text cannot carry all of its information; always/never",
+        description="auto: keep the image file whenever text cannot carry all of its information or the "
+        "result is uncertain; always/never",
     )
+    join_continuations: bool = Field(True, description="Join paragraphs and tables split across columns/pages")
     prefer_vlm_for_complex_tables: bool = True
     complex_table_cells: int = Field(120, description="Tables with more cells count as complex")
     verify_vlm_with_ocr: bool = Field(True, description="Cross-check VLM numbers against OCR tokens")
+    ocr_agreement_check: bool = Field(
+        True, description="Read each OCR region twice at different scales; disagreement = uncertain (any language)"
+    )
+    ocr_min_agreement: float = Field(0.9, description="Minimum similarity between the two OCR readings")
     ocr_min_confidence: float = 0.85
     ocr_low_line_confidence: float = 0.6
     ocr_max_low_lines_ratio: float = 0.25

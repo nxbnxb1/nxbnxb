@@ -9,6 +9,11 @@ on:
       dataset:
         description: Folder with documents + <name>.gt.md (empty = demo documents)
         default: ""
+      vlm:
+        description: "VLM for pictures: local (free, on the runner), api (secrets), none"
+        type: choice
+        options: [local, api, none]
+        default: local
       model_tag:
         description: Release of the fine-tuned model (empty = newest vi_en model)
         default: ""
@@ -23,4 +28,5 @@ jobs:
       product: vi_en
       dataset: ${{ inputs.dataset }}
       model_tag: ${{ inputs.model_tag }}
+      vlm: ${{ inputs.vlm }}
     secrets: inherit

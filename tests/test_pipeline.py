@@ -80,6 +80,7 @@ def test_ocr_dropout_is_flagged_not_sent_to_vlm(settings):
     text = next(r for r in result.iter_regions() if r.type == RegionType.TEXT)
     assert text.method == Method.OCR and text.status == ValidationStatus.NEEDS_REVIEW
     assert "cần kiểm tra" in result.markdown
+    assert text.figure and "![Ảnh gốc]" in result.markdown  # uncertain → original picture kept
     assert all(r.task != "text" for r in vlm.requests)
 
 

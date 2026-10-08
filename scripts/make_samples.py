@@ -5,6 +5,8 @@
     samples/bao_cao.docx          Word version with headings, list and a merged-cell table
     samples/houkoku_digital.pdf   Japanese report with a text layer (built-in CJK font of PyMuPDF)
     samples/houkoku_scan.pdf      the same Japanese page as a scan
+    samples/hinh_anh.pdf          a page with a bar chart and a photo-like picture (no ground truth:
+                                  exercises the VLM and the keep-or-replace rule for pictures)
     samples/<name>.gt.md          expected Markdown, for `docextract bench samples`
 """
 
@@ -93,6 +95,49 @@ def japanese_pdf() -> bytes:
     return doc.tobytes(garbage=3, deflate=True)
 
 
+def bar_chart() -> bytes:
+    from PIL import ImageDraw, ImageFont
+
+    font = ImageFont.truetype(font_path(), 22)
+    image = Image.new("RGB", (900, 560), "white")
+    draw = ImageDraw.Draw(image)
+    draw.text((40, 20), "Doanh thu thuần (tỷ đồng)", font=font, fill="black")
+    draw.line((90, 480, 860, 480), fill="black", width=2)
+    draw.line((90, 80, 90, 480), fill="black", width=2)
+    for i, (year, value) in enumerate([("2022", 905.3), ("2023", 1012.8), ("2024", 1099.2), ("2025", 1234.5)]):
+        x = 150 + i * 180
+        top = 480 - int(value / 1300 * 380)
+        draw.rectangle((x, top, x + 100, 480), fill=(37, 99, 235))
+        draw.text((x + 2, top - 32), f"{value:,.1f}".replace(",", " ").replace(".", ",").replace(" ", "."), font=font, fill="black")
+        draw.text((x + 22, 490), year, font=font, fill="black")
+    buf = io.BytesIO()
+    image.save(buf, format="PNG")
+    return buf.getvalue()
+
+
+def photo() -> bytes:
+    """A photo-like picture: smooth colour gradients and noise, nothing a text could replace."""
+    rng = np.random.default_rng(1)
+    y, x = np.mgrid[0:420, 0:640]
+    arr = np.stack([(x / 640 * 180 + 40), (y / 420 * 150 + 60), ((x + y) / 1060 * 120 + 80)], axis=-1)
+    arr += rng.normal(0, 18, arr.shape)
+    buf = io.BytesIO()
+    Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(1.2)).save(buf, format="JPEG", quality=85)
+    return buf.getvalue()
+
+
+def pictures_pdf() -> bytes:
+    doc = pymupdf.open()
+    page = doc.new_page(width=595, height=842)
+    page.insert_font(fontname="vn", fontfile=font_path())
+    page.insert_text((60, 70), "Phụ lục: hình ảnh và biểu đồ", fontsize=16, fontname="vn")
+    page.insert_image(pymupdf.Rect(60, 100, 535, 395), stream=bar_chart())
+    page.insert_text((60, 415), "Hình 1. Doanh thu thuần giai đoạn 2022–2025", fontsize=10, fontname="vn")
+    page.insert_image(pymupdf.Rect(60, 450, 420, 686), stream=photo())
+    page.insert_text((60, 705), "Hình 2. Toàn cảnh nhà máy mới", fontsize=10, fontname="vn")
+    return doc.tobytes(garbage=3, deflate=True)
+
+
 def scanned_pdf(digital: bytes) -> bytes:
     src = pymupdf.open(stream=digital, filetype="pdf")
     pix = src[0].get_pixmap(dpi=200, alpha=False)
@@ -154,6 +199,7 @@ def main() -> None:
     (out / "bao_cao_digital.pdf").write_bytes(digital)
     (out / "bao_cao_scan.pdf").write_bytes(scanned_pdf(digital))
     (out / "bao_cao.docx").write_bytes(docx())
+    (out / "hinh_anh.pdf").write_bytes(pictures_pdf())
     pipe_table = "\n".join(
         ["| " + " | ".join(TABLE[0]) + " |", "|---|---|---|---|"] + ["| " + " | ".join(r) + " |" for r in TABLE[1:]]
     )

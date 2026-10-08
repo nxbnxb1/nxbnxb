@@ -198,6 +198,7 @@ class SourceInfo(BaseModel):
     size_bytes: int
     format: Literal["pdf", "docx", "image"]
     page_count: int
+    converted_from: str | None = None  # original extension when LibreOffice converted the file
 
 
 class DocumentStats(BaseModel):
