@@ -1,4 +1,4 @@
-name: _zz_dbg_e (reusable)
+name: _zz_dbg_i (reusable)
 
 # Fine-tunes the PP-OCRv5 recogniser of one product on synthetic text lines so it reads
 # Vietnamese (stock PaddleOCR dictionaries lack most Vietnamese letters with stacked diacritics)
@@ -688,3 +688,13 @@ jobs:
             --model-name "$BASE_MODEL" --report "$WORK/val.md")
           { echo "### ${{ inputs.product }}: after round 6 of ${{ inputs.rounds }} (validation lines)"; cat "$WORK/val.md"; } >> "$GITHUB_STEP_SUMMARY"
 
+  # --- end of generated rounds ---
+
+  finalize:
+    needs: [prepare, average-r1, average-r2, average-r3, average-r4, average-r5, average-r6]
+    # the last finished round counts, even if a later one failed
+    if: ${{ !cancelled() && needs.average-r1.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - run: echo ok

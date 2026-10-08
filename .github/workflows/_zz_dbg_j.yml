@@ -1,4 +1,4 @@
-name: _zz_dbg_g (reusable)
+name: _zz_dbg_j (reusable)
 
 # Fine-tunes the PP-OCRv5 recogniser of one product on synthetic text lines so it reads
 # Vietnamese (stock PaddleOCR dictionaries lack most Vietnamese letters with stacked diacritics)
@@ -394,3 +394,381 @@ jobs:
             --model-name "$BASE_MODEL" --report "$WORK/val.md")
           { echo "### ${{ inputs.product }}: after round 3 of ${{ inputs.rounds }} (validation lines)"; cat "$WORK/val.md"; } >> "$GITHUB_STEP_SUMMARY"
 
+  shard-r4:
+    needs: [prepare, average-r3]
+    if: ${{ !cancelled() && inputs.rounds >= 4 && needs.prepare.result == 'success' && needs.average-r3.result == 'success' }}
+    runs-on: ubuntu-latest
+    continue-on-error: true  # a lost runner only removes its share from the average
+    timeout-minutes: 150  # round_minutes (at most 100) + setup, data and upload
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJSON(needs.prepare.outputs.shards) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/ocr-train-setup
+        with:
+          paddleocr-ref: ${{ env.PADDLEOCR_REF }}
+          paddleocr-dir: ${{ env.PADDLEOCR_DIR }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.product }}-prep
+          path: ${{ env.WORK }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.product }}-avg-r3
+          path: ${{ env.WORK }}/start
+
+      - name: Train (round 4, runner ${{ matrix.shard }})
+        run: |
+          source "$WORK/model.env"  # FUSE, FREEZE, GTC, LR of this training
+          if [ -s "$WORK/start/avg.pdparams" ]; then export INIT_PARAMS="$WORK/start/avg.pdparams"
+          elif [ -s "$WORK/resume/weights.pdparams" ]; then export INIT_PARAMS="$WORK/resume/weights.pdparams"; fi
+          # constant LR per round, cosine over the rounds; warm-up at the start of every round
+          # because each runner starts with a fresh optimizer
+          export LR=$(python -c "import math; r, n, lr = 4, ${{ inputs.rounds }}, $LR; print(f'{lr * 0.5 * (1 + math.cos(math.pi * (r - 0.5) / n)):.6g}')")
+          export LR_CONST=1 NO_EVAL=1 WARMUP=0.03 FUSE FREEZE GTC
+          SAMPLES=${{ inputs.lines }} CHUNK=${{ inputs.lines }} EPOCHS=100 BATCH=32 PRINT_STEP=10 \
+          SEED=$(( 4 * 1000 + ${{ matrix.shard }} )) TIME_BUDGET_MIN=${{ inputs.round_minutes }} \
+            training/vi_ocr/run_training.sh train
+          grep -E "avg_batch_cost" "$WORK/output/train.log" | tail -1 || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.product }}-r4-shard-${{ matrix.shard }}
+          path: ${{ env.WORK }}/output/final.pdparams
+          retention-days: 7
+
+  average-r4:
+    needs: [prepare, shard-r4]
+    if: ${{ !cancelled() && inputs.rounds >= 4 && needs.shard-r4.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/ocr-train-setup
+        with:
+          paddleocr-ref: ${{ env.PADDLEOCR_REF }}
+          paddleocr-dir: ${{ env.PADDLEOCR_DIR }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.product }}-prep
+          path: ${{ env.WORK }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ inputs.product }}-r4-shard-*
+          path: shards
+
+      - name: Average the runners' weights
+        run: |
+          mkdir -p avg
+          found=$(ls shards/*/final.pdparams 2>/dev/null | wc -l)
+          wanted=${{ inputs.runners }}
+          echo "$found of $wanted runners finished round 4"
+          [ $((found * 2)) -ge "$wanted" ] || { echo "::error::fewer than half of the runners finished"; exit 1; }
+          python training/vi_ocr/average_params.py avg/avg.pdparams shards/*/final.pdparams
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.product }}-avg-r4
+          path: avg/avg.pdparams
+          retention-days: 7
+
+      - name: Validation after round 4
+        continue-on-error: true
+        run: |
+          source "$WORK/model.env"
+          export FUSE
+          EXPORT_PARAMS="$GITHUB_WORKSPACE/avg/avg.pdparams" training/vi_ocr/run_training.sh export
+          sets=()
+          for lang in ${LANGS//,/ }; do sets+=("$WORK/data/val_$lang"); done
+          (cd training/vi_ocr && python evaluate.py --eval "${sets[@]}" --model "round 4=$WORK/export" \
+            --model-name "$BASE_MODEL" --report "$WORK/val.md")
+          { echo "### ${{ inputs.product }}: after round 4 of ${{ inputs.rounds }} (validation lines)"; cat "$WORK/val.md"; } >> "$GITHUB_STEP_SUMMARY"
+
+  shard-r5:
+    needs: [prepare, average-r4]
+    if: ${{ !cancelled() && inputs.rounds >= 5 && needs.prepare.result == 'success' && needs.average-r4.result == 'success' }}
+    runs-on: ubuntu-latest
+    continue-on-error: true  # a lost runner only removes its share from the average
+    timeout-minutes: 150  # round_minutes (at most 100) + setup, data and upload
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJSON(needs.prepare.outputs.shards) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/ocr-train-setup
+        with:
+          paddleocr-ref: ${{ env.PADDLEOCR_REF }}
+          paddleocr-dir: ${{ env.PADDLEOCR_DIR }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.product }}-prep
+          path: ${{ env.WORK }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.product }}-avg-r4
+          path: ${{ env.WORK }}/start
+
+      - name: Train (round 5, runner ${{ matrix.shard }})
+        run: |
+          source "$WORK/model.env"  # FUSE, FREEZE, GTC, LR of this training
+          if [ -s "$WORK/start/avg.pdparams" ]; then export INIT_PARAMS="$WORK/start/avg.pdparams"
+          elif [ -s "$WORK/resume/weights.pdparams" ]; then export INIT_PARAMS="$WORK/resume/weights.pdparams"; fi
+          # constant LR per round, cosine over the rounds; warm-up at the start of every round
+          # because each runner starts with a fresh optimizer
+          export LR=$(python -c "import math; r, n, lr = 5, ${{ inputs.rounds }}, $LR; print(f'{lr * 0.5 * (1 + math.cos(math.pi * (r - 0.5) / n)):.6g}')")
+          export LR_CONST=1 NO_EVAL=1 WARMUP=0.03 FUSE FREEZE GTC
+          SAMPLES=${{ inputs.lines }} CHUNK=${{ inputs.lines }} EPOCHS=100 BATCH=32 PRINT_STEP=10 \
+          SEED=$(( 5 * 1000 + ${{ matrix.shard }} )) TIME_BUDGET_MIN=${{ inputs.round_minutes }} \
+            training/vi_ocr/run_training.sh train
+          grep -E "avg_batch_cost" "$WORK/output/train.log" | tail -1 || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.product }}-r5-shard-${{ matrix.shard }}
+          path: ${{ env.WORK }}/output/final.pdparams
+          retention-days: 7
+
+  average-r5:
+    needs: [prepare, shard-r5]
+    if: ${{ !cancelled() && inputs.rounds >= 5 && needs.shard-r5.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/ocr-train-setup
+        with:
+          paddleocr-ref: ${{ env.PADDLEOCR_REF }}
+          paddleocr-dir: ${{ env.PADDLEOCR_DIR }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.product }}-prep
+          path: ${{ env.WORK }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ inputs.product }}-r5-shard-*
+          path: shards
+
+      - name: Average the runners' weights
+        run: |
+          mkdir -p avg
+          found=$(ls shards/*/final.pdparams 2>/dev/null | wc -l)
+          wanted=${{ inputs.runners }}
+          echo "$found of $wanted runners finished round 5"
+          [ $((found * 2)) -ge "$wanted" ] || { echo "::error::fewer than half of the runners finished"; exit 1; }
+          python training/vi_ocr/average_params.py avg/avg.pdparams shards/*/final.pdparams
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.product }}-avg-r5
+          path: avg/avg.pdparams
+          retention-days: 7
+
+      - name: Validation after round 5
+        continue-on-error: true
+        run: |
+          source "$WORK/model.env"
+          export FUSE
+          EXPORT_PARAMS="$GITHUB_WORKSPACE/avg/avg.pdparams" training/vi_ocr/run_training.sh export
+          sets=()
+          for lang in ${LANGS//,/ }; do sets+=("$WORK/data/val_$lang"); done
+          (cd training/vi_ocr && python evaluate.py --eval "${sets[@]}" --model "round 5=$WORK/export" \
+            --model-name "$BASE_MODEL" --report "$WORK/val.md")
+          { echo "### ${{ inputs.product }}: after round 5 of ${{ inputs.rounds }} (validation lines)"; cat "$WORK/val.md"; } >> "$GITHUB_STEP_SUMMARY"
+
+  shard-r6:
+    needs: [prepare, average-r5]
+    if: ${{ !cancelled() && inputs.rounds >= 6 && needs.prepare.result == 'success' && needs.average-r5.result == 'success' }}
+    runs-on: ubuntu-latest
+    continue-on-error: true  # a lost runner only removes its share from the average
+    timeout-minutes: 150  # round_minutes (at most 100) + setup, data and upload
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJSON(needs.prepare.outputs.shards) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/ocr-train-setup
+        with:
+          paddleocr-ref: ${{ env.PADDLEOCR_REF }}
+          paddleocr-dir: ${{ env.PADDLEOCR_DIR }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.product }}-prep
+          path: ${{ env.WORK }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.product }}-avg-r5
+          path: ${{ env.WORK }}/start
+
+      - name: Train (round 6, runner ${{ matrix.shard }})
+        run: |
+          source "$WORK/model.env"  # FUSE, FREEZE, GTC, LR of this training
+          if [ -s "$WORK/start/avg.pdparams" ]; then export INIT_PARAMS="$WORK/start/avg.pdparams"
+          elif [ -s "$WORK/resume/weights.pdparams" ]; then export INIT_PARAMS="$WORK/resume/weights.pdparams"; fi
+          # constant LR per round, cosine over the rounds; warm-up at the start of every round
+          # because each runner starts with a fresh optimizer
+          export LR=$(python -c "import math; r, n, lr = 6, ${{ inputs.rounds }}, $LR; print(f'{lr * 0.5 * (1 + math.cos(math.pi * (r - 0.5) / n)):.6g}')")
+          export LR_CONST=1 NO_EVAL=1 WARMUP=0.03 FUSE FREEZE GTC
+          SAMPLES=${{ inputs.lines }} CHUNK=${{ inputs.lines }} EPOCHS=100 BATCH=32 PRINT_STEP=10 \
+          SEED=$(( 6 * 1000 + ${{ matrix.shard }} )) TIME_BUDGET_MIN=${{ inputs.round_minutes }} \
+            training/vi_ocr/run_training.sh train
+          grep -E "avg_batch_cost" "$WORK/output/train.log" | tail -1 || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.product }}-r6-shard-${{ matrix.shard }}
+          path: ${{ env.WORK }}/output/final.pdparams
+          retention-days: 7
+
+  average-r6:
+    needs: [prepare, shard-r6]
+    if: ${{ !cancelled() && inputs.rounds >= 6 && needs.shard-r6.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/ocr-train-setup
+        with:
+          paddleocr-ref: ${{ env.PADDLEOCR_REF }}
+          paddleocr-dir: ${{ env.PADDLEOCR_DIR }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.product }}-prep
+          path: ${{ env.WORK }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ inputs.product }}-r6-shard-*
+          path: shards
+
+      - name: Average the runners' weights
+        run: |
+          mkdir -p avg
+          found=$(ls shards/*/final.pdparams 2>/dev/null | wc -l)
+          wanted=${{ inputs.runners }}
+          echo "$found of $wanted runners finished round 6"
+          [ $((found * 2)) -ge "$wanted" ] || { echo "::error::fewer than half of the runners finished"; exit 1; }
+          python training/vi_ocr/average_params.py avg/avg.pdparams shards/*/final.pdparams
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.product }}-avg-r6
+          path: avg/avg.pdparams
+          retention-days: 7
+
+      - name: Validation after round 6
+        continue-on-error: true
+        run: |
+          source "$WORK/model.env"
+          export FUSE
+          EXPORT_PARAMS="$GITHUB_WORKSPACE/avg/avg.pdparams" training/vi_ocr/run_training.sh export
+          sets=()
+          for lang in ${LANGS//,/ }; do sets+=("$WORK/data/val_$lang"); done
+          (cd training/vi_ocr && python evaluate.py --eval "${sets[@]}" --model "round 6=$WORK/export" \
+            --model-name "$BASE_MODEL" --report "$WORK/val.md")
+          { echo "### ${{ inputs.product }}: after round 6 of ${{ inputs.rounds }} (validation lines)"; cat "$WORK/val.md"; } >> "$GITHUB_STEP_SUMMARY"
+
+  # --- end of generated rounds ---
+
+  finalize:
+    needs: [prepare, average-r1, average-r2, average-r3, average-r4, average-r5, average-r6]
+    # the last finished round counts, even if a later one failed
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/ocr-train-setup
+        with:
+          paddleocr-ref: ${{ env.PADDLEOCR_REF }}
+          paddleocr-dir: ${{ env.PADDLEOCR_DIR }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.product }}-prep
+          path: ${{ env.WORK }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ inputs.product }}-avg-r*
+          path: averages
+
+      - name: Export the last round
+        id: last
+        run: |
+          last=$(ls -d averages/*-avg-r* | sed 's/.*-avg-r//' | sort -n | tail -1)
+          echo "round=$last" >> "$GITHUB_OUTPUT"
+          mkdir -p "$WORK/output"
+          cp "averages/${{ inputs.product }}-avg-r$last/avg.pdparams" "$WORK/output/final.pdparams"
+          source "$WORK/model.env"
+          export FUSE
+          training/vi_ocr/run_training.sh export
+
+      - name: Evaluate against the product baseline
+        continue-on-error: true  # never lose a finished training run to an evaluation problem
+        working-directory: training/vi_ocr
+        run: |
+          source "$WORK/model.env"
+          sets=()
+          for lang in ${LANGS//,/ }; do sets+=("$WORK/data/eval_$lang"); done
+          python evaluate.py --eval "${sets[@]}" "$WORK/data/eval_clean" \
+            --baseline "$BASE_MODEL" --model "$NAME (fine-tuned)=$WORK/export" --model-name "$BASE_MODEL" \
+            --report "$WORK/report.md"
+          cat "$WORK/report.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Package
+        run: |
+          source "$WORK/model.env"
+          mkdir -p "$WORK/dist/$NAME" "$WORK/dist/checkpoint"
+          cp "$WORK/output/final.pdparams" "$WORK/dist/checkpoint/weights.pdparams"
+          cp "$WORK/dict.txt" "$WORK/model.env" "$WORK/dist/checkpoint/"
+          tar -czf "$WORK/dist/checkpoint.tar.gz" -C "$WORK/dist" checkpoint
+          cp -r "$WORK/export/." "$WORK/dist/$NAME/"
+          tar -czf "$WORK/dist/$NAME.tar.gz" -C "$WORK/dist" "$NAME"
+          ls -la "$WORK/dist"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.product }}-ocr-model-${{ github.run_number }}
+          path: |
+            ${{ env.WORK }}/dist/*.tar.gz
+            ${{ env.WORK }}/report.*
+
+      - name: Publish release
+        if: inputs.publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          source "$WORK/model.env"
+          {
+            echo "Product ${{ inputs.product }}: fine-tuned PP-OCRv5 mobile recognition model $NAME (baseline: $BASE_MODEL)."
+            echo "Run ${{ github.run_id }}: ${{ inputs.runners }} runners × ${{ steps.last.outputs.round }} round(s) of"
+            echo "${{ inputs.round_minutes }} min, ${{ inputs.lines }} new synthetic lines per runner and round;"
+            echo "fused=$FUSE frozen='${FREEZE}' gtc=$GTC; continued from '${{ inputs.resume_tag }}'."
+            echo
+            cat "$WORK/report.md" 2>/dev/null || echo "(evaluation report missing: see the workflow logs)"
+          } > "$WORK/notes.md"
+          assets=("$WORK/dist/$NAME.tar.gz" "$WORK/dist/checkpoint.tar.gz")
+          for f in "$WORK/report.md" "$WORK/report.json"; do [ -f "$f" ] && assets+=("$f"); done
+          gh release create "${{ inputs.product }}-ocr-${{ github.run_number }}" "${assets[@]}" \
+            --target "${{ github.sha }}" --title "${{ inputs.product }} OCR model #${{ github.run_number }}" --notes-file "$WORK/notes.md"

@@ -1,11 +1,11 @@
-name: zz debug e
+name: zz debug j
 on:
   workflow_dispatch:
 permissions:
   contents: write
 jobs:
   train:
-    uses: ./.github/workflows/_zz_dbg_e.yml
+    uses: ./.github/workflows/_zz_dbg_j.yml
     with:
       product: vi_en
       runners: 2
