@@ -1,4 +1,4 @@
-name: _zz_dbg_c (reusable)
+name: _zz_dbg_f (reusable)
 
 # Fine-tunes the PP-OCRv5 recogniser of one product on synthetic text lines so it reads
 # Vietnamese (stock PaddleOCR dictionaries lack most Vietnamese letters with stacked diacritics)
@@ -197,4 +197,102 @@ jobs:
           (cd training/vi_ocr && python evaluate.py --eval "${sets[@]}" --model "round 1=$WORK/export" \
             --model-name "$BASE_MODEL" --report "$WORK/val.md")
           { echo "### ${{ inputs.product }}: after round 1 of ${{ inputs.rounds }} (validation lines)"; cat "$WORK/val.md"; } >> "$GITHUB_STEP_SUMMARY"
+
+  shard-r2:
+    needs: [prepare, average-r1]
+    if: ${{ !cancelled() && inputs.rounds >= 2 && needs.prepare.result == 'success' && needs.average-r1.result == 'success' }}
+    runs-on: ubuntu-latest
+    continue-on-error: true  # a lost runner only removes its share from the average
+    timeout-minutes: 150  # round_minutes (at most 100) + setup, data and upload
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJSON(needs.prepare.outputs.shards) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/ocr-train-setup
+        with:
+          paddleocr-ref: ${{ env.PADDLEOCR_REF }}
+          paddleocr-dir: ${{ env.PADDLEOCR_DIR }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.product }}-prep
+          path: ${{ env.WORK }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.product }}-avg-r1
+          path: ${{ env.WORK }}/start
+
+      - name: Train (round 2, runner ${{ matrix.shard }})
+        run: |
+          source "$WORK/model.env"  # FUSE, FREEZE, GTC, LR of this training
+          if [ -s "$WORK/start/avg.pdparams" ]; then export INIT_PARAMS="$WORK/start/avg.pdparams"
+          elif [ -s "$WORK/resume/weights.pdparams" ]; then export INIT_PARAMS="$WORK/resume/weights.pdparams"; fi
+          # constant LR per round, cosine over the rounds; warm-up at the start of every round
+          # because each runner starts with a fresh optimizer
+          export LR=$(python -c "import math; r, n, lr = 2, ${{ inputs.rounds }}, $LR; print(f'{lr * 0.5 * (1 + math.cos(math.pi * (r - 0.5) / n)):.6g}')")
+          export LR_CONST=1 NO_EVAL=1 WARMUP=0.03 FUSE FREEZE GTC
+          SAMPLES=${{ inputs.lines }} CHUNK=${{ inputs.lines }} EPOCHS=100 BATCH=32 PRINT_STEP=10 \
+          SEED=$(( 2 * 1000 + ${{ matrix.shard }} )) TIME_BUDGET_MIN=${{ inputs.round_minutes }} \
+            training/vi_ocr/run_training.sh train
+          grep -E "avg_batch_cost" "$WORK/output/train.log" | tail -1 || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.product }}-r2-shard-${{ matrix.shard }}
+          path: ${{ env.WORK }}/output/final.pdparams
+          retention-days: 7
+
+  average-r2:
+    needs: [prepare, shard-r2]
+    if: ${{ !cancelled() && inputs.rounds >= 2 && needs.shard-r2.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/ocr-train-setup
+        with:
+          paddleocr-ref: ${{ env.PADDLEOCR_REF }}
+          paddleocr-dir: ${{ env.PADDLEOCR_DIR }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.product }}-prep
+          path: ${{ env.WORK }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ inputs.product }}-r2-shard-*
+          path: shards
+
+      - name: Average the runners' weights
+        run: |
+          mkdir -p avg
+          found=$(ls shards/*/final.pdparams 2>/dev/null | wc -l)
+          wanted=${{ inputs.runners }}
+          echo "$found of $wanted runners finished round 2"
+          [ $((found * 2)) -ge "$wanted" ] || { echo "::error::fewer than half of the runners finished"; exit 1; }
+          python training/vi_ocr/average_params.py avg/avg.pdparams shards/*/final.pdparams
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.product }}-avg-r2
+          path: avg/avg.pdparams
+          retention-days: 7
+
+      - name: Validation after round 2
+        continue-on-error: true
+        run: |
+          source "$WORK/model.env"
+          export FUSE
+          EXPORT_PARAMS="$GITHUB_WORKSPACE/avg/avg.pdparams" training/vi_ocr/run_training.sh export
+          sets=()
+          for lang in ${LANGS//,/ }; do sets+=("$WORK/data/val_$lang"); done
+          (cd training/vi_ocr && python evaluate.py --eval "${sets[@]}" --model "round 2=$WORK/export" \
+            --model-name "$BASE_MODEL" --report "$WORK/val.md")
+          { echo "### ${{ inputs.product }}: after round 2 of ${{ inputs.rounds }} (validation lines)"; cat "$WORK/val.md"; } >> "$GITHUB_STEP_SUMMARY"
 
