@@ -1,0 +1,48 @@
+name: zz debug m
+
+# Product vi_en: fine-tune its PaddleOCR recogniser on several GitHub runners at once (rounds of
+# training + averaging, see _train.yml), evaluate against its baseline and publish the Release
+# "vi_en-ocr-<run>".
+
+on:
+  workflow_dispatch:
+    inputs:
+      runners:
+        description: Runners training at the same time (each on its own synthetic lines)
+        type: string
+        default: 8
+      rounds:
+        description: Rounds (1-6); the runners' weights are averaged after each round
+        type: string
+        default: 4
+      round_minutes:
+        description: Training minutes per round (at most 100)
+        type: string
+        default: 50
+      lines:
+        description: New synthetic lines per runner and round
+        type: string
+        default: 24000
+      resume_tag:
+        description: Continue from the weights of this release; empty = start from the baseline model
+        default: ""
+      publish:
+        description: Publish the model as a GitHub Release
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  train:
+    uses: ./.github/workflows/_zz_dbg_k.yml
+    with:
+      product: vi_en
+      runners: ${{ fromJSON(inputs.runners) }}
+      rounds: ${{ fromJSON(inputs.rounds) }}
+      round_minutes: ${{ fromJSON(inputs.round_minutes) }}
+      lines: ${{ fromJSON(inputs.lines) }}
+      resume_tag: ${{ inputs.resume_tag }}
+      publish: ${{ inputs.publish }}
+
