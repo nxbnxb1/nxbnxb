@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.docextract_cache/
+models/
+vi_ocr_work/
+PaddleOCR/
+files.txt
+dist/
+build/
+.venv/

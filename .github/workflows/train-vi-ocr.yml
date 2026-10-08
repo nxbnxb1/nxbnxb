@@ -1,0 +1,123 @@
+name: Train Vietnamese OCR
+
+# Fine-tunes the PP-OCRv5 recogniser on synthetic Vietnamese + English text lines
+# (stock PaddleOCR dictionaries lack most Vietnamese letters with stacked diacritics),
+# evaluates it against the stock models and publishes it as a GitHub Release
+# "vi-ocr-<run>" that the Extract workflow downloads automatically.
+
+on:
+  workflow_dispatch:
+    inputs:
+      samples:
+        description: Synthetic training lines
+        default: "60000"
+      epochs:
+        description: Training epochs
+        default: "4"
+      time_budget_minutes:
+        description: Stop training after this many minutes (the job limit is 6 h)
+        default: "290"
+      resume_tag:
+        description: Continue from the checkpoint of this release (e.g. vi-ocr-3); empty = start from PP-OCRv5
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: train-vi-ocr
+  cancel-in-progress: false
+
+env:
+  PADDLEOCR_REF: dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf  # training code, pinned
+  WORK: ${{ github.workspace }}/vi_ocr_work
+  PADDLEOCR_DIR: ${{ github.workspace }}/PaddleOCR
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Fonts with Vietnamese coverage
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-dejavu-core fonts-liberation2 fonts-freefont-ttf fonts-noto-core \
+            fonts-crosextra-carlito fonts-crosextra-caladea fonts-roboto fonts-open-sans >/dev/null
+
+      - name: PaddleOCR training code
+        run: |
+          git init -q "$PADDLEOCR_DIR"
+          git -C "$PADDLEOCR_DIR" fetch -q --depth 1 https://github.com/PaddlePaddle/PaddleOCR "$PADDLEOCR_REF"
+          git -C "$PADDLEOCR_DIR" checkout -q FETCH_HEAD
+
+      - name: Python packages
+        run: |
+          pip install "paddlepaddle==3.3.1" "paddleocr==3.7.0" wordfreq fonttools rapidfuzz
+          pip install -r "$PADDLEOCR_DIR/requirements.txt"
+          # albumentations pulls opencv-python-headless, which shadows the cv2 build PaddleX expects
+          pip uninstall -y opencv-python-headless opencv-python || true
+          pip install --force-reinstall --no-deps "opencv-contrib-python==4.10.0.84"
+
+      - name: Resume checkpoint
+        if: inputs.resume_tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$WORK/resume"
+          gh release download "${{ inputs.resume_tag }}" -p "checkpoint.tar.gz" -D "$WORK/resume"
+          tar -xzf "$WORK/resume/checkpoint.tar.gz" -C "$WORK/resume"
+          echo "RESUME_CHECKPOINT=$WORK/resume/checkpoint/latest" >> "$GITHUB_ENV"
+
+      - name: Train and export
+        env:
+          SAMPLES: ${{ inputs.samples }}
+          EPOCHS: ${{ inputs.epochs }}
+          TIME_BUDGET_MIN: ${{ inputs.time_budget_minutes }}
+        run: training/vi_ocr/run_training.sh
+
+      - name: Evaluate against stock PaddleOCR models
+        working-directory: training/vi_ocr
+        run: |
+          python evaluate.py --eval "$WORK/data/eval" "$WORK/data/eval_clean" \
+            --baseline latin_PP-OCRv5_mobile_rec --baseline PP-OCRv6_medium_rec \
+            --model "vi_en (fine-tuned)=$WORK/export" --report "$WORK/report.md"
+          cat "$WORK/report.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Package
+        run: |
+          mkdir -p "$WORK/dist/vi_en_PP-OCRv5_mobile_rec" "$WORK/dist/checkpoint"
+          cp -r "$WORK/export/." "$WORK/dist/vi_en_PP-OCRv5_mobile_rec/"
+          tar -czf "$WORK/dist/vi_en_PP-OCRv5_mobile_rec.tar.gz" -C "$WORK/dist" vi_en_PP-OCRv5_mobile_rec
+          cp "$WORK"/output/latest.* "$WORK/dist/checkpoint/"
+          cp "$WORK/vi_en_dict.txt" "$WORK/dist/checkpoint/"
+          tar -czf "$WORK/dist/checkpoint.tar.gz" -C "$WORK/dist" checkpoint
+          ls -la "$WORK/dist"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vi-ocr-model-${{ github.run_number }}
+          path: |
+            ${{ env.WORK }}/dist/*.tar.gz
+            ${{ env.WORK }}/report.*
+            ${{ env.WORK }}/output/train.log
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "Fine-tuned PP-OCRv5 mobile recognition model for Vietnamese + English."
+            echo "Trained by run ${{ github.run_id }}: samples=${{ inputs.samples }}, epochs=${{ inputs.epochs }}, resume='${{ inputs.resume_tag }}'."
+            echo
+            cat "$WORK/report.md"
+          } > "$WORK/notes.md"
+          gh release create "vi-ocr-${{ github.run_number }}" \
+            "$WORK/dist/vi_en_PP-OCRv5_mobile_rec.tar.gz" "$WORK/dist/checkpoint.tar.gz" "$WORK/report.md" "$WORK/report.json" \
+            --target "${{ github.sha }}" --title "Vietnamese OCR model #${{ github.run_number }}" --notes-file "$WORK/notes.md"

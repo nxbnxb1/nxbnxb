@@ -1,0 +1,138 @@
+name: Extract documents
+
+# Push PDF / Word / scanned images into inputs/ (or run manually): the documents are
+# converted on the GitHub runner and inputs/<name>.<ext> becomes outputs/<name>.md and
+# outputs/<name>.json, committed back to the branch and attached as an artifact.
+#
+# Optional repository settings:
+#   secrets.DOCEXTRACT_VLM_BASE_URL / secrets.DOCEXTRACT_VLM_API_KEY / vars.DOCEXTRACT_VLM_MODEL
+#     OpenAI-compatible endpoint of a Qwen-VL model for charts, pictures and difficult tables.
+#     Without it, everything else still runs (text is always OCR / PDF text layer).
+
+on:
+  push:
+    paths: ["inputs/**"]
+  workflow_dispatch:
+    inputs:
+      path:
+        description: File or folder to convert
+        default: inputs
+      pages:
+        description: Pages, e.g. 1-3,5 (empty = all)
+        default: ""
+      model_tag:
+        description: Vietnamese OCR release tag (empty = newest vi-ocr-* release)
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: extract-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Files to convert
+        id: files
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            target="${{ inputs.path }}"
+            if [ -d "$target" ]; then
+              find "$target" -type f \( -iname '*.pdf' -o -iname '*.docx' -o -iname '*.doc' -o -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.tif' -o -iname '*.tiff' \) > files.txt
+            else
+              echo "$target" > files.txt
+            fi
+          else
+            before="${{ github.event.before }}"
+            if [ -z "$before" ] || [ "$before" = "0000000000000000000000000000000000000000" ]; then
+              git ls-files inputs > files.txt
+            else
+              git diff --name-only --diff-filter=AM "$before" "${{ github.sha }}" -- inputs > files.txt
+            fi
+            grep -iE '\.(pdf|docx|doc|png|jpe?g|tiff?)$' files.txt > filtered.txt || true
+            mv filtered.txt files.txt
+          fi
+          echo "Files:"; cat files.txt
+          echo "count=$(grep -c . files.txt || true)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-python@v5
+        if: steps.files.outputs.count != '0'
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install docextract with PaddleOCR
+        if: steps.files.outputs.count != '0'
+        run: |
+          pip install -e ".[paddle]"
+          if grep -qiE '\.doc$' files.txt; then
+            sudo apt-get update -qq && sudo apt-get install -y -qq libreoffice-writer-nogui >/dev/null
+          fi
+
+      - name: Cache PaddleOCR models
+        if: steps.files.outputs.count != '0'
+        uses: actions/cache@v4
+        with:
+          path: ~/.paddlex/official_models
+          key: paddlex-models-${{ runner.os }}-v1
+
+      - name: Vietnamese OCR model from Releases
+        if: steps.files.outputs.count != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="${{ inputs.model_tag }}"
+          if [ -z "$tag" ]; then
+            tag=$(gh release list --limit 50 --json tagName,createdAt \
+              --jq '[.[] | select(.tagName | startswith("vi-ocr-"))] | sort_by(.createdAt) | last | .tagName // ""')
+          fi
+          if [ -n "$tag" ]; then
+            gh release download "$tag" -p "vi_en_PP-OCRv5_mobile_rec.tar.gz" -D models
+            tar -xzf models/vi_en_PP-OCRv5_mobile_rec.tar.gz -C models
+            echo "DOCEXTRACT_OCR_REC_MODEL_DIR=$PWD/models/vi_en_PP-OCRv5_mobile_rec" >> "$GITHUB_ENV"
+            echo "Using Vietnamese OCR model $tag" | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::warning::No vi-ocr-* release yet: using the stock PaddleOCR model, which drops many Vietnamese letters. Run the 'Train Vietnamese OCR' workflow first."
+          fi
+
+      - name: Convert
+        if: steps.files.outputs.count != '0'
+        env:
+          DOCEXTRACT_VLM_BASE_URL: ${{ secrets.DOCEXTRACT_VLM_BASE_URL }}
+          DOCEXTRACT_VLM_API_KEY: ${{ secrets.DOCEXTRACT_VLM_API_KEY }}
+          DOCEXTRACT_VLM_MODEL: ${{ vars.DOCEXTRACT_VLM_MODEL || 'Qwen/Qwen2.5-VL-7B-Instruct' }}
+          DOCEXTRACT_CACHE_DIR: ${{ github.workspace }}/.docextract_cache
+          DOCEXTRACT_ROUTE_LOG_PATH: ${{ github.workspace }}/outputs/route_log.jsonl
+        run: |
+          args=()
+          [ -n "${{ inputs.pages }}" ] && args+=(--pages "${{ inputs.pages }}")
+          mapfile -t files < files.txt
+          python -m docextract -v extract "${files[@]}" -o outputs "${args[@]}" | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: steps.files.outputs.count != '0'
+        with:
+          name: outputs-${{ github.run_number }}
+          path: outputs/
+
+      - name: Commit outputs
+        if: steps.files.outputs.count != '0'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add outputs
+          if git diff --cached --quiet; then
+            echo "nothing to commit"
+          else
+            git commit -m "Extract: $(wc -l < files.txt) document(s) from run ${{ github.run_number }}"
+            git pull --rebase origin "${GITHUB_REF_NAME}"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
