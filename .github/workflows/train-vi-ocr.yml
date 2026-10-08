@@ -28,10 +28,6 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: train-vi-ocr
-  cancel-in-progress: false
-
 env:
   PADDLEOCR_REF: dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf  # training code, pinned
   WORK: ${{ github.workspace }}/vi_ocr_work
@@ -87,6 +83,7 @@ jobs:
         run: training/vi_ocr/run_training.sh
 
       - name: Evaluate against stock PaddleOCR models
+        continue-on-error: true  # never lose a finished training run to an evaluation problem
         working-directory: training/vi_ocr
         run: |
           python evaluate.py --eval "$WORK/data/eval" "$WORK/data/eval_clean" \
@@ -95,16 +92,18 @@ jobs:
           cat "$WORK/report.md" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Package
+        if: ${{ !cancelled() }}
         run: |
           mkdir -p "$WORK/dist/vi_en_PP-OCRv5_mobile_rec" "$WORK/dist/checkpoint"
+          # checkpoint first: it allows resuming even if the export below is missing
+          cp "$WORK"/output/latest.* "$WORK/vi_en_dict.txt" "$WORK/dist/checkpoint/"
+          tar -czf "$WORK/dist/checkpoint.tar.gz" -C "$WORK/dist" checkpoint
           cp -r "$WORK/export/." "$WORK/dist/vi_en_PP-OCRv5_mobile_rec/"
           tar -czf "$WORK/dist/vi_en_PP-OCRv5_mobile_rec.tar.gz" -C "$WORK/dist" vi_en_PP-OCRv5_mobile_rec
-          cp "$WORK"/output/latest.* "$WORK/dist/checkpoint/"
-          cp "$WORK/vi_en_dict.txt" "$WORK/dist/checkpoint/"
-          tar -czf "$WORK/dist/checkpoint.tar.gz" -C "$WORK/dist" checkpoint
           ls -la "$WORK/dist"
 
       - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
         with:
           name: vi-ocr-model-${{ github.run_number }}
           path: |
@@ -113,7 +112,7 @@ jobs:
             ${{ env.WORK }}/output/train.log
 
       - name: Publish release
-        if: inputs.publish
+        if: ${{ !cancelled() && inputs.publish && hashFiles('vi_ocr_work/dist/vi_en_PP-OCRv5_mobile_rec.tar.gz') != '' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -121,8 +120,9 @@ jobs:
             echo "Fine-tuned PP-OCRv5 mobile recognition model for Vietnamese + English."
             echo "Trained by run ${{ github.run_id }}: samples=${{ inputs.samples }}, epochs=${{ inputs.epochs }}, resume='${{ inputs.resume_tag }}'."
             echo
-            cat "$WORK/report.md"
+            cat "$WORK/report.md" 2>/dev/null || echo "(evaluation report missing: see the workflow logs)"
           } > "$WORK/notes.md"
-          gh release create "vi-ocr-${{ github.run_number }}" \
-            "$WORK/dist/vi_en_PP-OCRv5_mobile_rec.tar.gz" "$WORK/dist/checkpoint.tar.gz" "$WORK/report.md" "$WORK/report.json" \
+          assets=("$WORK/dist/vi_en_PP-OCRv5_mobile_rec.tar.gz" "$WORK/dist/checkpoint.tar.gz")
+          for f in "$WORK/report.md" "$WORK/report.json"; do [ -f "$f" ] && assets+=("$f"); done
+          gh release create "vi-ocr-${{ github.run_number }}" "${assets[@]}" \
             --target "${{ github.sha }}" --title "Vietnamese OCR model #${{ github.run_number }}" --notes-file "$WORK/notes.md"
