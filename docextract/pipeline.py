@@ -77,6 +77,13 @@ class DocumentPipeline:
 
     # --- public API --------------------------------------------------------------------
 
+    def warm_up(self) -> None:
+        """Load every model (benchmarks time processing, not loading)."""
+        for name in ("layout", "ocr", "table", "formula", "orientation"):
+            engine = getattr(self.engines, name, None)
+            if hasattr(engine, "warm_up"):
+                engine.warm_up()
+
     def process_file(self, path: str | Path, options: ExtractOptions | None = None) -> DocumentResult:
         path = Path(path)
         return self.process_bytes(path.read_bytes(), path.name, options)

@@ -87,6 +87,18 @@ def cmd_serve(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_compare(args: argparse.Namespace) -> int:
+    from .benchmark import compare_reports
+
+    baseline = json.loads(Path(args.baseline).read_text(encoding="utf-8"))
+    candidate = json.loads(Path(args.candidate).read_text(encoding="utf-8"))
+    table = compare_reports(baseline, candidate, (args.baseline_name, args.candidate_name))
+    if args.output:
+        Path(args.output).write_text(table, encoding="utf-8")
+    print(table)
+    return 0
+
+
 def cmd_bench(args: argparse.Namespace) -> int:
     from .benchmark import run_benchmark
 
@@ -133,6 +145,14 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--product", choices=["vi_en", "vi_en_ja"])
     p.add_argument("--split", choices=["dev", "test"], help="only documents under dev/ or test/")
     p.set_defaults(func=cmd_bench)
+
+    p = sub.add_parser("compare", help="side-by-side table of two benchmark.json files")
+    p.add_argument("baseline")
+    p.add_argument("candidate")
+    p.add_argument("--baseline-name", default="baseline")
+    p.add_argument("--candidate-name", default="fine-tuned")
+    p.add_argument("-o", "--output")
+    p.set_defaults(func=cmd_compare)
 
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO if args.verbose else logging.WARNING, format="%(levelname)s %(name)s: %(message)s")

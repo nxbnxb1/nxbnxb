@@ -86,11 +86,16 @@ class _PaddleAdapter:
     def _load(self):  # pragma: no cover - implemented by subclasses
         raise NotImplementedError
 
-    def _predict(self, *args, **kwargs) -> list:
+    def warm_up(self) -> None:
+        """Load the model now instead of at the first prediction."""
         with self._lock:
             if self._model is None:
                 log.info("loading %s", self.name)
                 self._model = self._load()
+
+    def _predict(self, *args, **kwargs) -> list:
+        self.warm_up()
+        with self._lock:
             return list(self._model.predict(*args, **kwargs))
 
 

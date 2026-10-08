@@ -21,7 +21,7 @@
 #            LR (default per product), LR_CONST=1 (constant LR instead of cosine), WARMUP
 #            (fraction of a chunk), PRINT_STEP, NO_EVAL=1 (no validation during training),
 #            PROBE=1 (speed measurement: keep nothing)
-#   device:  USE_GPU=1 (e.g. on Kaggle), LOADER_WORKERS (data loader processes, default 2)
+#   loader:  LOADER_WORKERS (data loader processes, default 2)
 #   CPU:     THREADS (default: all cores), FUSE / FREEZE / GTC (see train_cpu.py)
 set -euo pipefail
 
@@ -121,7 +121,6 @@ print(round(c / s, 6), max(1, math.ceil(e * s / c)))")
     "Global.save_model_dir=$WORK/output"
     "Global.save_res_path=$WORK/output/predicts.txt"
     "Global.checkpoints="
-    "Global.use_gpu=$([ "${USE_GPU:-0}" = 1 ] && echo true || echo false)"
     "Optimizer.lr.learning_rate=${LR:-$DEFAULT_LR}"
     "Optimizer.lr.warmup_epoch=${WARMUP:-1}"
     "Train.dataset.data_dir=$WORK/data/train/"

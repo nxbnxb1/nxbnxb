@@ -7,11 +7,6 @@ name: "Việt + Anh · Train OCR model"
 on:
   workflow_dispatch:
     inputs:
-      compute:
-        description: "github: several free GitHub CPU runners; kaggle: one free Kaggle GPU (needs KAGGLE_* secrets)"
-        type: choice
-        options: [github, kaggle]
-        default: github
       runners:
         description: Runners training at the same time (each on its own synthetic lines)
         type: number
@@ -41,7 +36,6 @@ permissions:
 
 jobs:
   train:
-    if: inputs.compute == 'github'
     uses: ./.github/workflows/_train.yml
     with:
       product: vi_en
@@ -52,11 +46,3 @@ jobs:
       resume_tag: ${{ inputs.resume_tag }}
       publish: ${{ inputs.publish }}
 
-  train-kaggle:
-    if: inputs.compute == 'kaggle'
-    uses: ./.github/workflows/_train_kaggle.yml
-    with:
-      product: vi_en
-      resume_tag: ${{ inputs.resume_tag }}
-      publish: ${{ inputs.publish }}
-    secrets: inherit

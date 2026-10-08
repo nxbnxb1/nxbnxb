@@ -78,11 +78,18 @@ def documents(dataset: Path, split: str | None = None):
 
 
 def run_benchmark(
-    dataset: Path, use_vlm: bool = True, pipeline: DocumentPipeline | None = None, split: str | None = None
+    dataset: Path,
+    use_vlm: bool = True,
+    pipeline: DocumentPipeline | None = None,
+    split: str | None = None,
+    warmup: bool = True,
 ) -> dict:
     pipeline = pipeline or DocumentPipeline(Settings.from_env())
+    docs = list(documents(dataset, split))
+    if warmup:  # ms/page measures processing, not model loading
+        pipeline.warm_up()
     rows = []
-    for doc, gt_path, category, doc_split in documents(dataset, split):
+    for doc, gt_path, category, doc_split in docs:
         gt = gt_path.read_text(encoding="utf-8")
         result = pipeline.process_file(doc, ExtractOptions(use_vlm=use_vlm))
         pred = document_text(result.markdown or "")
@@ -146,4 +153,45 @@ def _report(rows: list[dict], summary: dict, categories: dict[str, dict]) -> str
     for row in rows:
         lines.append("| " + " | ".join(_cell(row[c]) for c in cols) + " |")
     lines += ["", "</details>"]
+    return "\n".join(lines) + "\n"
+
+
+# --- baseline vs candidate ----------------------------------------------------------------
+
+# (key, label, higher is better)
+COMPARED = [
+    ("cer", "CER", False),
+    ("word_f1", "word F1", True),
+    ("teds", "TEDS", True),
+    ("heading_f1", "heading F1", True),
+    ("ms_per_page", "ms/page", False),
+    ("needs_review_ratio", "needs review", False),
+]
+
+
+def _change(old, new, higher_better: bool) -> str:
+    if old is None or new is None:
+        return f"{_cell(old)} → {_cell(new)}"
+    delta = new - old
+    if abs(delta) < 1e-9:
+        mark = "="
+    else:
+        mark = "better" if (delta > 0) == higher_better else "worse"
+    return f"{old} → {new} ({mark})"
+
+
+def compare_reports(baseline: dict, candidate: dict, names: tuple[str, str] = ("baseline", "fine-tuned")) -> str:
+    """Side-by-side table of two benchmark reports on the same documents, per category and overall."""
+    lines = [
+        f"Each cell: {names[0]} → {names[1]}. Lower is better for CER, ms/page and needs review; higher for the rest.",
+        "",
+        "| category | documents | " + " | ".join(label for _, label, _ in COMPARED) + " |",
+        "|" + "---|" * (len(COMPARED) + 2),
+    ]
+    cats = dict(candidate.get("categories") or {})
+    rows = [(name, (baseline.get("categories") or {}).get(name, {}), values) for name, values in cats.items()]
+    rows.append(("**all**", baseline["summary"], candidate["summary"]))
+    for name, old, new in rows:
+        cells = [_change(old.get(key), new.get(key), better) for key, _, better in COMPARED]
+        lines.append(f"| {name} | {new.get('documents', '-')} | " + " | ".join(cells) + " |")
     return "\n".join(lines) + "\n"

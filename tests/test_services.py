@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 from docextract import DocumentPipeline
 from docextract.api import app, set_pipeline
-from docextract.benchmark import run_benchmark
+from docextract.benchmark import compare_reports, run_benchmark
 from docextract.cli import main as cli_main
 from docextract.config import Settings
 from docextract.engines.base import Engines, VlmRequest
@@ -117,6 +117,12 @@ def test_benchmark_and_cli(tmp_path, settings, monkeypatch):
     report = run_benchmark(tmp_path / "eval", pipeline=DocumentPipeline(settings, Engines()), split="test")
     assert [r["document"] for r in report["documents"]] == ["test/reports/report.pdf"]
     assert report["documents"][0]["category"] == "reports" and list(report["categories"]) == ["reports"]
+
+    # baseline vs candidate: per category and overall, with the direction of each change
+    worse = json.loads(json.dumps(report))
+    worse["summary"]["cer"] = report["summary"]["cer"] + 0.1
+    table = compare_reports(report, worse)
+    assert "| reports | 1 |" in table and "| **all** |" in table and "(worse)" in table
 
     monkeypatch.setenv("DOCEXTRACT_LAYOUT_BACKEND", "heuristic")
     monkeypatch.setenv("DOCEXTRACT_OCR_BACKEND", "none")

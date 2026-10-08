@@ -1,4 +1,4 @@
-"""Compare recognition models on labelled line images: CER, line accuracy, Vietnamese letters.
+"""Compare recognition models on labelled line images: CER, line accuracy, Vietnamese letters, speed.
 
     python evaluate.py --eval data/eval data/eval_clean \
         --model vi_en=export/ --baseline latin_PP-OCRv5_mobile_rec --baseline PP-OCRv6_medium_rec \
@@ -34,6 +34,7 @@ def recognise(model_name: str, model_dir: str | None, paths: list[Path], batch: 
     if model_dir:
         kwargs["model_dir"] = model_dir
     model = TextRecognition(**kwargs)
+    list(model.predict([str(p) for p in paths[:batch]], batch_size=batch))  # warm-up, not timed
     start = time.perf_counter()
     texts = []
     for i in range(0, len(paths), batch):
@@ -93,7 +94,7 @@ def main() -> None:
             examples[label].extend((r, h) for r, h in zip(refs[:8], hyps[:8]) if len(examples[label]) < 8)
             print(Path(directory).name, label, metrics, flush=True)
 
-    lines = ["# Vietnamese + English recognition: evaluation", ""]
+    lines = ["# Text line recognition: baseline vs fine-tuned (same runner, one after the other)", ""]
     for dataset, by_model in results.items():
         lines += [f"## {dataset}", "", "| model | CER | line accuracy | Vietnamese letter recall | ms/line |", "|---|---|---|---|---|"]
         for label, m in by_model.items():
