@@ -1,0 +1,15 @@
+name: zz debug a
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  train:
+    uses: ./.github/workflows/_zz_dbg_a.yml
+    with:
+      product: vi_en
+      runners: 2
+      rounds: 1
+      round_minutes: 5
+      lines: 1000
+      publish: false
