@@ -98,20 +98,7 @@ jobs:
         if: steps.files.outputs.count != '0'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          tag="${{ inputs.model_tag }}"
-          if [ -z "$tag" ]; then
-            tag=$(gh release list --limit 50 --json tagName,createdAt \
-              --jq '[.[] | select(.tagName | startswith("vi-ocr-"))] | sort_by(.createdAt) | last | .tagName // ""')
-          fi
-          if [ -n "$tag" ]; then
-            gh release download "$tag" -p "vi_en_PP-OCRv5_mobile_rec.tar.gz" -D models
-            tar -xzf models/vi_en_PP-OCRv5_mobile_rec.tar.gz -C models
-            echo "DOCEXTRACT_OCR_REC_MODEL_DIR=$PWD/models/vi_en_PP-OCRv5_mobile_rec" >> "$GITHUB_ENV"
-            echo "Using Vietnamese OCR model $tag" | tee -a "$GITHUB_STEP_SUMMARY"
-          else
-            echo "::warning::No vi-ocr-* release yet: using the stock PaddleOCR model, which drops many Vietnamese letters. Run the 'Train Vietnamese OCR' workflow first."
-          fi
+        run: scripts/fetch_ocr_model.sh "${{ inputs.model_tag }}"
 
       - name: Convert
         if: steps.files.outputs.count != '0'

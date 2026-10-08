@@ -1,8 +1,9 @@
-"""Generate demo documents (Vietnamese + English) for the Extract workflow:
+"""Generate demo documents (Vietnamese + English) and their ground truth:
 
     samples/bao_cao_digital.pdf   PDF with a text layer
     samples/bao_cao_scan.pdf      the same page as a skewed, noisy scan (image only)
     samples/bao_cao.docx          Word version with headings, list and a merged-cell table
+    samples/<name>.gt.md          expected Markdown, for `docextract bench samples`
 """
 
 from __future__ import annotations
@@ -101,6 +102,14 @@ def docx() -> bytes:
     return buf.getvalue()
 
 
+def ground_truth(table: str) -> str:
+    bullets = "\n".join(f"- {b}" for b in BULLETS)
+    return (
+        f"# {TITLE}\n\n## 1. Kết quả hoạt động\n\n" + "\n\n".join(PARAGRAPHS) + f"\n\n{table}\n\n"
+        f"## 2. Kế hoạch năm 2026\n\n{bullets}\n"
+    )
+
+
 def main() -> None:
     out = Path(sys.argv[1] if len(sys.argv) > 1 else "samples")
     out.mkdir(parents=True, exist_ok=True)
@@ -108,6 +117,17 @@ def main() -> None:
     (out / "bao_cao_digital.pdf").write_bytes(digital)
     (out / "bao_cao_scan.pdf").write_bytes(scanned_pdf(digital))
     (out / "bao_cao.docx").write_bytes(docx())
+    pipe_table = "\n".join(
+        ["| " + " | ".join(TABLE[0]) + " |", "|---|---|---|---|"] + ["| " + " | ".join(r) + " |" for r in TABLE[1:]]
+    )
+    rows = "".join("<tr>" + "".join(f"<td>{v}</td>" for v in r) + "</tr>" for r in TABLE[1:])
+    html_table = (
+        '<table><tr><th rowspan="2">Chỉ tiêu (tỷ đồng)</th><th colspan="2">Giá trị</th>'
+        '<th rowspan="2">Tăng trưởng</th></tr><tr><th>Năm 2024</th><th>Năm 2025</th></tr>' + rows + "</table>"
+    )
+    for name in ("bao_cao_digital", "bao_cao_scan"):
+        (out / f"{name}.gt.md").write_text(ground_truth(pipe_table), encoding="utf-8")
+    (out / "bao_cao.gt.md").write_text(ground_truth(html_table), encoding="utf-8")
     print("\n".join(str(p) for p in sorted(out.iterdir())))
 
 
