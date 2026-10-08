@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1210" viewBox="0 0 1400 1210" role="img">
+<defs><marker id="m475569" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker><marker id="m16a34a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#16a34a"/></marker><marker id="mdc2626" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#dc2626"/></marker><marker id="md97706" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#d97706"/></marker></defs>
+<rect x="0" y="0" width="1400" height="1210" fill="#ffffff"/>
+<text x="700.0" y="40" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="24" font-weight="700" fill="#0f172a" text-anchor="middle"><tspan x="700.0" dy="0">Hình 2. Router, thực thi theo vòng và kiểm tra kết quả</tspan></text>
+<text x="700.0" y="68" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="15" font-weight="400" fill="#475569" text-anchor="middle"><tspan x="700.0" dy="0">Mỗi vùng có một chuỗi phương pháp; thử lần lượt đến khi kết quả đạt kiểm tra</tspan></text>
+<rect x="30" y="100" width="930" height="610" rx="16" fill="none" stroke="#d97706" stroke-width="1.4" stroke-dasharray="7 5"/>
+<rect x="48" y="86" width="289.2" height="28" rx="14" fill="#d97706"/>
+<text x="192.6" y="105" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle"><tspan x="192.6" dy="0">CHUỖI PHƯƠNG PHÁP THEO LOẠI VÙNG</tspan></text>
+<rect x="50" y="128" width="190" height="84" rx="12" fill="#dbeafe" stroke="#2563eb" stroke-width="1.6"/>
+<text x="145.0" y="154" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="15.5" font-weight="700" fill="#1e40af" text-anchor="middle"><tspan x="145.0" dy="0">Văn bản</tspan></text>
+<text x="145.0" y="177" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1f2937" text-anchor="middle"><tspan x="145.0" dy="0">tiêu đề · đoạn · danh sách</tspan><tspan x="145.0" dy="17">header/footer · con dấu</tspan></text>
+<rect x="268" y="146" width="138" height="48" rx="10" fill="#dbeafe" stroke="#2563eb" stroke-width="1.6"/>
+<text x="337.0" y="174.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#1e40af" text-anchor="middle"><tspan x="337.0" dy="0">Text layer PDF *</tspan></text>
+<rect x="434" y="146" width="89" height="48" rx="10" fill="#dbeafe" stroke="#2563eb" stroke-width="1.6"/>
+<text x="478.5" y="174.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#1e40af" text-anchor="middle"><tspan x="478.5" dy="0">PaddleOCR</tspan></text>
+<path d="M 408 170 L 432 170" fill="none" stroke="#475569" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#m475569)"/>
+<path d="M 242 170 L 266 170" fill="none" stroke="#475569" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#m475569)"/>
+<text x="268" y="216" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="600" fill="#dc2626" text-anchor="start"><tspan x="268" dy="0">✕ Không dùng VLM cho văn bản</tspan></text>
+<rect x="50" y="240" width="190" height="84" rx="12" fill="#e0e7ff" stroke="#4f46e5" stroke-width="1.6"/>
+<text x="145.0" y="266" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="15.5" font-weight="700" fill="#3730a3" text-anchor="middle"><tspan x="145.0" dy="0">Bảng</tspan></text>
+<text x="145.0" y="289" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1f2937" text-anchor="middle"><tspan x="145.0" dy="0">bảng biểu</tspan></text>
+<rect x="268" y="258" width="145" height="48" rx="10" fill="#dbeafe" stroke="#2563eb" stroke-width="1.6"/>
+<text x="340.5" y="286.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#1e40af" text-anchor="middle"><tspan x="340.5" dy="0">Bảng vector PDF *</tspan></text>
+<rect x="441" y="258" width="131" height="48" rx="10" fill="#e0e7ff" stroke="#4f46e5" stroke-width="1.6"/>
+<text x="506.5" y="286.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#3730a3" text-anchor="middle"><tspan x="506.5" dy="0">PaddleOCR Table</tspan></text>
+<path d="M 415 282 L 439 282" fill="none" stroke="#475569" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#m475569)"/>
+<rect x="600" y="258" width="84" height="48" rx="10" fill="#f3e8ff" stroke="#9333ea" stroke-width="1.6"/>
+<text x="642.0" y="286.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#6b21a8" text-anchor="middle"><tspan x="642.0" dy="0">VLM</tspan></text>
+<path d="M 574 282 L 598 282" fill="none" stroke="#475569" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#m475569)"/>
+<rect x="712" y="258" width="215" height="48" rx="10" fill="#fee2e2" stroke="#dc2626" stroke-width="1.6"/>
+<text x="819.5" y="286.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#991b1b" text-anchor="middle"><tspan x="819.5" dy="0">Chữ + ảnh gốc, cần kiểm tra</tspan></text>
+<path d="M 686 282 L 710 282" fill="none" stroke="#475569" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#m475569)"/>
+<path d="M 242 282 L 266 282" fill="none" stroke="#475569" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#m475569)"/>
+<text x="268" y="328" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="500" fill="#334155" text-anchor="start"><tspan x="268" dy="0">Bảng lớn (&gt;45% trang hoặc &gt;120 ô): VLM trước PaddleOCR Table</tspan></text>
+<rect x="50" y="352" width="190" height="84" rx="12" fill="#fce7f3" stroke="#db2777" stroke-width="1.6"/>
+<text x="145.0" y="378" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="15.5" font-weight="700" fill="#9d174d" text-anchor="middle"><tspan x="145.0" dy="0">Công thức</tspan></text>
+<text x="145.0" y="401" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1f2937" text-anchor="middle"><tspan x="145.0" dy="0">toán học</tspan></text>
+<rect x="268" y="370" width="117" height="48" rx="10" fill="#fce7f3" stroke="#db2777" stroke-width="1.6"/>
+<text x="326.5" y="398.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#9d174d" text-anchor="middle"><tspan x="326.5" dy="0">PP-FormulaNet</tspan></text>
+<rect x="413" y="370" width="84" height="48" rx="10" fill="#f3e8ff" stroke="#9333ea" stroke-width="1.6"/>
+<text x="455.0" y="398.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#6b21a8" text-anchor="middle"><tspan x="455.0" dy="0">VLM</tspan></text>
+<path d="M 387 394 L 411 394" fill="none" stroke="#475569" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#m475569)"/>
+<rect x="525" y="370" width="215" height="48" rx="10" fill="#fee2e2" stroke="#dc2626" stroke-width="1.6"/>
+<text x="632.5" y="398.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#991b1b" text-anchor="middle"><tspan x="632.5" dy="0">Chữ + ảnh gốc, cần kiểm tra</tspan></text>
+<path d="M 499 394 L 523 394" fill="none" stroke="#475569" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#m475569)"/>
+<path d="M 242 394 L 266 394" fill="none" stroke="#475569" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#m475569)"/>
+<rect x="50" y="464" width="190" height="84" rx="12" fill="#f3e8ff" stroke="#9333ea" stroke-width="1.6"/>
+<text x="145.0" y="490" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="15.5" font-weight="700" fill="#6b21a8" text-anchor="middle"><tspan x="145.0" dy="0">Biểu đồ</tspan></text>
+<text x="145.0" y="513" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1f2937" text-anchor="middle"><tspan x="145.0" dy="0">sơ đồ, đồ thị</tspan></text>
+<rect x="268" y="482" width="166" height="48" rx="10" fill="#f3e8ff" stroke="#9333ea" stroke-width="1.6"/>
+<text x="351.0" y="510.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#6b21a8" text-anchor="middle"><tspan x="351.0" dy="0">VLM: mô tả + số liệu</tspan></text>
+<rect x="462" y="482" width="145" height="48" rx="10" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.6"/>
+<text x="534.5" y="510.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#5b21b6" text-anchor="middle"><tspan x="534.5" dy="0">Giữ hình (Hình 3)</tspan></text>
+<path d="M 436 506 L 460 506" fill="none" stroke="#475569" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#m475569)"/>
+<path d="M 242 506 L 266 506" fill="none" stroke="#475569" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#m475569)"/>
+<text x="268" y="552" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="500" fill="#334155" text-anchor="start"><tspan x="268" dy="0">Chữ và số in trong hình luôn do OCR / text layer đọc</tspan></text>
+<rect x="50" y="576" width="190" height="84" rx="12" fill="#f3e8ff" stroke="#9333ea" stroke-width="1.6"/>
+<text x="145.0" y="602" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="15.5" font-weight="700" fill="#6b21a8" text-anchor="middle"><tspan x="145.0" dy="0">Hình ảnh</tspan></text>
+<text x="145.0" y="625" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1f2937" text-anchor="middle"><tspan x="145.0" dy="0">ảnh, logo, chữ ký…</tspan></text>
+<rect x="268" y="594" width="145" height="48" rx="10" fill="#f3e8ff" stroke="#9333ea" stroke-width="1.6"/>
+<text x="340.5" y="622.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#6b21a8" text-anchor="middle"><tspan x="340.5" dy="0">VLM: loại + mô tả</tspan></text>
+<rect x="441" y="594" width="145" height="48" rx="10" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.6"/>
+<text x="513.5" y="622.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#5b21b6" text-anchor="middle"><tspan x="513.5" dy="0">Giữ hình (Hình 3)</tspan></text>
+<path d="M 415 618 L 439 618" fill="none" stroke="#475569" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#m475569)"/>
+<path d="M 242 618 L 266 618" fill="none" stroke="#475569" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#m475569)"/>
+<text x="268" y="664" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="500" fill="#334155" text-anchor="start"><tspan x="268" dy="0">Nhỏ hơn 1% trang: giữ hình, không mô tả · nhỏ hơn 0,2%: trang trí, bỏ</tspan></text>
+<text x="50" y="690" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#475569" text-anchor="start" font-style="italic"><tspan x="50" dy="0">* chỉ khi trang PDF có text layer dùng được. Engine chưa cấu hình (VD: chưa có VLM) được bỏ khỏi chuỗi.</tspan></text>
+<rect x="1000" y="100" width="370" height="610" rx="16" fill="none" stroke="#16a34a" stroke-width="1.4" stroke-dasharray="7 5"/>
+<rect x="1018" y="86" width="125.8" height="28" rx="14" fill="#16a34a"/>
+<text x="1080.9" y="105" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle"><tspan x="1080.9" dy="0">VÒNG THỰC THI</tspan></text>
+<rect x="1025" y="128" width="320" height="64" rx="12" fill="#fef3c7" stroke="#d97706" stroke-width="1.6"/>
+<text x="1185.0" y="154" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="700" fill="#92400e" text-anchor="middle"><tspan x="1185.0" dy="0">1. Gom vùng theo phương pháp</tspan></text>
+<text x="1185.0" y="175" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1f2937" text-anchor="middle"><tspan x="1185.0" dy="0">kế tiếp trong chuỗi của từng vùng</tspan></text>
+<rect x="1025" y="222" width="320" height="64" rx="12" fill="#dbeafe" stroke="#2563eb" stroke-width="1.6"/>
+<text x="1185.0" y="248" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="700" fill="#1e40af" text-anchor="middle"><tspan x="1185.0" dy="0">2. Chạy theo batch</tspan></text>
+<text x="1185.0" y="269" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1f2937" text-anchor="middle"><tspan x="1185.0" dy="0">nhóm chạy song song · cache</tspan></text>
+<rect x="1025" y="316" width="320" height="64" rx="12" fill="#dcfce7" stroke="#16a34a" stroke-width="1.6"/>
+<text x="1185.0" y="342" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="700" fill="#166534" text-anchor="middle"><tspan x="1185.0" dy="0">3. Kiểm tra kết quả</tspan></text>
+<text x="1185.0" y="363" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1f2937" text-anchor="middle"><tspan x="1185.0" dy="0">các phép kiểm tra bên dưới</tspan></text>
+<polygon points="1185,397.0 1260.0,432 1185,467.0 1110.0,432" fill="#dcfce7" stroke="#16a34a" stroke-width="1.6"/>
+<text x="1185" y="437" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="700" fill="#166534" text-anchor="middle"><tspan x="1185" dy="0">Đạt?</tspan></text>
+<rect x="1025" y="500" width="140" height="70" rx="12" fill="#dcfce7" stroke="#16a34a" stroke-width="1.6"/>
+<text x="1095.0" y="526" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" font-weight="700" fill="#166534" text-anchor="middle"><tspan x="1095.0" dy="0">Chốt kết quả</tspan></text>
+<text x="1095.0" y="546" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="400" fill="#1f2937" text-anchor="middle"><tspan x="1095.0" dy="0">passed / unchecked</tspan></text>
+<polygon points="1270,500.0 1345.0,535 1270,570.0 1195.0,535" fill="#fef3c7" stroke="#d97706" stroke-width="1.6"/>
+<text x="1270" y="540" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="700" fill="#92400e" text-anchor="middle"><tspan x="1270" dy="0">Còn cách?</tspan></text>
+<rect x="1060" y="612" width="290" height="84" rx="12" fill="#fee2e2" stroke="#dc2626" stroke-width="1.6"/>
+<text x="1205.0" y="638" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="700" fill="#991b1b" text-anchor="middle"><tspan x="1205.0" dy="0">Hết cách</tspan></text>
+<text x="1205.0" y="659" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1f2937" text-anchor="middle"><tspan x="1205.0" dy="0">lấy kết quả điểm cao nhất,</tspan><tspan x="1205.0" dy="17">needs_review + lý do</tspan></text>
+<path d="M 1185 192 L 1185 220" fill="none" stroke="#475569" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m475569)"/>
+<path d="M 1185 286 L 1185 314" fill="none" stroke="#475569" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m475569)"/>
+<path d="M 1185 380 L 1185 396" fill="none" stroke="#475569" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m475569)"/>
+<path d="M 1140 450 L 1095 498" fill="none" stroke="#16a34a" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m16a34a)"/>
+<rect x="1087.9" y="455" width="28.2" height="24" rx="6" fill="#ffffff" stroke="#16a34a" stroke-width="1"/>
+<text x="1102" y="470" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="600" fill="#16a34a" text-anchor="middle"><tspan x="1102" dy="0">có</tspan></text>
+<path d="M 1230 450 L 1262 499" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#mdc2626)"/>
+<rect x="1237.25" y="455" width="49.5" height="24" rx="6" fill="#ffffff" stroke="#dc2626" stroke-width="1"/>
+<text x="1262" y="470" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="600" fill="#dc2626" text-anchor="middle"><tspan x="1262" dy="0">không</tspan></text>
+<path d="M 1345 535 L 1362 535 L 1362 160 L 1347 160" fill="none" stroke="#d97706" stroke-width="2.2" stroke-linejoin="round" stroke-dasharray="7 5" marker-end="url(#md97706)"/>
+<rect x="1344.35" y="345" width="35.3" height="24" rx="6" fill="#ffffff" stroke="#d97706" stroke-width="1"/>
+<text x="1362" y="360" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="600" fill="#d97706" text-anchor="middle"><tspan x="1362" dy="0">còn</tspan></text>
+<path d="M 1270 571 L 1270 610" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#mdc2626)"/>
+<rect x="1282.35" y="577" width="35.3" height="24" rx="6" fill="#ffffff" stroke="#dc2626" stroke-width="1"/>
+<text x="1300" y="592" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="600" fill="#dc2626" text-anchor="middle"><tspan x="1300" dy="0">hết</tspan></text>
+<rect x="30" y="750" width="1340" height="330" rx="16" fill="none" stroke="#16a34a" stroke-width="1.4" stroke-dasharray="7 5"/>
+<rect x="48" y="736" width="160.2" height="28" rx="14" fill="#16a34a"/>
+<text x="128.1" y="755" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle"><tspan x="128.1" dy="0">CÁC PHÉP KIỂM TRA</tspan></text>
+<rect x="50" y="778" width="252" height="180" rx="12" fill="#dbeafe" stroke="#2563eb" stroke-width="1.6"/>
+<text x="66" y="804" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="15.5" font-weight="700" fill="#1e40af" text-anchor="start"><tspan x="66" dy="0">Văn bản OCR</tspan></text>
+<text x="66" y="827" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1f2937" text-anchor="start"><tspan x="66" dy="0">Độ tin cậy trung bình ≥ 0,85</tspan><tspan x="66" dy="17">Dòng tin cậy &lt; 0,6: ≤ 25%</tspan><tspan x="66" dy="17">Ký tự lỗi: �, vùng riêng, (cid:)</tspan><tspan x="66" dy="17">Mất chữ tiếng Việt: từ không</tspan><tspan x="66" dy="17">có nguyên âm (“Cng”, “Vit”)</tspan></text>
+<rect x="314" y="778" width="252" height="180" rx="12" fill="#dbeafe" stroke="#2563eb" stroke-width="1.6"/>
+<text x="330" y="804" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="15.5" font-weight="700" fill="#1e40af" text-anchor="start"><tspan x="330" dy="0">Text layer PDF</tspan></text>
+<text x="330" y="827" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1f2937" text-anchor="start"><tspan x="330" dy="0">Font cũ TCVN3/VNI</tspan><tspan x="330" dy="17">(“Céng hßa x· héi”)</tspan><tspan x="330" dy="17">(cid:…), ký tự vùng riêng</tspan><tspan x="330" dy="17">Không đạt → OCR</tspan></text>
+<rect x="578" y="778" width="252" height="180" rx="12" fill="#e0e7ff" stroke="#4f46e5" stroke-width="1.6"/>
+<text x="594" y="804" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="15.5" font-weight="700" fill="#3730a3" text-anchor="start"><tspan x="594" dy="0">Bảng</tspan></text>
+<text x="594" y="827" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1f2937" text-anchor="start"><tspan x="594" dy="0">Mỗi hàng đủ số ô (tính</tspan><tspan x="594" dy="17">rowspan/colspan) · ô trống ≤ 60%</tspan><tspan x="594" dy="17">Độ tin cậy ≥ 0,8 (+0,1 nếu phức tạp)</tspan><tspan x="594" dy="17">Đối chiếu số liệu ≥ 90% và</tspan><tspan x="594" dy="17">ký tự đặc biệt % ₫ € ± ≤ ≥</tspan></text>
+<rect x="842" y="778" width="252" height="180" rx="12" fill="#fce7f3" stroke="#db2777" stroke-width="1.6"/>
+<text x="858" y="804" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="15.5" font-weight="700" fill="#9d174d" text-anchor="start"><tspan x="858" dy="0">Công thức</tspan></text>
+<text x="858" y="827" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1f2937" text-anchor="start"><tspan x="858" dy="0">Cân ngoặc { }</tspan><tspan x="858" dy="17">\left/\right, \begin/\end</tspan><tspan x="858" dy="17">Không lặp token</tspan><tspan x="858" dy="17">(lỗi giải mã)</tspan></text>
+<rect x="1106" y="778" width="252" height="180" rx="12" fill="#f3e8ff" stroke="#9333ea" stroke-width="1.6"/>
+<text x="1122" y="804" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="15.5" font-weight="700" fill="#6b21a8" text-anchor="start"><tspan x="1122" dy="0">Hình · biểu đồ</tspan></text>
+<text x="1122" y="827" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1f2937" text-anchor="start"><tspan x="1122" dy="0">Có mô tả, không bị từ chối</tspan><tspan x="1122" dy="17">Thay bằng chữ chỉ khi</tspan><tspan x="1122" dy="17">không mất thông tin;</tspan><tspan x="1122" dy="17">ngược lại giữ hình (Hình 3)</tspan></text>
+<text x="50" y="990" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" font-weight="700" fill="#1f2937" text-anchor="start"><tspan x="50" dy="0">Trạng thái mỗi vùng trong JSON:</tspan></text>
+<rect x="270" y="972" width="104" height="28" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="1.6"/>
+<text x="322.0" y="990.2" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="700" fill="#166534" text-anchor="middle"><tspan x="322.0" dy="0">passed</tspan></text>
+<text x="382" y="991" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#475569" text-anchor="start"><tspan x="382" dy="0">đạt kiểm tra</tspan></text>
+<rect x="520" y="972" width="104" height="28" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.6"/>
+<text x="572.0" y="990.2" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="700" fill="#334155" text-anchor="middle"><tspan x="572.0" dy="0">unchecked</tspan></text>
+<text x="632" y="991" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#475569" text-anchor="start"><tspan x="632" dy="0">không kiểm tra tự động được</tspan></text>
+<rect x="860" y="972" width="104" height="28" rx="10" fill="#fee2e2" stroke="#dc2626" stroke-width="1.6"/>
+<text x="912.0" y="990.2" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="700" fill="#991b1b" text-anchor="middle"><tspan x="912.0" dy="0">needs_review</tspan></text>
+<text x="972" y="991" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#475569" text-anchor="start"><tspan x="972" dy="0">cần người kiểm tra</tspan></text>
+<rect x="1130" y="972" width="104" height="28" rx="10" fill="#f1f5f9" stroke="#64748b" stroke-width="1.6"/>
+<text x="1182.0" y="990.2" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="700" fill="#334155" text-anchor="middle"><tspan x="1182.0" dy="0">skipped</tspan></text>
+<text x="1242" y="991" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#475569" text-anchor="start"><tspan x="1242" dy="0">bỏ qua (trang trí)</tspan></text>
+<rect x="50" y="1020" width="1300" height="46" rx="12" fill="#fef3c7" stroke="#d97706" stroke-width="1.6"/>
+<text x="700.0" y="1046" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#1f2937" text-anchor="middle"><tspan x="700.0" dy="0">Mỗi quyết định của Router và kết quả kiểm tra được ghi vào route_log.jsonl → dữ liệu huấn luyện Neural Router (giai đoạn 3)</tspan></text>
+<text x="700" y="1120" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#475569" text-anchor="middle"><tspan x="700" dy="0">Ví dụ: bảng trong bản scan → PaddleOCR Table cho hàng thiếu ô → không đạt → VLM dựng lại bảng HTML</tspan></text>
+<text x="700" y="1146" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#475569" text-anchor="middle"><tspan x="700" dy="0">→ số liệu của VLM được đối chiếu với token OCR tin cậy cao → đạt → status = passed, attempts = [table_recognition, vlm]</tspan></text>
+<text x="700" y="1180" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" font-weight="600" fill="#991b1b" text-anchor="middle"><tspan x="700" dy="0">Văn bản OCR bị mất chữ tiếng Việt → không chuyển sang VLM → giữ kết quả OCR, needs_review, &lt;!-- cần kiểm tra --&gt; trong Markdown</tspan></text>
+</svg>

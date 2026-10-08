@@ -4,9 +4,16 @@
 >
 > - Văn bản **bắt buộc** lấy từ text layer PDF hoặc OCR; **không dùng VLM cho văn bản**. VLM chỉ dùng cho biểu đồ,
 >   hình ảnh và làm dự phòng cấu trúc cho bảng/công thức.
-> - Chỉ phục vụ **tiếng Việt và tiếng Anh**. Model nhận dạng gốc của PaddleOCR thiếu chữ tiếng Việt có dấu chồng,
->   nên dự án fine-tune PP-OCRv5 với bộ ký tự Việt + Anh (`training/vi_ocr`).
-> - Toàn bộ chạy trên **GitHub Actions** (CI, huấn luyện model OCR, trích xuất tài liệu).
+> - Phục vụ **tiếng Việt, tiếng Anh và tiếng Nhật**. Model nhận dạng gốc của PaddleOCR thiếu chữ tiếng Việt có dấu
+>   chồng, nên dự án fine-tune PP-OCRv5 với bộ ký tự Việt + Anh + Nhật (`training/vi_ocr`).
+> - **Không mất thông tin:** hình chỉ được thay bằng chữ khi chữ mang được toàn bộ nội dung; nếu không, giữ file hình
+>   (`docextract/figures.py`).
+> - Phương pháp áp dụng chung cho mọi loại tài liệu (quy tắc theo loại nội dung và mức kiểm chứng được), không tinh
+>   chỉnh theo bộ test; benchmark báo cáo đúng kết quả, kể cả khi sai.
+> - Toàn bộ chạy trên **GitHub Actions** (CI, huấn luyện model OCR, trích xuất tài liệu, benchmark).
+>
+> Hình minh họa: [tổng quan](images/pipeline_1_overview.svg) · [Router & kiểm tra](images/pipeline_2_router.svg) ·
+> [xử lý hình ảnh](images/pipeline_3_figures.svg) · [huấn luyện OCR](images/pipeline_4_ocr_training.svg)
 
 ## 1. Mục tiêu
 
