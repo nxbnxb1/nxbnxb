@@ -36,12 +36,15 @@ def convert(data: bytes, filename: str, target: str, timeout: int = 600) -> byte
     with tempfile.TemporaryDirectory() as tmp:
         src = Path(tmp) / f"input{ext}"
         src.write_bytes(data)
-        subprocess.run(
-            [soffice, "--headless", "--norestore", "--convert-to", target, "--outdir", tmp, str(src)],
-            check=True,
-            capture_output=True,
-            timeout=timeout,
-        )
+        try:
+            subprocess.run(
+                [soffice, "--headless", "--norestore", "--convert-to", target, "--outdir", tmp, str(src)],
+                check=True,
+                capture_output=True,
+                timeout=timeout,
+            )
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
+            raise ValueError(f"{filename}: LibreOffice could not convert it ({exc})") from exc
         out = Path(tmp) / f"input.{target}"
         if not out.exists():
             raise ValueError(f"{filename}: LibreOffice produced no {target}")

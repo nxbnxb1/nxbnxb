@@ -25,7 +25,8 @@ def test_api_extract_and_jobs(settings):
     body = client.post("/v1/extract", files=files, data={"use_vlm": "false"}).json()
     assert "# ACME Annual Report" in body["markdown"]
     assert body["document"]["source"]["filename"] == "report.pdf"
-    assert client.post("/v1/extract", files={"file": ("x.txt", b"hello", "text/plain")}).status_code == 415
+    junk = {"file": ("x.bin", b"\x00\x01 not a document", "application/octet-stream")}
+    assert client.post("/v1/extract", files=junk).status_code == 415
 
     job = client.post("/v1/jobs", files=files).json()
     for _ in range(100):

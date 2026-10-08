@@ -1,0 +1,109 @@
+name: OCR training · speed probe
+
+# Measures how fast the OCR recogniser trains on a GitHub CPU runner under several settings, all
+# in parallel, a few minutes each: Paddle thread count, oneDNN kernels, static graph, frozen early
+# backbone stages, CTC branch only. The table in the run summary gives samples/s per setting and
+# how many passes over the training set fit in a full training job. Nothing is published.
+
+on:
+  workflow_dispatch:
+    inputs:
+      products:
+        description: products to measure
+        type: choice
+        default: both
+        options: [both, vi_en, vi_en_ja]
+      minutes:
+        description: training minutes per setting
+        default: "10"
+
+permissions:
+  contents: read
+
+env:
+  PADDLEOCR_REF: dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf
+  WORK: ${{ github.workspace }}/vi_ocr_work
+  PADDLEOCR_DIR: ${{ github.workspace }}/PaddleOCR
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        product: ${{ fromJSON(inputs.products == 'both' && '["vi_en","vi_en_ja"]' || format('["{0}"]', inputs.products)) }}
+        variant:
+          - {name: "1 thread (as before)", threads: "1", onednn: "0", static: "0", freeze: "", gtc: "1"}
+          - {name: "all cores", threads: "", onednn: "0", static: "0", freeze: "", gtc: "1"}
+          - {name: "all cores + oneDNN", threads: "", onednn: "1", static: "0", freeze: "", gtc: "1"}
+          - {name: "all cores + static graph", threads: "", onednn: "0", static: "1", freeze: "", gtc: "1"}
+          - {name: "all cores + oneDNN + static graph", threads: "", onednn: "1", static: "1", freeze: "", gtc: "1"}
+          - {name: "all cores + frozen stages 1-4", threads: "", onednn: "0", static: "0", freeze: "conv1,blocks2,blocks3,blocks4", gtc: "1"}
+          - {name: "all cores + CTC only", threads: "", onednn: "0", static: "0", freeze: "", gtc: "0"}
+          - {name: "all cores + frozen stages 1-4 + CTC only", threads: "", onednn: "0", static: "0", freeze: "conv1,blocks2,blocks3,blocks4", gtc: "0"}
+          - {name: "all cores + oneDNN + frozen stages 1-4 + CTC only", threads: "", onednn: "1", static: "0", freeze: "conv1,blocks2,blocks3,blocks4", gtc: "0"}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/ocr-train-setup
+        with:
+          paddleocr-ref: ${{ env.PADDLEOCR_REF }}
+          paddleocr-dir: ${{ env.PADDLEOCR_DIR }}
+
+      - name: Train for ${{ inputs.minutes }} minutes
+        env:
+          LANGS: ${{ matrix.product == 'vi_en_ja' && 'vi,en,ja' || 'vi,en' }}
+          SAMPLES: "2000"
+          CHUNK: "2000"
+          EPOCHS: "100"
+          VAL_COUNT: "50"
+          EVAL_COUNT: "20"
+          BATCH: "32"
+          PRINT_STEP: "1"
+          TIME_BUDGET_MIN: ${{ inputs.minutes }}
+          PROBE: "1"
+          THREADS: ${{ matrix.variant.threads }}
+          ONEDNN: ${{ matrix.variant.onednn }}
+          STATIC: ${{ matrix.variant.static }}
+          FREEZE: ${{ matrix.variant.freeze }}
+          GTC: ${{ matrix.variant.gtc }}
+        run: training/vi_ocr/run_training.sh  # THREADS empty = all cores
+
+      - name: Result
+        if: always()
+        id: result
+        run: |
+          slug=$(echo "${{ matrix.product }}-${{ matrix.variant.name }}" | tr -c 'A-Za-z0-9-' '_')
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
+          mkdir -p speed
+          python training/vi_ocr/speed_report.py one "$WORK/output/train.log" --variant "${{ matrix.variant.name }}" \
+            --product "${{ matrix.product }}" --status "$(cat "$WORK/train_status" 2>/dev/null || echo -1)" \
+            --out "speed/result_$slug.json"
+          grep -E "train_cpu|Error|error" "$WORK/output/train.log" | tail -5 || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: speed-${{ steps.result.outputs.slug }}
+          path: speed/
+
+  report:
+    needs: probe
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: speed-*
+          path: speed
+      - name: Table
+        run: |
+          {
+            echo "## OCR training speed on a GitHub runner ($(nproc) cores)"
+            echo
+            python training/vi_ocr/speed_report.py table speed --samples 60000 --budget-min 290
+            echo
+            echo "exit 124/130 = stopped by the time limit as planned; any other code = the setting failed (see its job log)."
+          } >> "$GITHUB_STEP_SUMMARY"

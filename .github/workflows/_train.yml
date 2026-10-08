@@ -35,6 +35,13 @@ env:
   PADDLEOCR_REF: dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf  # training code, pinned
   WORK: ${{ github.workspace }}/vi_ocr_work
   PADDLEOCR_DIR: ${{ github.workspace }}/PaddleOCR
+  # CPU settings measured by the "OCR training · speed probe" workflow (see training/vi_ocr/README.md)
+  THREADS: ""  # all cores
+  ONEDNN: "0"
+  STATIC: "0"
+  FREEZE: ""
+  GTC: "1"
+  CHUNK: "6000"  # lines between two checkpoints
 
 jobs:
   train:
@@ -43,31 +50,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/ocr-train-setup
         with:
-          python-version: "3.12"
-          cache: pip
-
-      - name: Fonts with Vietnamese coverage
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq fonts-dejavu-core fonts-liberation2 fonts-freefont-ttf fonts-noto-core \
-            fonts-crosextra-carlito fonts-crosextra-caladea fonts-roboto fonts-open-sans \
-            fonts-noto-cjk fonts-ipaexfont-gothic fonts-ipaexfont-mincho >/dev/null
-
-      - name: PaddleOCR training code
-        run: |
-          git init -q "$PADDLEOCR_DIR"
-          git -C "$PADDLEOCR_DIR" fetch -q --depth 1 https://github.com/PaddlePaddle/PaddleOCR "$PADDLEOCR_REF"
-          git -C "$PADDLEOCR_DIR" checkout -q FETCH_HEAD
-
-      - name: Python packages
-        run: |
-          pip install "paddlepaddle==3.3.1" "paddleocr==3.7.0" wordfreq fonttools rapidfuzz
-          pip install -r "$PADDLEOCR_DIR/requirements.txt"
-          # albumentations pulls opencv-python-headless, which shadows the cv2 build PaddleX expects
-          pip uninstall -y opencv-python-headless opencv-python || true
-          pip install --force-reinstall --no-deps "opencv-contrib-python==4.10.0.84"
+          paddleocr-ref: ${{ env.PADDLEOCR_REF }}
+          paddleocr-dir: ${{ env.PADDLEOCR_DIR }}
 
       - name: Resume checkpoint
         if: inputs.resume_tag != ''

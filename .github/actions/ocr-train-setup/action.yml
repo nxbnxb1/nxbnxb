@@ -1,0 +1,43 @@
+name: OCR training setup
+description: Python, fonts for synthetic text (Vietnamese, Japanese), PaddleOCR training code and packages.
+
+inputs:
+  paddleocr-ref:
+    description: PaddleOCR commit with the training code
+    required: true
+  paddleocr-dir:
+    description: where to check it out
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+        cache: pip
+
+    - name: Fonts with Vietnamese and Japanese coverage
+      shell: bash
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq fonts-dejavu-core fonts-liberation2 fonts-freefont-ttf fonts-noto-core \
+          fonts-crosextra-carlito fonts-crosextra-caladea fonts-roboto fonts-open-sans \
+          fonts-noto-cjk fonts-ipaexfont-gothic fonts-ipaexfont-mincho >/dev/null
+
+    - name: PaddleOCR training code
+      shell: bash
+      run: |
+        git init -q "${{ inputs.paddleocr-dir }}"
+        git -C "${{ inputs.paddleocr-dir }}" fetch -q --depth 1 https://github.com/PaddlePaddle/PaddleOCR "${{ inputs.paddleocr-ref }}"
+        git -C "${{ inputs.paddleocr-dir }}" checkout -q FETCH_HEAD
+
+    - name: Python packages
+      shell: bash
+      run: |
+        pip install "paddlepaddle==3.3.1" "paddleocr==3.7.0" wordfreq fonttools rapidfuzz
+        pip install -r "${{ inputs.paddleocr-dir }}/requirements.txt"
+        # albumentations pulls opencv-python-headless, which shadows the cv2 build PaddleX expects
+        pip uninstall -y opencv-python-headless opencv-python || true
+        pip install --force-reinstall --no-deps "opencv-contrib-python==4.10.0.84"
+        nproc; free -g; lscpu | grep -E 'Model name|Flags' | cut -c1-300

@@ -10,7 +10,7 @@ on:
         description: Synthetic training lines
         default: "60000"
       epochs:
-        description: Training epochs
+        description: Passes over the training lines
         default: "4"
       time_budget_minutes:
         description: Stop training after this many minutes (the job limit is 6 h)
