@@ -261,7 +261,7 @@ def main() -> None:
     parser.add_argument("out", help="output directory")
     parser.add_argument("--count", type=int, default=50000)
     parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--max-len", type=int, default=25, help="max characters per line (model max_text_length)")
+    parser.add_argument("--max-len", type=int, default=23, help="max characters per line (NRTR drops labels >= max_text_length - 1)")
     parser.add_argument("--no-augment", action="store_true", help="clean renderings (for evaluation)")
     parser.add_argument("--font-dir", action="append", default=None, help="font directory (repeatable)")
     parser.add_argument("--workers", type=int, default=os.cpu_count() or 2)
