@@ -106,6 +106,17 @@ def test_benchmark_and_cli(tmp_path, settings, monkeypatch):
     report = run_benchmark(tmp_path, pipeline=DocumentPipeline(settings, Engines()))
     summary = report["summary"]
     assert summary["cer"] < 0.02 and summary["teds"] == 1.0 and summary["heading_f1"] == 1.0
+    assert summary["word_f1"] > 0.98
+
+    # sub-directories are categories; a first-level dev/ or test/ is the split
+    for split in ("dev", "test"):
+        folder = tmp_path / "eval" / split / "reports"
+        folder.mkdir(parents=True)
+        for suffix in (".pdf", ".gt.md"):
+            (folder / f"report{suffix}").write_bytes((tmp_path / f"report{suffix}").read_bytes())
+    report = run_benchmark(tmp_path / "eval", pipeline=DocumentPipeline(settings, Engines()), split="test")
+    assert [r["document"] for r in report["documents"]] == ["test/reports/report.pdf"]
+    assert report["documents"][0]["category"] == "reports" and list(report["categories"]) == ["reports"]
 
     monkeypatch.setenv("DOCEXTRACT_LAYOUT_BACKEND", "heuristic")
     monkeypatch.setenv("DOCEXTRACT_OCR_BACKEND", "none")

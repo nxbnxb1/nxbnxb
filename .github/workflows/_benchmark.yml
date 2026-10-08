@@ -1,9 +1,13 @@
 name: _benchmark (reusable)
 
-# Phase 2 for one product: CER/WER, table TEDS, heading F1, time/page, VLM calls and cost/page on
-# documents with ground truth (<name>.gt.md next to each document), for the product's baseline
-# (stock PaddleOCR model it is fine-tuned from) and for the product's fine-tuned model.
-# Empty dataset = the product's generated demo documents (scripts/make_samples.py --product).
+# Phase 2 for one product: CER/WER, word F1, table TEDS, heading F1, time/page, VLM calls and
+# cost/page per category, for the product's baseline (stock PaddleOCR model it is fine-tuned from)
+# and for the product's fine-tuned model.
+#   dataset=eval   held-out set: newest "eval-set-*" Release (Wikipedia articles of the product's
+#                  languages as digital PDF / DOCX / scan) + OmniDocBench real pages (9 kinds),
+#                  split dev/test (split input; report test)
+#   dataset=demo   the product's generated demo documents (scripts/make_samples.py --product)
+#   anything else  a folder in the repository with documents and <name>.gt.md files
 
 on:
   workflow_call:
@@ -13,13 +17,19 @@ on:
         required: true
       dataset:
         type: string
-        default: ""
+        default: eval
+      split:
+        type: string
+        default: test
+      omnidocbench_per_kind:
+        type: string
+        default: "6"
       model_tag:
         type: string
         default: ""
       vlm:
         type: string
-        default: local
+        default: none
 
 permissions:
   contents: read
@@ -27,7 +37,7 @@ permissions:
 jobs:
   bench:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 350
     env:
       PRODUCT: ${{ inputs.product }}
       DOCEXTRACT_PRODUCT: ${{ inputs.product }}
@@ -61,12 +71,36 @@ jobs:
         run: scripts/start_local_vlm.sh "${{ vars.DOCEXTRACT_LOCAL_VLM || 'qwen2.5vl:3b' }}"
 
       - name: Dataset
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          if [ -z "${{ inputs.dataset }}" ]; then
-            python scripts/make_samples.py samples --product "$PRODUCT"
-            echo "DATASET=samples" >> "$GITHUB_ENV"
-          else
-            echo "DATASET=${{ inputs.dataset }}" >> "$GITHUB_ENV"
+          case "${{ inputs.dataset }}" in
+            ""|demo)
+              python scripts/make_samples.py samples --product "$PRODUCT"
+              echo "DATASET=samples" >> "$GITHUB_ENV" ;;
+            eval)
+              tag=$(gh release list --limit 100 --json tagName --jq '[.[] | select(.tagName | startswith("eval-set-"))][0].tagName')
+              if [ -n "$tag" ]; then
+                gh release download "$tag" -p eval_wikipedia.tar.gz && tar -xzf eval_wikipedia.tar.gz
+                echo "Wikipedia part: $tag"
+              else
+                echo "::warning::no eval-set release yet: run 'Build evaluation set' first (OmniDocBench only)"
+              fi
+              pip install lxml
+              python scripts/build_eval_set.py omnidocbench eval --per-kind "${{ inputs.omnidocbench_per_kind }}"
+              langs=$(python -c "from docextract.products import PRODUCTS; print(' '.join(PRODUCTS['$PRODUCT'].languages))")
+              for dir in eval/*/wiki_*; do
+                [ -d "$dir" ] || continue
+                lang=${dir##*/wiki_}
+                [[ " $langs " == *" $lang "* ]] || rm -rf "$dir"  # only the product's languages
+              done
+              find eval -name '*.gt.md' | sed 's#/[^/]*$##' | sort | uniq -c
+              echo "DATASET=eval" >> "$GITHUB_ENV" ;;
+            *)
+              echo "DATASET=${{ inputs.dataset }}" >> "$GITHUB_ENV" ;;
+          esac
+          if [ "${{ inputs.split }}" = dev ] || [ "${{ inputs.split }}" = test ]; then
+            echo "SPLIT_ARGS=--split ${{ inputs.split }}" >> "$GITHUB_ENV"
           fi
 
       - name: Baseline (stock PaddleOCR model of the product)
@@ -76,7 +110,7 @@ jobs:
           DOCEXTRACT_VLM_MODEL: ${{ inputs.vlm == 'api' && (vars.DOCEXTRACT_VLM_MODEL || 'Qwen/Qwen2.5-VL-7B-Instruct') || env.DOCEXTRACT_VLM_MODEL }}
         run: |
           baseline=$(python -c "from docextract.products import PRODUCTS; print(PRODUCTS['$PRODUCT'].baseline_model)")
-          python -m docextract bench "$DATASET" -o bench/baseline
+          python -m docextract bench "$DATASET" $SPLIT_ARGS -o bench/baseline
           { echo "## $PRODUCT — baseline ($baseline)"; cat bench/baseline/benchmark.md; } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Fine-tuned model of the product from Releases
@@ -91,7 +125,7 @@ jobs:
           DOCEXTRACT_VLM_API_KEY: ${{ inputs.vlm == 'api' && secrets.DOCEXTRACT_VLM_API_KEY || '' }}
           DOCEXTRACT_VLM_MODEL: ${{ inputs.vlm == 'api' && (vars.DOCEXTRACT_VLM_MODEL || 'Qwen/Qwen2.5-VL-7B-Instruct') || env.DOCEXTRACT_VLM_MODEL }}
         run: |
-          python -m docextract bench "$DATASET" -o bench/finetuned
+          python -m docextract bench "$DATASET" $SPLIT_ARGS -o bench/finetuned
           { echo "## $PRODUCT — fine-tuned model"; cat bench/finetuned/benchmark.md; } >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v4

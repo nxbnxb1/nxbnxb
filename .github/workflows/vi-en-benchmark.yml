@@ -1,19 +1,24 @@
 name: "Việt + Anh · Benchmark"
 
 # Product vi_en: its baseline (stock PaddleOCR model) and its fine-tuned model on documents with
-# ground truth. Empty dataset = the product's demo documents.
+# ground truth, per category (see _benchmark.yml).
 
 on:
   workflow_dispatch:
     inputs:
       dataset:
-        description: Folder with documents + <name>.gt.md (empty = demo documents)
-        default: ""
-      vlm:
-        description: "VLM for pictures: local (free, on the runner), api (secrets), none"
+        description: "eval (held-out set), demo, or a folder with documents + <name>.gt.md"
+        default: eval
+      split:
+        description: "test (report), dev (tuning) or all"
         type: choice
-        options: [local, api, none]
-        default: local
+        options: [test, dev, all]
+        default: test
+      vlm:
+        description: "VLM: none, local (free but ~2 min per picture on the runner), api (secrets)"
+        type: choice
+        options: [none, local, api]
+        default: none
       model_tag:
         description: Release of the fine-tuned model (empty = newest vi_en model)
         default: ""
@@ -27,6 +32,7 @@ jobs:
     with:
       product: vi_en
       dataset: ${{ inputs.dataset }}
+      split: ${{ inputs.split }}
       model_tag: ${{ inputs.model_tag }}
       vlm: ${{ inputs.vlm }}
     secrets: inherit

@@ -77,13 +77,11 @@ jobs:
       matrix:
         product: ${{ fromJSON(inputs.products == 'both' && '["vi_en","vi_en_ja"]' || format('["{0}"]', inputs.products)) }}
         variant:
-          - {name: "1 thread (as before)", threads: "1", onednn: "0", static: "0", freeze: "", gtc: "1"}
-          - {name: "all cores", threads: "", onednn: "0", static: "0", freeze: "", gtc: "1"}
-          - {name: "all cores + oneDNN", threads: "", onednn: "1", static: "0", freeze: "", gtc: "1"}
-          - {name: "all cores + frozen stages 1-4", threads: "", onednn: "0", static: "0", freeze: "conv1,blocks2,blocks3,blocks4", gtc: "1"}
-          - {name: "all cores + CTC only", threads: "", onednn: "0", static: "0", freeze: "", gtc: "0"}
-          - {name: "all cores + frozen stages 1-4 + CTC only", threads: "", onednn: "0", static: "0", freeze: "conv1,blocks2,blocks3,blocks4", gtc: "0"}
-          - {name: "all cores + oneDNN + frozen stages 1-4 + CTC only", threads: "", onednn: "1", static: "0", freeze: "conv1,blocks2,blocks3,blocks4", gtc: "0"}
+          - {name: "all cores (reference)", fuse: "0", freeze: "", gtc: "1"}
+          - {name: "fused", fuse: "1", freeze: "", gtc: "1"}
+          - {name: "fused + CTC only", fuse: "1", freeze: "", gtc: "0"}
+          - {name: "fused + frozen stages 1-4", fuse: "1", freeze: "conv1,blocks2,blocks3,blocks4", gtc: "1"}
+          - {name: "fused + frozen stages 1-4 + CTC only", fuse: "1", freeze: "conv1,blocks2,blocks3,blocks4", gtc: "0"}
     steps:
       - uses: actions/checkout@v4
 
@@ -104,9 +102,7 @@ jobs:
           PRINT_STEP: "1"
           TIME_BUDGET_MIN: ${{ inputs.minutes }}
           PROBE: "1"
-          THREADS: ${{ matrix.variant.threads }}
-          ONEDNN: ${{ matrix.variant.onednn }}
-          STATIC: ${{ matrix.variant.static }}
+          FUSE: ${{ matrix.variant.fuse }}
           FREEZE: ${{ matrix.variant.freeze }}
           GTC: ${{ matrix.variant.gtc }}
         run: training/vi_ocr/run_training.sh  # THREADS empty = all cores

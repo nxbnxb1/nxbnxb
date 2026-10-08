@@ -15,8 +15,8 @@
 #      VAL_COUNT     validation lines per language (separate from the evaluation sets)
 #      EVAL_COUNT    evaluation lines per language (evaluate.py, after training)
 #      PRINT_STEP    log every N iterations
-#      CPU speed:    THREADS (default: all cores), ONEDNN=1, STATIC=1 (to_static), and
-#                    FREEZE / GTC (see train_cpu.py)
+#      CPU speed:    THREADS (default: all cores) and FUSE / FREEZE / GTC (see train_cpu.py);
+#                    measured by the "OCR training · speed probe" workflow
 #      PROBE=1       speed measurement only: no export
 set -euo pipefail
 
@@ -55,9 +55,14 @@ DICT="$WORK/dict.txt"
 mkdir -p "$WORK/pretrained" "$WORK/output"
 echo "NAME=$NAME" > "$WORK/model.env"
 echo "BASE_MODEL=$BASE_MODEL" >> "$WORK/model.env"
+echo "FUSE=${FUSE:-0}" >> "$WORK/model.env"  # checkpoints of a fused model resume/export fused
 
 echo "::group::dictionary + pretrained weights ($BASE_MODEL)"
-python "$HERE/charset.py" "$DICT" "${DICT_ARGS[@]}"
+if [ -n "${RESUME_DICT:-}" ]; then
+  cp "$RESUME_DICT" "$DICT"  # a resumed checkpoint keeps the dictionary it was trained with
+else
+  python "$HERE/charset.py" "$DICT" "${DICT_ARGS[@]}"
+fi
 if [ ! -s "$WORK/pretrained/base.pdparams" ]; then
   curl -fsSL --retry 6 --retry-delay 10 --retry-all-errors -o "$WORK/pretrained/base.pdparams" "$PRETRAINED_URL"
 fi
@@ -92,7 +97,6 @@ echo "$EPOCHS pass(es) over $SAMPLES lines = $EPOCH_NUM chunks of ~$((SAMPLES < 
 
 # CPU: Paddle runs its math on a single thread unless told otherwise
 export FLAGS_paddle_num_threads="$THREADS" OMP_NUM_THREADS="$THREADS" MKL_NUM_THREADS="$THREADS"
-if [ "${ONEDNN:-0}" = 1 ]; then export FLAGS_use_mkldnn=1 FLAGS_use_onednn=1; fi
 
 OVERRIDES=(
   "Global.model_name=$BASE_MODEL"
@@ -100,7 +104,6 @@ OVERRIDES=(
   "Global.print_batch_step=$PRINT_STEP"
   "Global.eval_batch_epoch=1"
   "Global.save_epoch_step=1000000"
-  "Global.to_static=$([ "${STATIC:-0}" = 1 ] && echo true || echo false)"
   "Global.character_dict_path=$DICT"
   "Global.save_model_dir=$WORK/output"
   "Global.save_res_path=$WORK/output/predicts.txt"
@@ -136,7 +139,7 @@ BEST="$WORK/output/best_accuracy"
 
 echo "::group::export inference model from $BEST"
 rm -rf "$WORK/export"
-python tools/export_model.py -c "$CONFIG" -o \
+python "$HERE/train_cpu.py" export -c "$CONFIG" -o \
   "Global.model_name=$BASE_MODEL" \
   "Global.pretrained_model=$BEST" \
   "Global.character_dict_path=$DICT" \

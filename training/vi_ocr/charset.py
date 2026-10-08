@@ -2,9 +2,12 @@
 
 * ``vi,en``: compact set for Vietnamese + English (281 characters), trained from
   ``latin_PP-OCRv5_mobile_rec``.
-* ``vi,en,ja``: the dictionary of ``PP-OCRv5_mobile_rec`` (kana, kanji, Latin, symbols;
-  18 383 characters) in its original order, with the missing Vietnamese letters and
-  symbols appended, so every existing class keeps its weights.
+* ``vi,en,ja``: the characters of the ``PP-OCRv5_mobile_rec`` dictionary that belong to the
+  standard Japanese character set (encodable in CP932 = JIS X 0208 + common vendor extensions:
+  kana, 6 221 kanji, full-width forms, symbols), in their original order, with the Vietnamese
+  letters and symbols appended: about 7 000 classes instead of 18 383. Chinese-only characters
+  are dropped: they never occur in Japanese text, and every output class costs training time
+  on a CPU runner. Every kept class keeps its pretrained weights.
 
 The stock PaddleOCR latin/PP-OCRv5/PP-OCRv6 dictionaries miss most Vietnamese letters with
 stacked diacritics (ộ, ủ, ệ, ạ, ...), so those models silently drop them.
@@ -51,7 +54,15 @@ def build_charset(langs: tuple[str, ...] = ("vi", "en"), base_dict: list[str] | 
         return vi_en
     if not base_dict:
         raise ValueError("a Japanese-capable base dictionary (ppocrv5_dict.txt) is required for 'ja'")
-    return _unique(list(base_dict) + vi_en)
+    return _unique([ch for ch in base_dict if is_japanese_charset(ch)] + vi_en)
+
+
+def is_japanese_charset(ch: str) -> bool:
+    try:
+        ch.encode("cp932")
+    except UnicodeEncodeError:
+        return False
+    return True
 
 
 def read_dict(path: str) -> list[str]:

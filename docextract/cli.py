@@ -96,7 +96,7 @@ def cmd_bench(args: argparse.Namespace) -> int:
         from .pipeline import DocumentPipeline
 
         pipeline = DocumentPipeline(Settings.from_env(product=args.product))
-    report = run_benchmark(Path(args.dataset), use_vlm=not args.no_vlm, pipeline=pipeline)
+    report = run_benchmark(Path(args.dataset), use_vlm=not args.no_vlm, pipeline=pipeline, split=args.split)
     out = Path(args.output)
     out.mkdir(parents=True, exist_ok=True)
     (out / "benchmark.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -131,6 +131,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("-o", "--output", default="benchmark")
     p.add_argument("--no-vlm", action="store_true")
     p.add_argument("--product", choices=["vi_en", "vi_en_ja"])
+    p.add_argument("--split", choices=["dev", "test"], help="only documents under dev/ or test/")
     p.set_defaults(func=cmd_bench)
 
     args = parser.parse_args(argv)

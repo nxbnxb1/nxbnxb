@@ -1,12 +1,14 @@
-"""Evaluation metrics: CER/WER, TEDS for tables, heading structure F1."""
+"""Evaluation metrics: CER/WER, order-independent word F1, TEDS for tables, heading structure F1."""
 
 from __future__ import annotations
 
+import re
+from collections import Counter
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 
 from .tables import Table, parse_html_table
-from .textutil import markdown_to_plain, normalize
+from .textutil import is_cjk, markdown_to_plain, normalize
 
 try:  # rapidfuzz is optional but makes CER on whole documents fast
     from rapidfuzz.distance import Levenshtein as _RFLevenshtein
@@ -52,6 +54,32 @@ def wer(reference: str, hypothesis: str, plain: bool = True) -> float:
     if not ref_words:
         return 0.0 if not hyp_words else 1.0
     return levenshtein(ref_words, hyp_words) / len(ref_words)
+
+
+def tokens(text: str) -> list[str]:
+    """Words (lower case, without punctuation); each CJK character counts as one token."""
+    out = []
+    for word in re.findall(r"\w+", normalize(text).lower()):
+        if any(is_cjk(ch) for ch in word):
+            out.extend(re.findall(r"[^\W\d_]|\d+", word) if not word.isascii() else [word])
+        else:
+            out.append(word)
+    return out
+
+
+def word_f1(reference: str, hypothesis: str, plain: bool = True) -> float:
+    """F1 of the bags of words: ignores reading order, which ground truths of complex layouts
+    (columns, sidebars, forms) often define differently from any reasonable reading."""
+    if plain:
+        reference, hypothesis = markdown_to_plain(reference), markdown_to_plain(hypothesis)
+    ref, hyp = Counter(tokens(reference)), Counter(tokens(hypothesis))
+    if not ref and not hyp:
+        return 1.0
+    common = sum((ref & hyp).values())
+    if not common:
+        return 0.0
+    precision, recall = common / sum(hyp.values()), common / sum(ref.values())
+    return 2 * precision * recall / (precision + recall)
 
 
 # --- TEDS (Tree-Edit-Distance-based Similarity, Zhong et al. 2020) -------------------

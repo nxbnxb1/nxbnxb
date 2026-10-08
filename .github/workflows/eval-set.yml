@@ -1,0 +1,60 @@
+name: Build evaluation set
+
+# Builds the Wikipedia part of the held-out evaluation set (scripts/build_eval_set.py) and freezes
+# it as a GitHub Release "eval-set-<run>" used by both products' Benchmark workflows. Documents are
+# chosen by a hash of their title (never by results) and split into dev/ (~30%, may be used for
+# tuning) and test/ (reporting only). OmniDocBench pages are not redistributed: Benchmark downloads
+# them from a pinned revision.
+
+on:
+  workflow_dispatch:
+    inputs:
+      per_language:
+        description: Featured Wikipedia articles per language (vi, en, ja)
+        default: "8"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: LibreOffice and fonts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libreoffice-writer-nogui fonts-noto-core fonts-noto-cjk fonts-dejavu-core \
+            fonts-liberation2 >/dev/null
+
+      - name: Install
+        run: pip install -e . lxml
+
+      - name: Wikipedia articles (vi, en, ja)
+        run: |
+          for lang in vi en ja; do
+            python scripts/build_eval_set.py wikipedia eval --lang "$lang" --count "${{ inputs.per_language }}"
+          done
+          find eval -name '*.gt.md' | sed 's#/[^/]*$##' | sort | uniq -c
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tar -czf eval_wikipedia.tar.gz eval
+          {
+            echo "Held-out evaluation set (Wikipedia part): featured articles in Vietnamese, English and Japanese,"
+            echo "each as digital PDF, DOCX and scanned PDF, with the article text as ground truth."
+            echo "Text: Wikipedia contributors, CC BY-SA 4.0 — titles, revisions and URLs in manifest.json."
+            echo
+            echo "Use dev/ for tuning, report test/."
+          } > notes.md
+          gh release create "eval-set-${{ github.run_number }}" eval_wikipedia.tar.gz eval/manifest.json \
+            --target "${{ github.sha }}" --title "Evaluation set #${{ github.run_number }}" --notes-file notes.md

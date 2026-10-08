@@ -37,8 +37,7 @@ env:
   PADDLEOCR_DIR: ${{ github.workspace }}/PaddleOCR
   # CPU settings measured by the "OCR training · speed probe" workflow (see training/vi_ocr/README.md)
   THREADS: ""  # all cores
-  ONEDNN: "0"
-  STATIC: "0"
+  NEW_MODEL_FUSE: "1"  # fused backbone for new runs; a resumed checkpoint keeps its own setting
   FREEZE: ""
   GTC: "1"
   CHUNK: "6000"  # lines between two checkpoints
@@ -72,6 +71,9 @@ jobs:
             [ "${{ inputs.product }}" = "vi_en" ] && [ -f "$ckpt/vi_en_dict.txt" ] && ok=1 || ok=0
           fi
           [ "$ok" = 1 ] || { echo "::error::checkpoint of ${{ inputs.resume_tag }} is not a ${{ inputs.product }} model"; exit 1; }
+          echo "RESUME_DICT=$ckpt/$(ls "$ckpt" | grep -m1 'dict.txt$')" >> "$GITHUB_ENV"
+          # a fused checkpoint continues fused, an unfused one unfused
+          echo "RESUME_FUSE=$(sed -n 's/^FUSE=//p' "$ckpt/model.env" 2>/dev/null | head -1 | grep . || echo 0)" >> "$GITHUB_ENV"
 
       - name: Train and export
         env:
@@ -79,6 +81,7 @@ jobs:
           SAMPLES: ${{ inputs.samples }}
           EPOCHS: ${{ inputs.epochs }}
           TIME_BUDGET_MIN: ${{ inputs.time_budget_minutes }}
+          FUSE: ${{ env.RESUME_FUSE || env.NEW_MODEL_FUSE }}
         run: training/vi_ocr/run_training.sh
 
       - name: Evaluate against the product baseline
