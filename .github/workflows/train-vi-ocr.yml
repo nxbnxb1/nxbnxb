@@ -1,13 +1,18 @@
 name: Train Vietnamese OCR
 
-# Fine-tunes the PP-OCRv5 recogniser on synthetic Vietnamese + English text lines
-# (stock PaddleOCR dictionaries lack most Vietnamese letters with stacked diacritics),
-# evaluates it against the stock models and publishes it as a GitHub Release
-# "vi-ocr-<run>" that the Extract workflow downloads automatically.
+# Fine-tunes the PP-OCRv5 recogniser on synthetic text lines so it reads Vietnamese
+# (stock PaddleOCR dictionaries lack most Vietnamese letters with stacked diacritics)
+# while keeping English and, with "vi,en,ja", Japanese. Evaluates against the stock
+# models and publishes a GitHub Release "vi-ocr-<run>" the Extract workflow downloads.
 
 on:
   workflow_dispatch:
     inputs:
+      languages:
+        description: Languages the model must read
+        type: choice
+        options: ["vi,en,ja", "vi,en"]
+        default: "vi,en,ja"
       samples:
         description: Synthetic training lines
         default: "60000"
@@ -49,7 +54,8 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq fonts-dejavu-core fonts-liberation2 fonts-freefont-ttf fonts-noto-core \
-            fonts-crosextra-carlito fonts-crosextra-caladea fonts-roboto fonts-open-sans >/dev/null
+            fonts-crosextra-carlito fonts-crosextra-caladea fonts-roboto fonts-open-sans \
+            fonts-noto-cjk fonts-ipaexfont-gothic fonts-ipaexfont-mincho >/dev/null
 
       - name: PaddleOCR training code
         run: |
@@ -74,9 +80,13 @@ jobs:
           gh release download "${{ inputs.resume_tag }}" -p "checkpoint.tar.gz" -D "$WORK/resume"
           tar -xzf "$WORK/resume/checkpoint.tar.gz" -C "$WORK/resume"
           echo "RESUME_CHECKPOINT=$WORK/resume/checkpoint/latest" >> "$GITHUB_ENV"
+          # the checkpoint must be continued with the dictionary it was trained with
+          grep -q "vi_en_ja" "$WORK/resume/checkpoint/model.env" 2>/dev/null && want="vi,en,ja" || want="vi,en"
+          [ "$want" = "${{ inputs.languages }}" ] || { echo "::error::checkpoint was trained for $want"; exit 1; }
 
       - name: Train and export
         env:
+          LANGS: ${{ inputs.languages }}
           SAMPLES: ${{ inputs.samples }}
           EPOCHS: ${{ inputs.epochs }}
           TIME_BUDGET_MIN: ${{ inputs.time_budget_minutes }}
@@ -86,20 +96,26 @@ jobs:
         continue-on-error: true  # never lose a finished training run to an evaluation problem
         working-directory: training/vi_ocr
         run: |
-          python evaluate.py --eval "$WORK/data/eval" "$WORK/data/eval_clean" \
-            --baseline latin_PP-OCRv5_mobile_rec --baseline PP-OCRv6_medium_rec \
-            --model "vi_en (fine-tuned)=$WORK/export" --report "$WORK/report.md"
+          source "$WORK/model.env"
+          sets=()
+          for lang in ${LANGS//,/ }; do sets+=("$WORK/data/eval_$lang"); done
+          python evaluate.py --eval "${sets[@]}" "$WORK/data/eval_clean" \
+            --baseline latin_PP-OCRv5_mobile_rec --baseline PP-OCRv5_mobile_rec --baseline PP-OCRv6_medium_rec \
+            --model "$NAME (fine-tuned)=$WORK/export" --model-name "$BASE_MODEL" --report "$WORK/report.md"
           cat "$WORK/report.md" >> "$GITHUB_STEP_SUMMARY"
+        env:
+          LANGS: ${{ inputs.languages }}
 
       - name: Package
         if: ${{ !cancelled() }}
         run: |
-          mkdir -p "$WORK/dist/vi_en_PP-OCRv5_mobile_rec" "$WORK/dist/checkpoint"
+          source "$WORK/model.env"
+          mkdir -p "$WORK/dist/$NAME" "$WORK/dist/checkpoint"
           # checkpoint first: it allows resuming even if the export below is missing
-          cp "$WORK"/output/latest.* "$WORK/vi_en_dict.txt" "$WORK/dist/checkpoint/"
+          cp "$WORK"/output/latest.* "$WORK/dict.txt" "$WORK/model.env" "$WORK/dist/checkpoint/"
           tar -czf "$WORK/dist/checkpoint.tar.gz" -C "$WORK/dist" checkpoint
-          cp -r "$WORK/export/." "$WORK/dist/vi_en_PP-OCRv5_mobile_rec/"
-          tar -czf "$WORK/dist/vi_en_PP-OCRv5_mobile_rec.tar.gz" -C "$WORK/dist" vi_en_PP-OCRv5_mobile_rec
+          cp -r "$WORK/export/." "$WORK/dist/$NAME/"
+          tar -czf "$WORK/dist/$NAME.tar.gz" -C "$WORK/dist" "$NAME"
           ls -la "$WORK/dist"
 
       - uses: actions/upload-artifact@v4
@@ -112,17 +128,18 @@ jobs:
             ${{ env.WORK }}/output/train.log
 
       - name: Publish release
-        if: ${{ !cancelled() && inputs.publish && hashFiles('vi_ocr_work/dist/vi_en_PP-OCRv5_mobile_rec.tar.gz') != '' }}
+        if: ${{ !cancelled() && inputs.publish && hashFiles('vi_ocr_work/dist/*_PP-OCRv5_mobile_rec.tar.gz') != '' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          source "$WORK/model.env"
           {
-            echo "Fine-tuned PP-OCRv5 mobile recognition model for Vietnamese + English."
+            echo "Fine-tuned PP-OCRv5 mobile recognition model ($NAME), languages: ${{ inputs.languages }}."
             echo "Trained by run ${{ github.run_id }}: samples=${{ inputs.samples }}, epochs=${{ inputs.epochs }}, resume='${{ inputs.resume_tag }}'."
             echo
             cat "$WORK/report.md" 2>/dev/null || echo "(evaluation report missing: see the workflow logs)"
           } > "$WORK/notes.md"
-          assets=("$WORK/dist/vi_en_PP-OCRv5_mobile_rec.tar.gz" "$WORK/dist/checkpoint.tar.gz")
+          assets=("$WORK/dist/$NAME.tar.gz" "$WORK/dist/checkpoint.tar.gz")
           for f in "$WORK/report.md" "$WORK/report.json"; do [ -f "$f" ] && assets+=("$f"); done
           gh release create "vi-ocr-${{ github.run_number }}" "${assets[@]}" \
-            --target "${{ github.sha }}" --title "Vietnamese OCR model #${{ github.run_number }}" --notes-file "$WORK/notes.md"
+            --target "${{ github.sha }}" --title "OCR model #${{ github.run_number }} (${{ inputs.languages }})" --notes-file "$WORK/notes.md"

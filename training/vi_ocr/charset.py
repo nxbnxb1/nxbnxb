@@ -1,13 +1,18 @@
-"""Character set for the Vietnamese + English recognition model.
+"""Character sets for the recognition models.
 
-The stock PaddleOCR latin/PP-OCRv6 dictionaries miss most Vietnamese letters with
-stacked diacritics (ộ, ủ, ệ, ạ, ...), so the model silently drops them. This set
-covers every Vietnamese letter (NFC, both cases), ASCII and the symbols common in
-Vietnamese/English administrative, financial and technical documents.
+* ``vi,en``: compact set for Vietnamese + English (281 characters), trained from
+  ``latin_PP-OCRv5_mobile_rec``.
+* ``vi,en,ja``: the dictionary of ``PP-OCRv5_mobile_rec`` (kana, kanji, Latin, symbols;
+  18 383 characters) in its original order, with the missing Vietnamese letters and
+  symbols appended, so every existing class keeps its weights.
+
+The stock PaddleOCR latin/PP-OCRv5/PP-OCRv6 dictionaries miss most Vietnamese letters with
+stacked diacritics (ộ, ủ, ệ, ạ, ...), so those models silently drop them.
 """
 
 from __future__ import annotations
 
+import argparse
 import string
 import unicodedata
 
@@ -29,30 +34,43 @@ def vietnamese_letters() -> list[str]:
 SYMBOLS = list("₫€£¥°±×÷≤≥≠≈→←↑↓↔…“”‘’–—•·§©®™‰½¼¾²³µπΩαβγδλσΣ∑√∞∆№«»")
 
 
-def build_charset() -> list[str]:
-    chars: list[str] = []
-    for group in (string.digits, string.ascii_letters, string.punctuation):
-        chars.extend(group)
-    chars.extend(vietnamese_letters())
-    chars.extend(SYMBOLS)
+def _unique(chars) -> list[str]:
     seen: set[str] = set()
-    unique = []
+    out = []
     for ch in chars:
-        if ch not in seen and not ch.isspace():
+        if ch and ch not in seen and not ch.isspace():
             seen.add(ch)
-            unique.append(ch)
-    return unique
+            out.append(ch)
+    return out
 
 
-def write_dict(path: str) -> list[str]:
-    chars = build_charset()
+def build_charset(langs: tuple[str, ...] = ("vi", "en"), base_dict: list[str] | None = None) -> list[str]:
+    latin = list(string.digits) + list(string.ascii_letters) + list(string.punctuation)
+    vi_en = _unique(latin + vietnamese_letters() + SYMBOLS)
+    if "ja" not in langs:
+        return vi_en
+    if not base_dict:
+        raise ValueError("a Japanese-capable base dictionary (ppocrv5_dict.txt) is required for 'ja'")
+    return _unique(list(base_dict) + vi_en)
+
+
+def read_dict(path: str) -> list[str]:
+    with open(path, encoding="utf-8") as fh:
+        return [line.rstrip("\n").rstrip("\r") for line in fh if line.rstrip("\n\r")]
+
+
+def write_dict(path: str, langs: tuple[str, ...] = ("vi", "en"), base_dict_path: str | None = None) -> list[str]:
+    chars = build_charset(langs, read_dict(base_dict_path) if base_dict_path else None)
     with open(path, "w", encoding="utf-8") as fh:
         fh.write("\n".join(chars) + "\n")
     return chars
 
 
 if __name__ == "__main__":
-    import sys
-
-    out = sys.argv[1] if len(sys.argv) > 1 else "vi_en_dict.txt"
-    print(f"{len(write_dict(out))} characters written to {out}")
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("out", nargs="?", default="vi_en_dict.txt")
+    parser.add_argument("--langs", default="vi,en", help="vi,en or vi,en,ja")
+    parser.add_argument("--base-dict", help="ppocrv5_dict.txt (required with ja)")
+    args = parser.parse_args()
+    chars = write_dict(args.out, tuple(args.langs.split(",")), args.base_dict)
+    print(f"{len(chars)} characters written to {args.out}")
