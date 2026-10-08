@@ -7,7 +7,9 @@ import os
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+
+from .products import PRODUCTS, Product
 
 ENV_PREFIX = "DOCEXTRACT_"
 
@@ -15,6 +17,11 @@ Backend = Literal["auto", "paddle", "none"]
 
 
 class Settings(BaseModel):
+    # --- Product ---------------------------------------------------------------
+    product: Literal["vi_en", "vi_en_ja"] = Field(
+        "vi_en", description="vi_en = Việt + Anh, vi_en_ja = Việt + Anh + Nhật (see docextract/products.py)"
+    )
+
     # --- Input / preprocessing -------------------------------------------------
     dpi: int = Field(200, ge=72, le=600, description="Render resolution for PDF pages")
     max_pages: int | None = Field(None, description="Process at most this many pages")
@@ -37,12 +44,9 @@ class Settings(BaseModel):
 
     # --- OCR / table / formula (PaddleOCR) -------------------------------------
     ocr_backend: Backend = "auto"
-    ocr_lang: Literal["vi", "en", "ja"] = Field(
-        "vi", description="Main document language for the stock model (a fine-tuned vi_en_ja model reads all three)"
-    )
     ocr_version: str | None = Field("PP-OCRv5", description="PP-OCRv5, PP-OCRv6, ...; None = PaddleOCR default")
     ocr_det_model: str | None = Field(None, description="Override text detection model name")
-    ocr_rec_model: str | None = Field(None, description="Override text recognition model name")
+    ocr_rec_model: str | None = Field(None, description="Override text recognition model name (default: product baseline)")
     ocr_rec_model_dir: str | None = Field(None, description="Custom (e.g. fine-tuned Vietnamese) recognition model")
     ocr_det_unclip_ratio: float | None = Field(
         None, description="Grow detected text boxes; larger keeps stacked Vietnamese diacritics inside the box"
@@ -109,6 +113,19 @@ class Settings(BaseModel):
     @property
     def vlm_enabled(self) -> bool:
         return bool(self.vlm_base_url)
+
+    @property
+    def product_info(self) -> Product:
+        return PRODUCTS[self.product]
+
+    @model_validator(mode="after")
+    def _languages_belong_to_product(self) -> Settings:
+        languages = PRODUCTS[self.product].languages
+        for name in ("output_locale", "vlm_language"):
+            value = getattr(self, name)
+            if value is not None and value not in languages:
+                raise ValueError(f"{name}={value!r} is not a language of product {self.product} {languages}")
+        return self
 
     @classmethod
     def from_env(cls, env: dict[str, str] | None = None, **overrides) -> Settings:

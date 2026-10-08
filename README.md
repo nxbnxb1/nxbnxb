@@ -1,4 +1,4 @@
-# docextract — Trích xuất tài liệu bằng OCR + VLM (tiếng Việt · tiếng Anh · tiếng Nhật)
+# docextract — Trích xuất tài liệu bằng OCR + VLM (Việt + Anh · Việt + Anh + Nhật)
 
 Chuyển **PDF, Word (.docx/.doc) và ảnh scan** thành **Markdown + JSON** có cấu trúc, giữ nguyên nội dung,
 số liệu, bảng biểu và thứ tự đọc, kèm metadata để truy vết về tài liệu gốc. Phục vụ AI / RAG / LLM.
@@ -6,21 +6,40 @@ số liệu, bảng biểu và thứ tự đọc, kèm metadata để truy vết
 Nguyên tắc: **không mất thông tin**. Văn bản chỉ lấy từ text layer PDF hoặc OCR (không bao giờ từ VLM);
 hình ảnh chỉ được thay bằng chữ khi chữ mang được toàn bộ nội dung, nếu không thì giữ lại file hình.
 
-Mọi thứ chạy trên **GitHub Actions** — không cần cài đặt gì trên máy cá nhân.
+Mọi thứ chạy trên **GitHub Actions**, không cần cài đặt gì trên máy cá nhân.
+
+## Hai sản phẩm
+
+Cùng một mã nguồn, hai sản phẩm độc lập. Mỗi sản phẩm có model OCR, baseline, workflow, thư mục vào/ra
+và Release riêng ([`docextract/products.py`](docextract/products.py)):
+
+| | **Việt + Anh** (`vi_en`) | **Việt + Anh + Nhật** (`vi_en_ja`) |
+|---|---|---|
+| Ngôn ngữ | tiếng Việt, tiếng Anh | tiếng Việt, tiếng Anh, tiếng Nhật |
+| Model OCR | `vi_en_PP-OCRv5_mobile_rec` (fine-tune) | `vi_en_ja_PP-OCRv5_mobile_rec` (fine-tune) |
+| Baseline | `latin_PP-OCRv5_mobile_rec` gốc | `PP-OCRv5_mobile_rec` gốc |
+| Đưa tài liệu vào | `inputs/vi_en/` | `inputs/vi_en_ja/` |
+| Kết quả | `outputs/vi_en/` | `outputs/vi_en_ja/` |
+| Workflow | `Việt + Anh · Extract documents / Benchmark / Train OCR model` | `Việt + Anh + Nhật · Extract documents / Benchmark / Train OCR model` |
+| Release model | `vi_en-ocr-<số>` | `vi_en_ja-ocr-<số>` |
+
+Baseline của mỗi sản phẩm là model PaddleOCR gốc mà model của sản phẩm đó được fine-tune từ. Khi chưa có Release,
+sản phẩm chạy bằng baseline. Benchmark và đánh giá khi huấn luyện chỉ so mỗi sản phẩm với baseline của chính nó.
 
 ## Cách dùng (trên GitHub)
 
 | Việc cần làm | Cách làm |
 |---|---|
-| Trích xuất tài liệu | Đẩy file vào thư mục `inputs/` → workflow **Extract documents** tự chạy, sinh `outputs/<tên>.md` và `outputs/<tên>.json`, commit lại vào nhánh và đính kèm artifact. Hoặc vào tab *Actions → Extract documents → Run workflow* (chọn file/thư mục, trang). |
-| Huấn luyện model OCR tiếng Việt | *Actions → Train Vietnamese OCR → Run workflow*. Model được kiểm thử rồi xuất bản thành Release `vi-ocr-<số>`; workflow Extract tự tải bản mới nhất. |
+| Trích xuất tài liệu | Đẩy file vào `inputs/vi_en/` hoặc `inputs/vi_en_ja/` → workflow *Extract documents* của sản phẩm đó tự chạy, sinh `outputs/<sản phẩm>/<tên>.md`, `<tên>.json`, `<tên>_assets/*.png` (hình giữ lại), commit vào nhánh và đính kèm artifact. Hoặc *Actions → … · Extract documents → Run workflow* (chọn file/thư mục, trang, hoặc `demo`). |
+| Huấn luyện model OCR | *Actions → … · Train OCR model → Run workflow*. Model được đánh giá so với baseline của sản phẩm rồi xuất bản thành Release; workflow Extract/Benchmark của sản phẩm tự tải bản mới nhất. |
+| Đo chất lượng | *Actions → … · Benchmark*: baseline và model fine-tune của sản phẩm trên tài liệu mẫu (hoặc thư mục có `<tên>.gt.md`). |
 | Kiểm thử mã nguồn | Workflow **CI** chạy `pytest` ở mỗi lần push / pull request. |
 
 Cấu hình tùy chọn (*Settings → Secrets and variables → Actions*):
 
 - `DOCEXTRACT_VLM_BASE_URL`, `DOCEXTRACT_VLM_API_KEY` (secrets) và `DOCEXTRACT_VLM_MODEL` (variable):
-  endpoint tương thích OpenAI của một VLM (ví dụ Qwen-VL qua vLLM hoặc DashScope). VLM chỉ dùng cho biểu đồ,
-  hình ảnh và làm phương án dự phòng cho bảng/công thức. Không cấu hình VLM thì mọi phần khác vẫn chạy.
+  endpoint tương thích OpenAI của một VLM (ví dụ Qwen-VL qua vLLM hoặc DashScope). VLM chỉ dùng cho hình ảnh, biểu
+  đồ và làm phương án dự phòng cho bảng/công thức. Không cấu hình VLM thì mọi phần khác vẫn chạy, hình được giữ lại.
 
 ## Kiến trúc
 
@@ -63,13 +82,13 @@ Model nhận dạng gốc của PaddleOCR (`latin_PP-OCRv5_mobile_rec`, `PP-OCRv
 **thiếu hầu hết chữ tiếng Việt có dấu chồng** (ộ, ủ, ệ, ạ, ỹ…): "Cộng hòa xã hội chủ nghĩa" bị đọc thành
 "Cng hòa xã hi ch nghĩa" mà độ tin cậy vẫn ~0.98. [`training/vi_ocr`](training/vi_ocr) cải thiện chính PaddleOCR:
 
-- **Việt + Anh + Nhật** (mặc định): từ `PP-OCRv5_mobile_rec` (đã đọc kana/kanji/Latin), giữ nguyên 18.383 ký tự
-  và thêm 118 chữ Việt/ký hiệu còn thiếu; dữ liệu huấn luyện có cả dòng tiếng Nhật để không quên tiếng Nhật.
-- **Việt + Anh**: từ `latin_PP-OCRv5_mobile_rec` với bộ ký tự gọn 281 ký tự.
+- Sản phẩm **Việt + Anh**: từ `latin_PP-OCRv5_mobile_rec` với bộ ký tự gọn 281 ký tự.
+- Sản phẩm **Việt + Anh + Nhật**: từ `PP-OCRv5_mobile_rec` (đã đọc kana/kanji/Latin), giữ nguyên 18.383 ký tự và
+  thêm 118 chữ Việt/ký hiệu còn thiếu; dữ liệu huấn luyện có cả dòng tiếng Nhật để không quên tiếng Nhật.
 
 Chữ mới được khởi tạo từ chữ gần nhất (`ộ ← ô ← o`); dữ liệu tổng hợp theo tần suất từ vựng, mẫu văn bản hành chính –
 tài chính, font phủ đủ ký tự từng dòng (loại font vẽ thiếu dấu), làm xấu như ảnh scan. Đánh giá CER theo từng ngôn ngữ
-so với model gốc rồi xuất bản Release.
+của sản phẩm so với baseline của chính sản phẩm đó rồi xuất bản Release.
 
 ## Đầu ra
 
@@ -114,8 +133,8 @@ Mọi tham số trong [`docextract/config.py`](docextract/config.py) đặt đư
 
 | Biến | Mặc định | Ý nghĩa |
 |---|---|---|
-| `DOCEXTRACT_OCR_REC_MODEL_DIR` | (Release mới nhất) | Model nhận dạng tiếng Việt đã fine-tune |
-| `DOCEXTRACT_OCR_LANG` | `vi` | Ngôn ngữ chính khi dùng model gốc: `vi`, `en`, `ja` (model đã fine-tune đọc cả ba) |
+| `DOCEXTRACT_PRODUCT` | `vi_en` | `vi_en` (Việt + Anh) hoặc `vi_en_ja` (Việt + Anh + Nhật) |
+| `DOCEXTRACT_OCR_REC_MODEL_DIR` | (Release mới nhất của sản phẩm) | Model nhận dạng đã fine-tune; không có thì dùng baseline |
 | `DOCEXTRACT_FIGURE_POLICY` | `auto` | Giữ file hình: `auto` (theo quy tắc), `always`, `never` |
 | `DOCEXTRACT_LAYOUT_BACKEND` | `auto` | `paddle`, `heuristic` (nhanh, chỉ PDF có text) |
 | `DOCEXTRACT_DPI` | `200` | Độ phân giải render trang PDF |
@@ -123,7 +142,7 @@ Mọi tham số trong [`docextract/config.py`](docextract/config.py) đặt đư
 | `DOCEXTRACT_OCR_MIN_CONFIDENCE` | `0.85` | Ngưỡng tin cậy OCR |
 | `DOCEXTRACT_CACHE_DIR` | — | Cache kết quả theo nội dung vùng cắt (SQLite) |
 | `DOCEXTRACT_ROUTE_LOG_PATH` | — | Log quyết định của Router (JSONL) |
-| `DOCEXTRACT_OUTPUT_LOCALE` | `vi` | Nhãn trong Markdown và ngôn ngữ mô tả hình không có chữ (`vi`/`en`/`ja`) |
+| `DOCEXTRACT_OUTPUT_LOCALE` | `vi` | Nhãn trong Markdown và ngôn ngữ mô tả hình không có chữ (một ngôn ngữ của sản phẩm) |
 
 ## Thành phần khác
 
@@ -137,7 +156,7 @@ Mọi tham số trong [`docextract/config.py`](docextract/config.py) đặt đư
 ## Lộ trình
 
 - [x] Giai đoạn 1: Parser + OCR + Layout Detection + Router luật + kiểm tra/hợp nhất + VLM cho nội dung hình ảnh.
-- [x] Model OCR Việt · Anh · Nhật (workflow huấn luyện, xuất bản Release).
+- [x] Hai sản phẩm Việt + Anh và Việt + Anh + Nhật, mỗi sản phẩm có model OCR fine-tune và baseline riêng.
 - [x] Quy tắc giữ hình / thay bằng chữ, không mất thông tin.
 - [ ] Giai đoạn 2: benchmark trên tài liệu thực tế (`docextract bench`), tinh chỉnh ngưỡng Router.
 - [ ] Giai đoạn 3: Neural Router học từ log `route_log.jsonl`.

@@ -43,11 +43,11 @@ def _res(result: Any) -> dict:
     return dict(result)
 
 
-_PADDLE_LANG = {"vi": "vi", "en": "en", "ja": "japan"}
-
-
 def _rec_model(settings: Settings) -> dict[str, str]:
-    """Recognition model overrides; a custom model dir carries its architecture name in inference.yml."""
+    """Recognition model: the product's fine-tuned model dir if installed, else the product baseline.
+
+    A custom model dir carries its architecture name in inference.yml.
+    """
     kwargs: dict[str, str] = {}
     name = settings.ocr_rec_model
     if settings.ocr_rec_model_dir:
@@ -56,8 +56,7 @@ def _rec_model(settings: Settings) -> dict[str, str]:
             config = Path(settings.ocr_rec_model_dir) / "inference.yml"
             match = re.search(r"^\s*model_name:\s*([\w.-]+)", config.read_text(encoding="utf-8"), re.M) if config.exists() else None
             name = match.group(1) if match else None
-    if name:
-        kwargs["text_recognition_model_name"] = name
+    kwargs["text_recognition_model_name"] = name or settings.product_info.baseline_model
     return kwargs
 
 
@@ -128,17 +127,17 @@ class PaddleLayoutDetector(_PaddleAdapter):
 class PaddleTextRecognizer(_PaddleAdapter):
     def __init__(self, settings: Settings) -> None:
         super().__init__(settings)
-        model = settings.ocr_rec_model or settings.ocr_version or "default"
+        model = settings.ocr_rec_model or settings.product_info.baseline_model
         if settings.ocr_rec_model_dir:
-            model = f"{model}@{Path(settings.ocr_rec_model_dir).name}"
-        self.name = f"paddle:ocr:{model}:{settings.ocr_lang}"
+            model = Path(settings.ocr_rec_model_dir).name
+        self.name = f"paddle:ocr:{settings.product}:{model}"
 
     def _load(self):
         from paddleocr import PaddleOCR
 
         s = self.settings
         kwargs = dict(
-            lang=_PADDLE_LANG[s.ocr_lang],
+            lang=s.product_info.paddle_lang,
             ocr_version=s.ocr_version,
             use_doc_orientation_classify=False,  # done once per page in preprocessing
             use_doc_unwarping=False,

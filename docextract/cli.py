@@ -47,6 +47,8 @@ def cmd_extract(args: argparse.Namespace) -> int:
     from .pipeline import DocumentPipeline, ExtractOptions, parse_pages
 
     overrides = {}
+    if args.product:
+        overrides["product"] = args.product
     if args.layout:
         overrides["layout_backend"] = args.layout
     if args.dpi:
@@ -86,7 +88,13 @@ def cmd_serve(args: argparse.Namespace) -> int:
 def cmd_bench(args: argparse.Namespace) -> int:
     from .benchmark import run_benchmark
 
-    report = run_benchmark(Path(args.dataset), use_vlm=not args.no_vlm)
+    pipeline = None
+    if args.product:
+        from .config import Settings
+        from .pipeline import DocumentPipeline
+
+        pipeline = DocumentPipeline(Settings.from_env(product=args.product))
+    report = run_benchmark(Path(args.dataset), use_vlm=not args.no_vlm, pipeline=pipeline)
     out = Path(args.output)
     out.mkdir(parents=True, exist_ok=True)
     (out / "benchmark.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -108,6 +116,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--no-vlm", action="store_true", help="never call the VLM")
     p.add_argument("--layout", choices=["auto", "paddle", "heuristic"], help="layout backend")
     p.add_argument("--dpi", type=int, help="render resolution for PDF pages")
+    p.add_argument("--product", choices=["vi_en", "vi_en_ja"], help="Việt + Anh or Việt + Anh + Nhật (default: env / vi_en)")
     p.set_defaults(func=cmd_extract)
 
     p = sub.add_parser("serve", help="run the FastAPI server")
@@ -119,6 +128,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("dataset", help="directory with documents and <name>.gt.md files")
     p.add_argument("-o", "--output", default="benchmark")
     p.add_argument("--no-vlm", action="store_true")
+    p.add_argument("--product", choices=["vi_en", "vi_en_ja"])
     p.set_defaults(func=cmd_bench)
 
     args = parser.parse_args(argv)

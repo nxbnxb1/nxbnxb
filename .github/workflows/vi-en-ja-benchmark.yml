@@ -1,0 +1,26 @@
+name: "Việt + Anh + Nhật · Benchmark"
+
+# Product vi_en_ja: its baseline (stock PaddleOCR model) and its fine-tuned model on documents with
+# ground truth. Empty dataset = the product's demo documents.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dataset:
+        description: Folder with documents + <name>.gt.md (empty = demo documents)
+        default: ""
+      model_tag:
+        description: Release of the fine-tuned model (empty = newest vi_en_ja model)
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  bench:
+    uses: ./.github/workflows/_benchmark.yml
+    with:
+      product: vi_en_ja
+      dataset: ${{ inputs.dataset }}
+      model_tag: ${{ inputs.model_tag }}
+    secrets: inherit

@@ -1,0 +1,37 @@
+name: "Việt + Anh + Nhật · Extract documents"
+
+# Product vi_en_ja. Push PDF / Word / scanned images into inputs/vi_en_ja/ (or run manually):
+# outputs/vi_en_ja/<name>.md, <name>.json and <name>_assets/*.png are committed back.
+
+on:
+  push:
+    paths: ["inputs/vi_en_ja/**"]
+  workflow_dispatch:
+    inputs:
+      path:
+        description: File or folder to convert (empty = inputs/vi_en_ja)
+        default: ""
+      pages:
+        description: Pages, e.g. 1-3,5 (empty = all)
+        default: ""
+      model_tag:
+        description: Release of the fine-tuned model (empty = newest vi_en_ja model)
+        default: ""
+      demo:
+        description: Convert the generated demo documents instead
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    uses: ./.github/workflows/_extract.yml
+    with:
+      product: vi_en_ja
+      path: ${{ inputs.path || '' }}
+      pages: ${{ inputs.pages || '' }}
+      model_tag: ${{ inputs.model_tag || '' }}
+      demo: ${{ inputs.demo == true }}
+    secrets: inherit

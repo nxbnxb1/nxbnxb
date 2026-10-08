@@ -1,32 +1,30 @@
-name: Train Vietnamese OCR
+name: _train (reusable)
 
-# Fine-tunes the PP-OCRv5 recogniser on synthetic text lines so it reads Vietnamese
-# (stock PaddleOCR dictionaries lack most Vietnamese letters with stacked diacritics)
-# while keeping English and, with "vi,en,ja", Japanese. Evaluates against the stock
-# models and publishes a GitHub Release "vi-ocr-<run>" the Extract workflow downloads.
+# Fine-tunes the PP-OCRv5 recogniser of one product on synthetic text lines so it reads
+# Vietnamese (stock PaddleOCR dictionaries lack most Vietnamese letters with stacked
+# diacritics) while keeping English and, for vi_en_ja, Japanese. Evaluates against the
+# product's own baseline (the stock model it starts from) and publishes a GitHub Release
+# "<product>-ocr-<run>" that the product's Extract/Benchmark workflows download.
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
-      languages:
-        description: Languages the model must read
-        type: choice
-        options: ["vi,en,ja", "vi,en"]
-        default: "vi,en,ja"
+      product:
+        type: string
+        required: true
       samples:
-        description: Synthetic training lines
+        type: string
         default: "60000"
       epochs:
-        description: Training epochs
+        type: string
         default: "4"
       time_budget_minutes:
-        description: Stop training after this many minutes (the job limit is 6 h)
+        type: string
         default: "290"
       resume_tag:
-        description: Continue from the checkpoint of this release (e.g. vi-ocr-3); empty = start from PP-OCRv5
+        type: string
         default: ""
       publish:
-        description: Publish the model as a GitHub Release
         type: boolean
         default: true
 
@@ -80,31 +78,36 @@ jobs:
           gh release download "${{ inputs.resume_tag }}" -p "checkpoint.tar.gz" -D "$WORK/resume"
           tar -xzf "$WORK/resume/checkpoint.tar.gz" -C "$WORK/resume"
           echo "RESUME_CHECKPOINT=$WORK/resume/checkpoint/latest" >> "$GITHUB_ENV"
-          # the checkpoint must be continued with the dictionary it was trained with
-          grep -q "vi_en_ja" "$WORK/resume/checkpoint/model.env" 2>/dev/null && want="vi,en,ja" || want="vi,en"
-          [ "$want" = "${{ inputs.languages }}" ] || { echo "::error::checkpoint was trained for $want"; exit 1; }
+          # the checkpoint must be continued with the dictionary of the same product
+          ckpt="$WORK/resume/checkpoint"
+          if [ -f "$ckpt/model.env" ]; then
+            grep -q "NAME=${{ inputs.product }}_PP-OCRv5" "$ckpt/model.env" && ok=1 || ok=0
+          else  # early releases: Vietnamese + English checkpoints only
+            [ "${{ inputs.product }}" = "vi_en" ] && [ -f "$ckpt/vi_en_dict.txt" ] && ok=1 || ok=0
+          fi
+          [ "$ok" = 1 ] || { echo "::error::checkpoint of ${{ inputs.resume_tag }} is not a ${{ inputs.product }} model"; exit 1; }
 
       - name: Train and export
         env:
-          LANGS: ${{ inputs.languages }}
+          LANGS: ${{ inputs.product == 'vi_en_ja' && 'vi,en,ja' || 'vi,en' }}
           SAMPLES: ${{ inputs.samples }}
           EPOCHS: ${{ inputs.epochs }}
           TIME_BUDGET_MIN: ${{ inputs.time_budget_minutes }}
         run: training/vi_ocr/run_training.sh
 
-      - name: Evaluate against stock PaddleOCR models
+      - name: Evaluate against the product baseline
         continue-on-error: true  # never lose a finished training run to an evaluation problem
         working-directory: training/vi_ocr
+        env:
+          LANGS: ${{ inputs.product == 'vi_en_ja' && 'vi,en,ja' || 'vi,en' }}
         run: |
           source "$WORK/model.env"
           sets=()
           for lang in ${LANGS//,/ }; do sets+=("$WORK/data/eval_$lang"); done
           python evaluate.py --eval "${sets[@]}" "$WORK/data/eval_clean" \
-            --baseline latin_PP-OCRv5_mobile_rec --baseline PP-OCRv5_mobile_rec --baseline PP-OCRv6_medium_rec \
-            --model "$NAME (fine-tuned)=$WORK/export" --model-name "$BASE_MODEL" --report "$WORK/report.md"
+            --baseline "$BASE_MODEL" --model "$NAME (fine-tuned)=$WORK/export" --model-name "$BASE_MODEL" \
+            --report "$WORK/report.md"
           cat "$WORK/report.md" >> "$GITHUB_STEP_SUMMARY"
-        env:
-          LANGS: ${{ inputs.languages }}
 
       - name: Package
         if: ${{ !cancelled() }}
@@ -121,7 +124,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: vi-ocr-model-${{ github.run_number }}
+          name: ${{ inputs.product }}-ocr-model-${{ github.run_number }}
           path: |
             ${{ env.WORK }}/dist/*.tar.gz
             ${{ env.WORK }}/report.*
@@ -134,12 +137,12 @@ jobs:
         run: |
           source "$WORK/model.env"
           {
-            echo "Fine-tuned PP-OCRv5 mobile recognition model ($NAME), languages: ${{ inputs.languages }}."
+            echo "Product ${{ inputs.product }}: fine-tuned PP-OCRv5 mobile recognition model $NAME (baseline: $BASE_MODEL)."
             echo "Trained by run ${{ github.run_id }}: samples=${{ inputs.samples }}, epochs=${{ inputs.epochs }}, resume='${{ inputs.resume_tag }}'."
             echo
             cat "$WORK/report.md" 2>/dev/null || echo "(evaluation report missing: see the workflow logs)"
           } > "$WORK/notes.md"
           assets=("$WORK/dist/$NAME.tar.gz" "$WORK/dist/checkpoint.tar.gz")
           for f in "$WORK/report.md" "$WORK/report.json"; do [ -f "$f" ] && assets+=("$f"); done
-          gh release create "vi-ocr-${{ github.run_number }}" "${assets[@]}" \
-            --target "${{ github.sha }}" --title "OCR model #${{ github.run_number }} (${{ inputs.languages }})" --notes-file "$WORK/notes.md"
+          gh release create "${{ inputs.product }}-ocr-${{ github.run_number }}" "${assets[@]}" \
+            --target "${{ github.sha }}" --title "${{ inputs.product }} OCR model #${{ github.run_number }}" --notes-file "$WORK/notes.md"

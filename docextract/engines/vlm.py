@@ -14,6 +14,7 @@ import httpx
 from PIL import Image
 
 from ..config import Settings
+from ..products import LANGUAGE_NAMES
 from .base import VlmRequest, VlmResult
 
 log = logging.getLogger(__name__)
@@ -59,16 +60,17 @@ PROMPTS: dict[str, str] = {
 }
 
 
-LANGUAGES = {"vi": "Vietnamese", "en": "English", "ja": "Japanese"}
-
-
-def prompt_for(task: str, hint: str | None, language: str | None, fallback: str = "vi") -> str:
+def prompt_for(
+    task: str, hint: str | None, language: str | None, fallback: str = "vi", languages: tuple[str, ...] = ("vi", "en")
+) -> str:
     if language:
-        lang = f"Write the description in {LANGUAGES.get(language, language)}."
+        lang = f"Write the description in {LANGUAGE_NAMES.get(language, language)}."
     else:
+        names = [LANGUAGE_NAMES[code] for code in languages]
+        choice = " or ".join(names) if len(names) < 3 else ", ".join(names[:-1]) + " or " + names[-1]
         lang = (
-            "Write the description in the language of the text in the image (Vietnamese, English or Japanese); "
-            f"if the image has no text, write it in {LANGUAGES.get(fallback, 'Vietnamese')}."
+            f"Write the description in the language of the text in the image ({choice}); "
+            f"if the image has no text, write it in {LANGUAGE_NAMES.get(fallback, 'Vietnamese')}."
         )
     prompt = PROMPTS[task].replace("{language}", lang)
     if hint:
@@ -141,7 +143,7 @@ class OpenAICompatibleVLM:
                     "role": "user",
                     "content": [
                         {"type": "image_url", "image_url": {"url": encode_image(request.image, s.vlm_max_image_side)}},
-                        {"type": "text", "text": prompt_for(request.task, request.hint, s.vlm_language, s.output_locale)},
+                        {"type": "text", "text": prompt_for(request.task, request.hint, s.vlm_language, s.output_locale, s.product_info.languages)},
                     ],
                 }
             ],

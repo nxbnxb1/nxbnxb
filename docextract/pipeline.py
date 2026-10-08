@@ -111,7 +111,7 @@ class DocumentPipeline:
                 page_count=page_count,
             ),
             pages=pages,
-            engines={**engines.describe(), "router": router.name, "docextract": __version__},
+            engines={**engines.describe(), "product": settings.product, "router": router.name, "docextract": __version__},
         )
         stem = Path(filename).stem or "document"
         for region in result.iter_regions():

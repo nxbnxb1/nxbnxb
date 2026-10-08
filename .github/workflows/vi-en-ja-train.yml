@@ -1,0 +1,38 @@
+name: "Việt + Anh + Nhật · Train OCR model"
+
+# Product vi_en_ja: fine-tune its PaddleOCR recogniser, evaluate against its baseline and publish
+# the Release "vi_en_ja-ocr-<run>".
+
+on:
+  workflow_dispatch:
+    inputs:
+      samples:
+        description: Synthetic training lines
+        default: "80000"
+      epochs:
+        description: Training epochs
+        default: "4"
+      time_budget_minutes:
+        description: Stop training after this many minutes (the job limit is 6 h)
+        default: "290"
+      resume_tag:
+        description: Continue from the checkpoint of this release; empty = start from the baseline model
+        default: ""
+      publish:
+        description: Publish the model as a GitHub Release
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  train:
+    uses: ./.github/workflows/_train.yml
+    with:
+      product: vi_en_ja
+      samples: ${{ inputs.samples }}
+      epochs: ${{ inputs.epochs }}
+      time_budget_minutes: ${{ inputs.time_budget_minutes }}
+      resume_tag: ${{ inputs.resume_tag }}
+      publish: ${{ inputs.publish }}

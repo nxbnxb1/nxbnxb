@@ -161,7 +161,7 @@ class Svg:
 
 def overview() -> Path:
     s = Svg(1400, 1335, "Hình 1. Tổng quan pipeline trích xuất tài liệu (OCR + VLM)",
-            "Tiếng Việt · tiếng Anh · tiếng Nhật — OCR/Parser xử lý phần dễ, VLM chỉ xử lý hình ảnh khó — chạy trên GitHub Actions")
+            "2 sản phẩm: Việt + Anh · Việt + Anh + Nhật — OCR/Parser xử lý phần dễ, VLM chỉ xử lý hình ảnh khó — GitHub Actions")
     gray = "#475569"
 
     # Đầu vào
@@ -232,7 +232,7 @@ def overview() -> Path:
     s.arrow([(950, 688), (1132, 688), (1132, 795)], "#d97706", width=1.6)
     engines = [
         ("Text layer PDF", ["PyMuPDF", "văn bản, tiêu đề,", "bảng vector"], "text"),
-        ("PaddleOCR", ["PP-OCRv5 fine-tune", "Việt · Anh · Nhật", "(Hình 4)"], "ocr"),
+        ("PaddleOCR", ["PP-OCRv5 fine-tune", "theo từng sản phẩm", "(Hình 4)"], "ocr"),
         ("Nhận dạng bảng", ["PaddleOCR Table", "→ HTML (rowspan,", "colspan)"], "table"),
         ("Công thức", ["PP-FormulaNet_plus-M", "→ LaTeX"], "formula"),
         ("VLM (Qwen-VL)", ["mô tả hình, biểu đồ ·", "dự phòng bảng/công thức"], "vlm"),
@@ -442,8 +442,8 @@ def figures() -> Path:
 
 
 def training() -> Path:
-    s = Svg(1400, 1010, "Hình 4. Cải thiện PaddleOCR: fine-tune model nhận dạng Việt · Anh · Nhật",
-            "Chạy hoàn toàn trong workflow “Train Vietnamese OCR” trên GitHub Actions")
+    s = Svg(1400, 1010, "Hình 4. Cải thiện PaddleOCR: fine-tune model nhận dạng cho từng sản phẩm",
+            "Việt + Anh (từ latin_PP-OCRv5_mobile_rec) · Việt + Anh + Nhật (từ PP-OCRv5_mobile_rec) — workflow “… · Train OCR model”")
     gray = "#475569"
     s.box(150, 95, 1100, 96, "Vấn đề: model gốc (latin/PP-OCRv5, PP-OCRv6) thiếu ~90 chữ tiếng Việt có dấu chồng (ạ ả ấ ầ … ộ … ỹ)", [
         "Ảnh “Cộng hòa xã hội chủ nghĩa Việt Nam”  →  OCR “Cng hòa xã hi ch nghĩa Vit Nam” với độ tin cậy 0,98",
@@ -451,9 +451,9 @@ def training() -> Path:
     ], "warn", size=13.5, title_size=15)
 
     steps_top = [
-        ("① Bộ ký tự", ["Việt+Anh+Nhật: từ điển PP-OCRv5", "(18.383 ký tự: kana, kanji, Latin)", "+ 118 chữ Việt & ký hiệu thiếu",
-                        "Việt+Anh: 281 ký tự gọn", "(ASCII, 134 chữ Việt, ₫ € ° ±…)"], "pre"),
-        ("② Khởi tạo trọng số", ["Từ PP-OCRv5_mobile_rec", "(hoặc latin_… cho Việt+Anh):", "giữ backbone PPLCNetV3 + SVTR;", "lớp CTC & NRTR: chữ cũ chép",
+        ("① Bộ ký tự", ["Việt + Anh: 281 ký tự gọn", "(ASCII, 134 chữ Việt, ₫ € ° ±…)", "Việt + Anh + Nhật: từ điển PP-OCRv5",
+                        "(18.383 ký tự: kana, kanji, Latin)", "+ 118 chữ Việt & ký hiệu còn thiếu"], "pre"),
+        ("② Khởi tạo trọng số", ["Từ model baseline của sản phẩm:", "giữ backbone PPLCNetV3 + SVTR;", "lớp CTC & NRTR: chữ cũ chép",
                                  "nguyên, chữ mới lấy từ chữ gần", "nhất: ộ ← ô ← o,  ẵ ← ă ← a"], "router"),
         ("③ Dữ liệu tổng hợp", ["Từ vựng Việt/Anh/Nhật theo tần suất", "Mẫu văn bản: số tiền đồng/円,", "ngày tháng, số hiệu, 第N条",
                                 "Âm tiết phủ chữ Việt hiếm, IN HOA", "Font phủ đủ ký tự của từng dòng", "(loại font vẽ thiếu dấu tiếng Việt)",
@@ -470,8 +470,8 @@ def training() -> Path:
     steps_bottom = [
         ("④ Fine-tune", ["CPU runner, giới hạn ~5 giờ", "CTC + NRTR (đa đầu ra)", "không random crop", "(tránh cắt mất dấu)"], "text"),
         ("⑤ Export", ["Định dạng PaddleOCR 3.x", "inference.json / .pdiparams", "/ .yml (kèm từ điển)"], "pre"),
-        ("⑥ Đánh giá", ["CER, độ chính xác dòng theo", "từng ngôn ngữ, tỷ lệ giữ", "chữ Việt; so với model gốc"], "check"),
-        ("⑦ GitHub Release", ["vi-ocr-N:", "model + checkpoint", "+ báo cáo đánh giá"], "out"),
+        ("⑥ Đánh giá", ["CER, độ chính xác dòng theo", "từng ngôn ngữ của sản phẩm;", "so với baseline của chính nó"], "check"),
+        ("⑦ GitHub Release", ["<sản phẩm>-ocr-N:", "model + checkpoint", "+ báo cáo đánh giá"], "out"),
     ]
     x = 150
     for title, lines, theme in steps_bottom:
@@ -483,9 +483,9 @@ def training() -> Path:
 
     # dùng model
     s.box(150, 760, 600, 112, "Dùng trong pipeline", [
-        "Workflow Extract documents / Benchmark tự tải Release mới nhất",
-        "→ DOCEXTRACT_OCR_REC_MODEL_DIR → PaddleOCR (văn bản, ô bảng,",
-        "chữ trong hình) dùng model Việt · Anh · Nhật",
+        "Extract / Benchmark của mỗi sản phẩm tự tải Release mới nhất",
+        "của sản phẩm đó → PaddleOCR (văn bản, ô bảng, chữ trong",
+        "hình); chưa có Release thì chạy bằng baseline",
     ], "ocr", size=13, align="start")
     s.box(800, 760, 450, 112, "Kết quả mong muốn", [
         "“Cộng hòa xã hội chủ nghĩa Việt Nam”, “売上高”",

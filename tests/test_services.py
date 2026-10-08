@@ -60,12 +60,25 @@ def test_vlm_client_retries_and_parses_chart(monkeypatch):
     assert result.data["chart_type"] == "bar" and result.input_tokens == 50
 
 
-def test_prompts_languages():
-    assert "Vietnamese, English or Japanese" in prompt_for("image", None, None)
+def test_prompts_follow_the_product_languages():
+    assert "(Vietnamese or English)" in prompt_for("image", None, None)
+    assert "(Vietnamese, English or Japanese)" in prompt_for("image", None, None, languages=("vi", "en", "ja"))
     assert "in English." in prompt_for("chart", None, "en")
     assert "in Japanese." in prompt_for("image", None, "ja")
     assert "lossless" in prompt_for("image", None, None) and "lossless" in prompt_for("chart", None, None)
     assert "1.234,5" in prompt_for("table", "Doanh thu 1.234,5", None)
+
+
+def test_products_have_their_own_baseline_and_languages():
+    import pytest
+
+    vi_en = Settings(product="vi_en")
+    vi_en_ja = Settings(product="vi_en_ja", output_locale="ja")
+    assert vi_en.product_info.baseline_model == "latin_PP-OCRv5_mobile_rec"
+    assert vi_en_ja.product_info.baseline_model == "PP-OCRv5_mobile_rec"
+    assert vi_en_ja.product_info.languages == ("vi", "en", "ja")
+    with pytest.raises(ValueError):
+        Settings(product="vi_en", output_locale="ja")  # Japanese is not part of the vi_en product
 
 
 def test_deskew_estimate():

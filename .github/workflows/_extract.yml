@@ -1,44 +1,47 @@
-name: Extract documents
+name: _extract (reusable)
 
-# Push PDF / Word / scanned images into inputs/ (or run manually): the documents are
-# converted on the GitHub runner and inputs/<name>.<ext> becomes outputs/<name>.md and
-# outputs/<name>.json, committed back to the branch and attached as an artifact.
+# Converts documents for one product: inputs/<product>/<name>.<ext> → outputs/<product>/<name>.md,
+# <name>.json and <name>_assets/*.png (pictures text cannot replace), committed back to the branch
+# and attached as an artifact. Called by "Việt + Anh · Extract" and "Việt + Anh + Nhật · Extract".
 #
 # Optional repository settings:
 #   secrets.DOCEXTRACT_VLM_BASE_URL / secrets.DOCEXTRACT_VLM_API_KEY / vars.DOCEXTRACT_VLM_MODEL
-#     OpenAI-compatible endpoint of a Qwen-VL model for charts, pictures and difficult tables.
-#     Without it, everything else still runs (text is always OCR / PDF text layer).
+#     OpenAI-compatible endpoint of a Qwen-VL model for pictures, charts and difficult tables.
+#     Without it everything else still runs (text is always OCR / PDF text layer; pictures are kept).
 
 on:
-  push:
-    paths: ["inputs/**"]
-  workflow_dispatch:
+  workflow_call:
     inputs:
+      product:
+        type: string
+        required: true
       path:
-        description: File or folder to convert
-        default: inputs
+        type: string
+        default: ""
       pages:
-        description: Pages, e.g. 1-3,5 (empty = all)
+        type: string
         default: ""
       model_tag:
-        description: Vietnamese OCR release tag (empty = newest vi-ocr-* release)
+        type: string
         default: ""
       demo:
-        description: Generate and convert the demo documents (scripts/make_samples.py) instead
         type: boolean
         default: false
 
 permissions:
   contents: write
 
-concurrency:
-  group: extract-${{ github.ref }}
-  cancel-in-progress: false
-
 jobs:
   extract:
     runs-on: ubuntu-latest
     timeout-minutes: 300
+    concurrency:
+      group: extract-${{ inputs.product }}-${{ github.ref }}
+      cancel-in-progress: false
+    env:
+      PRODUCT: ${{ inputs.product }}
+      DOCEXTRACT_PRODUCT: ${{ inputs.product }}
+      OUT: outputs/${{ inputs.product }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -49,8 +52,12 @@ jobs:
         run: |
           if [ "${{ inputs.demo }}" = "true" ]; then
             printf '%s\n' samples/bao_cao_digital.pdf samples/bao_cao_scan.pdf samples/bao_cao.docx > files.txt
+            if [ "$PRODUCT" = "vi_en_ja" ]; then
+              printf '%s\n' samples/houkoku_digital.pdf samples/houkoku_scan.pdf >> files.txt
+            fi
           elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             target="${{ inputs.path }}"
+            target="${target:-inputs/$PRODUCT}"
             if [ -d "$target" ]; then
               find "$target" -type f \( -iname '*.pdf' -o -iname '*.docx' -o -iname '*.doc' -o -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.tif' -o -iname '*.tiff' \) > files.txt
             else
@@ -59,9 +66,9 @@ jobs:
           else
             before="${{ github.event.before }}"
             if [ -z "$before" ] || [ "$before" = "0000000000000000000000000000000000000000" ]; then
-              git ls-files inputs > files.txt
+              git ls-files "inputs/$PRODUCT" > files.txt
             else
-              git diff --name-only --diff-filter=AM "$before" "${{ github.sha }}" -- inputs > files.txt
+              git diff --name-only --diff-filter=AM "$before" "${{ github.sha }}" -- "inputs/$PRODUCT" > files.txt
             fi
             grep -iE '\.(pdf|docx|doc|png|jpe?g|tiff?)$' files.txt > filtered.txt || true
             mv filtered.txt files.txt
@@ -85,7 +92,7 @@ jobs:
 
       - name: Demo documents
         if: inputs.demo
-        run: python scripts/make_samples.py samples
+        run: python scripts/make_samples.py samples --product "$PRODUCT"
 
       - name: Cache PaddleOCR models
         if: steps.files.outputs.count != '0'
@@ -94,11 +101,11 @@ jobs:
           path: ~/.paddlex/official_models
           key: paddlex-models-${{ runner.os }}-v1
 
-      - name: Vietnamese OCR model from Releases
+      - name: OCR model of the product from Releases
         if: steps.files.outputs.count != '0'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: scripts/fetch_ocr_model.sh "${{ inputs.model_tag }}"
+        run: scripts/fetch_ocr_model.sh "$PRODUCT" "${{ inputs.model_tag }}"
 
       - name: Convert
         if: steps.files.outputs.count != '0'
@@ -107,29 +114,29 @@ jobs:
           DOCEXTRACT_VLM_API_KEY: ${{ secrets.DOCEXTRACT_VLM_API_KEY }}
           DOCEXTRACT_VLM_MODEL: ${{ vars.DOCEXTRACT_VLM_MODEL || 'Qwen/Qwen2.5-VL-7B-Instruct' }}
           DOCEXTRACT_CACHE_DIR: ${{ github.workspace }}/.docextract_cache
-          DOCEXTRACT_ROUTE_LOG_PATH: ${{ github.workspace }}/outputs/route_log.jsonl
+          DOCEXTRACT_ROUTE_LOG_PATH: ${{ github.workspace }}/${{ env.OUT }}/route_log.jsonl
         run: |
           args=()
           [ -n "${{ inputs.pages }}" ] && args+=(--pages "${{ inputs.pages }}")
           mapfile -t files < files.txt
-          python -m docextract -v extract "${files[@]}" -o outputs "${args[@]}" | tee -a "$GITHUB_STEP_SUMMARY"
+          python -m docextract -v extract "${files[@]}" -o "$OUT" "${args[@]}" | tee -a "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v4
         if: steps.files.outputs.count != '0'
         with:
-          name: outputs-${{ github.run_number }}
-          path: outputs/
+          name: outputs-${{ inputs.product }}-${{ github.run_number }}
+          path: ${{ env.OUT }}/
 
       - name: Commit outputs
         if: steps.files.outputs.count != '0'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add outputs
+          git add "$OUT"
           if git diff --cached --quiet; then
             echo "nothing to commit"
           else
-            git commit -m "Extract: $(wc -l < files.txt) document(s) from run ${{ github.run_number }}"
+            git commit -m "Extract ($PRODUCT): $(wc -l < files.txt) document(s) from run ${{ github.run_number }}"
             git pull --rebase origin "${GITHUB_REF_NAME}"
             git push origin "HEAD:${GITHUB_REF_NAME}"
           fi

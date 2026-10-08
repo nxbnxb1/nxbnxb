@@ -3,13 +3,14 @@
     samples/bao_cao_digital.pdf   PDF with a text layer
     samples/bao_cao_scan.pdf      the same page as a skewed, noisy scan (image only)
     samples/bao_cao.docx          Word version with headings, list and a merged-cell table
+    samples/houkoku_digital.pdf   Japanese report with a text layer (built-in CJK font of PyMuPDF)
+    samples/houkoku_scan.pdf      the same Japanese page as a scan
     samples/<name>.gt.md          expected Markdown, for `docextract bench samples`
 """
 
 from __future__ import annotations
 
 import io
-import sys
 from pathlib import Path
 
 import numpy as np
@@ -32,6 +33,13 @@ TABLE = [["Chỉ tiêu", "Năm 2024", "Năm 2025", "Tăng trưởng"],
          ["Doanh thu thuần", "1.099,2", "1.234,5", "12,3%"],
          ["Lợi nhuận gộp", "312,4", "355,0", "13,6%"],
          ["Lợi nhuận sau thuế", "140,1", "156,8", "11,9%"]]
+
+
+JA_TITLE = "2025年度 事業報告書"
+JA_HEADINGS = ["1. 業績の概要", "2. 今後の取り組み"]
+JA_PARAGRAPH = ["当期の売上高は1,234億円となり、前期比12.3%の増加と", "なりました。営業利益は156億円でした。"]
+JA_TABLE = [["項目", "2024年度", "2025年度", "増減率"], ["売上高", "1,099", "1,234", "12.3%"], ["営業利益", "140", "156", "11.4%"]]
+JA_BULLETS = ["ベトナム市場での販売網を拡大します。", "新工場に85億円を投資します。"]
 
 
 def font_path() -> str:
@@ -60,6 +68,28 @@ def digital_pdf() -> bytes:
     for i, bullet in enumerate(BULLETS):
         page.insert_text((70, y + 58 + i * 16), f"- {bullet}", fontsize=10.5, fontname="vn")
     page.insert_text((290, 815), "1", fontsize=9, fontname="vn")
+    return doc.tobytes(garbage=3, deflate=True)
+
+
+def japanese_pdf() -> bytes:
+    doc = pymupdf.open()
+    page = doc.new_page(width=595, height=842)
+    jp = "japan"  # PyMuPDF's built-in CJK font, no system font needed
+    page.insert_text((60, 70), JA_TITLE, fontsize=17, fontname=jp)
+    page.insert_text((60, 110), JA_HEADINGS[0], fontsize=13, fontname=jp)
+    for i, line in enumerate(JA_PARAGRAPH):
+        page.insert_text((60, 138 + i * 17), line, fontsize=10.5, fontname=jp)
+    y = 185
+    for row in JA_TABLE:
+        for col, value in enumerate(row):
+            cell = pymupdf.Rect(60 + col * 118, y, 60 + (col + 1) * 118, y + 22)
+            page.draw_rect(cell, width=0.6)
+            page.insert_text((cell.x0 + 5, cell.y0 + 15), value, fontsize=9.5, fontname=jp)
+        y += 22
+    page.insert_text((60, y + 35), JA_HEADINGS[1], fontsize=13, fontname=jp)
+    for i, bullet in enumerate(JA_BULLETS):
+        page.insert_text((70, y + 58 + i * 16), f"- {bullet}", fontsize=10.5, fontname=jp)
+    page.insert_text((290, 815), "1", fontsize=9, fontname=jp)
     return doc.tobytes(garbage=3, deflate=True)
 
 
@@ -111,7 +141,14 @@ def ground_truth(table: str) -> str:
 
 
 def main() -> None:
-    out = Path(sys.argv[1] if len(sys.argv) > 1 else "samples")
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("out", nargs="?", default="samples")
+    parser.add_argument("--product", choices=["vi_en", "vi_en_ja"], default="vi_en",
+                        help="vi_en: Vietnamese/English documents; vi_en_ja: plus Japanese documents")
+    args = parser.parse_args()
+    out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     digital = digital_pdf()
     (out / "bao_cao_digital.pdf").write_bytes(digital)
@@ -128,6 +165,23 @@ def main() -> None:
     for name in ("bao_cao_digital", "bao_cao_scan"):
         (out / f"{name}.gt.md").write_text(ground_truth(pipe_table), encoding="utf-8")
     (out / "bao_cao.gt.md").write_text(ground_truth(html_table), encoding="utf-8")
+
+    if args.product != "vi_en_ja":
+        print("\n".join(str(p) for p in sorted(out.iterdir())))
+        return
+    japanese = japanese_pdf()
+    (out / "houkoku_digital.pdf").write_bytes(japanese)
+    (out / "houkoku_scan.pdf").write_bytes(scanned_pdf(japanese))
+    ja_table = "\n".join(
+        ["| " + " | ".join(JA_TABLE[0]) + " |", "|---|---|---|---|"] + ["| " + " | ".join(r) + " |" for r in JA_TABLE[1:]]
+    )
+    ja_bullets = "\n".join(f"- {b}" for b in JA_BULLETS)
+    ja_gt = (
+        f"# {JA_TITLE}\n\n## {JA_HEADINGS[0]}\n\n{''.join(JA_PARAGRAPH)}\n\n{ja_table}\n\n"
+        f"## {JA_HEADINGS[1]}\n\n{ja_bullets}\n"
+    )
+    for name in ("houkoku_digital", "houkoku_scan"):
+        (out / f"{name}.gt.md").write_text(ja_gt, encoding="utf-8")
     print("\n".join(str(p) for p in sorted(out.iterdir())))
 
 
