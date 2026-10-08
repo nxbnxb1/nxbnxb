@@ -10,3 +10,4 @@ files.txt
 dist/
 build/
 .venv/
+samples/

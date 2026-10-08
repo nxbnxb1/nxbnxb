@@ -23,6 +23,10 @@ on:
       model_tag:
         description: Vietnamese OCR release tag (empty = newest vi-ocr-* release)
         default: ""
+      demo:
+        description: Generate and convert the demo documents (scripts/make_samples.py) instead
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -43,7 +47,9 @@ jobs:
       - name: Files to convert
         id: files
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          if [ "${{ inputs.demo }}" = "true" ]; then
+            printf '%s\n' samples/bao_cao_digital.pdf samples/bao_cao_scan.pdf samples/bao_cao.docx > files.txt
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             target="${{ inputs.path }}"
             if [ -d "$target" ]; then
               find "$target" -type f \( -iname '*.pdf' -o -iname '*.docx' -o -iname '*.doc' -o -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.tif' -o -iname '*.tiff' \) > files.txt
@@ -76,6 +82,10 @@ jobs:
           if grep -qiE '\.doc$' files.txt; then
             sudo apt-get update -qq && sudo apt-get install -y -qq libreoffice-writer-nogui >/dev/null
           fi
+
+      - name: Demo documents
+        if: inputs.demo
+        run: python scripts/make_samples.py samples
 
       - name: Cache PaddleOCR models
         if: steps.files.outputs.count != '0'
