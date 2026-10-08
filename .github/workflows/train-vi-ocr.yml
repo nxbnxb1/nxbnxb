@@ -20,6 +20,10 @@ on:
       resume_tag:
         description: Continue from the checkpoint of this release (e.g. vi-ocr-3); empty = start from PP-OCRv5
         default: ""
+      publish:
+        description: Publish the model as a GitHub Release
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -109,6 +113,7 @@ jobs:
             ${{ env.WORK }}/output/train.log
 
       - name: Publish release
+        if: inputs.publish
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

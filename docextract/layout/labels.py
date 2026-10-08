@@ -70,8 +70,13 @@ def normalize_label(label: str) -> RegionType:
 
 
 def clean_candidates(candidates: list[Candidate], page_area: float, min_area_ratio: float) -> list[Candidate]:
-    """Drop specks, near-duplicates and text boxes that sit inside a table/figure."""
-    kept = [c for c in candidates if c.bbox.area >= page_area * min_area_ratio]
+    """Drop specks, near-duplicates and text boxes that sit inside a table/figure.
+
+    The size filter applies to model boxes only: PDF text blocks (e.g. a page number) are real.
+    """
+    kept = [
+        c for c in candidates if c.bbox.area >= page_area * min_area_ratio or c.label in ("orphan_text", "pdf_text_block")
+    ]
     kept.sort(key=lambda c: -(c.score if c.score is not None else 1.0))
     result: list[Candidate] = []
     for cand in kept:

@@ -12,7 +12,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from docx import Document
-from docx.oxml.ns import qn
+from docx.oxml.ns import nsmap, qn
+from lxml import etree
 from docx.table import Table as DocxTable
 from docx.table import _Cell
 from docx.text.paragraph import Paragraph
@@ -25,6 +26,11 @@ from ..textutil import normalize
 log = logging.getLogger(__name__)
 
 _HEADING_RE = re.compile(r"(heading|tiêu đề|título|titre|überschrift|überschrift)\s*(\d)", re.IGNORECASE)
+
+
+def _xpath(element, path: str) -> list:
+    """XPath with the WordprocessingML prefixes, also on plain lxml elements (numbering part)."""
+    return etree._Element.xpath(element, path, namespaces=nsmap)
 
 
 @dataclass
@@ -111,18 +117,18 @@ class DocxReader:
         match = _HEADING_RE.search(style)
         if match:
             return int(match.group(2)) - 1
-        values = p._p.xpath("./w:pPr/w:outlineLvl/@w:val")
+        values = _xpath(p._p, "./w:pPr/w:outlineLvl/@w:val")
         style_el = p.style.element if p.style is not None else None
         while not values and style_el is not None:
-            values = style_el.xpath("./w:pPr/w:outlineLvl/@w:val")
-            based = style_el.xpath("./w:basedOn/@w:val")
+            values = _xpath(style_el, "./w:pPr/w:outlineLvl/@w:val")
+            based = _xpath(style_el, "./w:basedOn/@w:val")
             style_el = self._style_by_id(based[0]) if based else None
         if values and values[0].isdigit() and int(values[0]) < 9:
             return int(values[0])
         return None
 
     def _style_by_id(self, style_id: str):
-        for style in self.doc.styles.element.xpath("./w:style"):
+        for style in _xpath(self.doc.styles.element, "./w:style"):
             if style.get(qn("w:styleId")) == style_id:
                 return style
         return None
@@ -134,19 +140,22 @@ class DocxReader:
         except (KeyError, NotImplementedError, AttributeError):
             return {}
         abstract: dict[str, dict[str, str]] = {}
-        for an in numbering.xpath("./w:abstractNum"):
-            levels = {lvl.get(qn("w:ilvl")): (lvl.xpath("./w:numFmt/@w:val") or ["bullet"])[0] for lvl in an.xpath("./w:lvl")}
+        for an in _xpath(numbering, "./w:abstractNum"):
+            levels = {
+                lvl.get(qn("w:ilvl")): (_xpath(lvl, "./w:numFmt/@w:val") or ["bullet"])[0]
+                for lvl in _xpath(an, "./w:lvl")
+            }
             abstract[an.get(qn("w:abstractNumId"))] = levels
         out = {}
-        for num in numbering.xpath("./w:num"):
-            ref = num.xpath("./w:abstractNumId/@w:val")
+        for num in _xpath(numbering, "./w:num"):
+            ref = _xpath(num, "./w:abstractNumId/@w:val")
             for ilvl, fmt in abstract.get(ref[0] if ref else "", {}).items():
                 out[(num.get(qn("w:numId")), ilvl)] = fmt
         return out
 
     def _list_marker(self, p: Paragraph, style: str) -> str | None:
-        num_id = p._p.xpath("./w:pPr/w:numPr/w:numId/@w:val")
-        ilvl = p._p.xpath("./w:pPr/w:numPr/w:ilvl/@w:val") or ["0"]
+        num_id = _xpath(p._p, "./w:pPr/w:numPr/w:numId/@w:val")
+        ilvl = _xpath(p._p, "./w:pPr/w:numPr/w:ilvl/@w:val") or ["0"]
         if not num_id and not style.lower().startswith("list"):
             return None
         if num_id and num_id[0] == "0":
@@ -181,7 +190,7 @@ class DocxReader:
         for r, tr in enumerate(table._tbl.tr_lst):
             col = tr.grid_before
             row: list[Cell] = []
-            is_header = bool(tr.xpath("./w:trPr/w:tblHeader")) or r == 0
+            is_header = bool(_xpath(tr, "./w:trPr/w:tblHeader")) or r == 0
             for tc in tr.tc_lst:
                 span = tc.grid_span
                 if tc.vMerge == "continue":
