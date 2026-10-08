@@ -15,6 +15,11 @@ Env:
           early stages detect strokes and edges and transfer to new letters unchanged.
   GTC     ``0`` trains the CTC branch only (the NRTR guidance branch is not run). Inference
           uses the CTC branch in both cases, so the exported model has the same structure.
+  INIT_PARAMS  weights to start from instead of the pretrained ones (e.g. the average of the
+          previous round, see _train.yml): same structure as the model being trained.
+
+Whatever stops training (end of the epochs, or SIGINT from ``timeout`` at the end of the time
+budget), the weights reached are saved to ``<save_model_dir>/final.pdparams``.
 """
 
 from __future__ import annotations
@@ -36,7 +41,9 @@ from ppocr.utils.utility import set_seed  # noqa: E402
 FUSE = os.environ.get("FUSE", "0") == "1"
 FREEZE = [s.strip() for s in os.environ.get("FREEZE", "").split(",") if s.strip()]
 GTC = os.environ.get("GTC", "1") != "0"
+INIT_PARAMS = os.environ.get("INIT_PARAMS") or None
 PRETRAINED: str | None = None  # loaded before fusing (FUSE=1), not by train.main
+MODEL = None
 
 
 def fuse(model) -> int:
@@ -49,11 +56,18 @@ def fuse(model) -> int:
 
 
 def _build_model(config, _build=train.build_model):
+    global MODEL
     model = _build(config)
     if FUSE:
         if PRETRAINED:
             load_pretrained_params(model, PRETRAINED)
         print(f"train_cpu: fused {fuse(model)} backbone blocks")
+    if INIT_PARAMS:
+        missing, unexpected = model.set_state_dict(paddle.load(INIT_PARAMS))
+        if missing or unexpected:
+            raise SystemExit(f"{INIT_PARAMS} does not fit the model: missing {missing[:5]}, unexpected {unexpected[:5]}")
+        print(f"train_cpu: started from {INIT_PARAMS}")
+    MODEL = model
     for name in FREEZE:
         for param in getattr(model.backbone, name).parameters():
             param.stop_gradient = True
@@ -121,4 +135,13 @@ elif __name__ == "__main__":
         config["Global"]["pretrained_model"] = None
     logger.info(f"train_cpu: {_flags()}, OMP_NUM_THREADS={os.environ.get('OMP_NUM_THREADS')}")
     set_seed(config["Global"].get("seed", 1024))
-    train.main(config, device, logger, vdl_writer)
+    train.set_signal_handlers = lambda: None  # SIGINT must reach the handler below, not kill the group
+    final = os.path.join(config["Global"]["save_model_dir"], "final.pdparams")
+    try:
+        train.main(config, device, logger, vdl_writer)
+    except KeyboardInterrupt:
+        logger.info("train_cpu: stopped by the time budget")
+    finally:
+        if MODEL is not None:
+            paddle.save(MODEL.state_dict(), final)
+            logger.info(f"train_cpu: weights saved to {final}")

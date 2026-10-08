@@ -83,8 +83,10 @@ Model nhận dạng gốc của PaddleOCR (`latin_PP-OCRv5_mobile_rec`, `PP-OCRv
 "Cng hòa xã hi ch nghĩa" mà độ tin cậy vẫn ~0.98. [`training/vi_ocr`](training/vi_ocr) cải thiện chính PaddleOCR:
 
 - Sản phẩm **Việt + Anh**: từ `latin_PP-OCRv5_mobile_rec` với bộ ký tự gọn 281 ký tự.
-- Sản phẩm **Việt + Anh + Nhật**: từ `PP-OCRv5_mobile_rec` (đã đọc kana/kanji/Latin), giữ nguyên 18.383 ký tự và
-  thêm 118 chữ Việt/ký hiệu còn thiếu; dữ liệu huấn luyện có cả dòng tiếng Nhật để không quên tiếng Nhật.
+- Sản phẩm **Việt + Anh + Nhật**: từ `PP-OCRv5_mobile_rec` (đã đọc kana/kanji/Latin), giữ các ký tự thuộc bộ chữ
+  chuẩn tiếng Nhật (CP932: kana, 6.221 kanji, ký tự toàn độ rộng) cùng trọng số gốc, thêm chữ Việt/ký hiệu còn thiếu:
+  6.973 lớp thay vì 18.383 (bỏ chữ Hán chỉ dùng trong tiếng Trung); dữ liệu huấn luyện có cả dòng tiếng Nhật để không
+  quên tiếng Nhật.
 
 Chữ mới được khởi tạo từ chữ gần nhất (`ộ ← ô ← o`); dữ liệu tổng hợp theo tần suất từ vựng, mẫu văn bản hành chính –
 tài chính, font phủ đủ ký tự từng dòng (loại font vẽ thiếu dấu), làm xấu như ảnh scan. Đánh giá CER theo từng ngôn ngữ
@@ -148,8 +150,14 @@ Mọi tham số trong [`docextract/config.py`](docextract/config.py) đặt đư
 
 - **API FastAPI** (`docextract/api.py`): `POST /v1/extract`, `POST /v1/jobs`, `GET /v1/jobs/{id}`,
   `GET /v1/jobs/{id}/markdown`, `GET /health` — dùng khi muốn triển khai thành dịch vụ (`docextract serve`).
-- **Benchmark giai đoạn 2** (`docextract bench <thư mục>`): mỗi tài liệu kèm `<tên>.gt.md`; tính CER, WER,
-  TEDS/TEDS-S cho bảng, F1 tiêu đề, ms/trang, số lần gọi VLM/trang, chi phí/trang, tỷ lệ vùng cần kiểm tra.
+- **Benchmark giai đoạn 2** (`docextract bench <thư mục> [--split test]`): mỗi tài liệu kèm `<tên>.gt.md`; thư mục con
+  là loại tài liệu, `dev/` – `test/` ở cấp đầu là tập tinh chỉnh / tập báo cáo. Tính CER, WER, F1 từ (không phụ thuộc thứ
+  tự đọc), TEDS/TEDS-S cho bảng, F1 tiêu đề, ms/trang, số lần gọi VLM/trang, chi phí/trang, tỷ lệ vùng cần kiểm tra —
+  theo từng loại và toàn bộ.
+- **Bộ đánh giá giữ riêng** ([`scripts/build_eval_set.py`](scripts/build_eval_set.py), workflow *Build evaluation set*):
+  trang thật thuộc 9 loại tài liệu (slide, bài báo khoa học, sách, sách giáo khoa màu, đề thi, tạp chí, báo, ghi chép,
+  báo cáo — OmniDocBench, đáp án do người chú thích) và bài viết chọn lọc Wikipedia tiếng Việt/Anh/Nhật ở ba dạng (PDF số,
+  DOCX, bản scan). Chọn theo hash, không theo kết quả; ~30% `dev/`, ~70% `test/`; chỉ được tinh chỉnh trên `dev/`.
 - **Tối ưu:** không OCR lại text đã có trong PDF; chỉ crop vùng cần xử lý; batch theo phương pháp; các nhóm phương
   pháp chạy song song; gọi VLM đồng thời; cache theo pixel của vùng cắt.
 
@@ -158,7 +166,8 @@ Mọi tham số trong [`docextract/config.py`](docextract/config.py) đặt đư
 - [x] Giai đoạn 1: Parser + OCR + Layout Detection + Router luật + kiểm tra/hợp nhất + VLM cho nội dung hình ảnh.
 - [x] Hai sản phẩm Việt + Anh và Việt + Anh + Nhật, mỗi sản phẩm có model OCR fine-tune và baseline riêng.
 - [x] Quy tắc giữ hình / thay bằng chữ, không mất thông tin.
-- [ ] Giai đoạn 2: benchmark trên tài liệu thực tế (`docextract bench`), tinh chỉnh ngưỡng Router.
+- [x] Bộ đánh giá giữ riêng nhiều loại tài liệu, đáp án tự nhiên, tách dev/test.
+- [ ] Giai đoạn 2: benchmark hai sản phẩm trên tập test (baseline và model fine-tune), tinh chỉnh ngưỡng trên dev.
 - [ ] Giai đoạn 3: Neural Router học từ log `route_log.jsonl`.
 
 Tài liệu thiết kế gốc: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Hình vẽ được sinh từ

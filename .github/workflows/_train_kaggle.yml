@@ -1,0 +1,124 @@
+name: _train_kaggle (reusable)
+
+# Optional: trains one product's OCR model on a free Kaggle GPU instead of GitHub CPU runners.
+# GitHub pushes the kernel (training/kaggle), waits for it, collects the model and publishes the
+# same Release "<product>-ocr-<run>" as _train.yml.
+#
+# Needs repository secrets KAGGLE_USERNAME and KAGGLE_API_TOKEN (or KAGGLE_KEY) of a Kaggle
+# account whose phone number is verified (GPU and internet access in kernels).
+
+on:
+  workflow_call:
+    inputs:
+      product:
+        type: string
+        required: true
+      samples:
+        type: number
+        default: 200000
+      epochs:
+        type: number
+        default: 10
+      minutes:
+        type: number  # training time on Kaggle; the whole kernel must finish within ~5.5 h
+        default: 240
+      resume_tag:
+        type: string
+        default: ""
+      publish:
+        type: boolean
+        default: true
+    secrets:
+      KAGGLE_USERNAME:
+        required: false
+      KAGGLE_KEY:
+        required: false
+      KAGGLE_API_TOKEN:
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  kaggle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    env:
+      KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+      KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+      KAGGLE_API_TOKEN: ${{ secrets.KAGGLE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Kaggle credentials
+        run: |
+          if [ -z "$KAGGLE_USERNAME" ] || { [ -z "$KAGGLE_KEY" ] && [ -z "$KAGGLE_API_TOKEN" ]; }; then
+            echo "::error::Add repository secrets KAGGLE_USERNAME and KAGGLE_API_TOKEN (kaggle.com → Settings → API)"
+            exit 1
+          fi
+          pip install -q kaggle
+
+      - name: Push the training kernel
+        id: push
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          resume=""
+          if [ -n "${{ inputs.resume_tag }}" ]; then
+            resume="https://github.com/${{ github.repository }}/releases/download/${{ inputs.resume_tag }}/checkpoint.tar.gz"
+          fi
+          id=$(python training/kaggle/make_kernel.py kernel --user "$KAGGLE_USERNAME" --product "${{ inputs.product }}" \
+            --repo "https://github.com/${{ github.repository }}.git" --sha "${{ github.sha }}" \
+            --samples "${{ inputs.samples }}" --epochs "${{ inputs.epochs }}" --minutes "${{ inputs.minutes }}" \
+            --resume-url "$resume")
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+          kaggle kernels push -p kernel --accelerator NvidiaTeslaT4
+
+      - name: Wait for the kernel
+        run: |
+          id="${{ steps.push.outputs.id }}"
+          while true; do
+            sleep 120
+            status=$(kaggle kernels status "$id" 2>&1 || true)
+            echo "$(date -u +%H:%M) $status"
+            case "${status,,}" in
+              *complete*) break ;;
+              *error*|*cancel*) echo "::error::kernel $id: $status"; break ;;
+            esac
+          done
+
+      - name: Collect the outputs
+        if: ${{ !cancelled() }}
+        run: |
+          mkdir -p out
+          kaggle kernels output "${{ steps.push.outputs.id }}" -p out
+          ls -la out
+          tail -n 60 out/*.log 2>/dev/null || true
+          cat out/run.json
+          [ -f out/report.md ] && cat out/report.md >> "$GITHUB_STEP_SUMMARY"
+          ls out/*_PP-OCRv5_mobile_rec.tar.gz out/checkpoint.tar.gz
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: ${{ inputs.product }}-ocr-model-${{ github.run_number }}
+          path: out/
+
+      - name: Publish release
+        if: inputs.publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          model=$(ls out/*_PP-OCRv5_mobile_rec.tar.gz)
+          {
+            echo "Product ${{ inputs.product }}: fine-tuned PP-OCRv5 mobile recognition model, trained on Kaggle"
+            echo "by run ${{ github.run_id }} (samples=${{ inputs.samples }}, epochs=${{ inputs.epochs }}, resume='${{ inputs.resume_tag }}')."
+            echo
+            echo '```json'; cat out/run.json; echo '```'
+            echo
+            cat out/report.md 2>/dev/null || echo "(evaluation report missing: see the kernel log)"
+          } > notes.md
+          assets=("$model" out/checkpoint.tar.gz)
+          for f in out/report.md out/report.json; do [ -f "$f" ] && assets+=("$f"); done
+          gh release create "${{ inputs.product }}-ocr-${{ github.run_number }}" "${assets[@]}" \
+            --target "${{ github.sha }}" --title "${{ inputs.product }} OCR model #${{ github.run_number }}" --notes-file notes.md

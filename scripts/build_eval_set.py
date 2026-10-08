@@ -1,8 +1,9 @@
 """Build a held-out evaluation set with natural ground truth (run on GitHub, see eval-set.yml).
 
 Every document goes to ``OUT/<split>/<category>/<id>.<ext>`` with ``<id>.gt.md`` next to it.
-Selection never looks at results: documents are picked by a hash of their id, and the same hash
-puts ~30% of them in ``dev/`` (allowed for tuning) and the rest in ``test/`` (report only).
+Selection never looks at results: documents are picked by a hash of their id, and within each
+language / kind a second hash puts 30% of them in ``dev/`` (allowed for tuning) and the rest in
+``test/`` (report only).
 
 Sources
   omnidocbench  real pages of 9 kinds (slides, papers, books, textbooks, exams, magazines,
@@ -50,8 +51,11 @@ def digest(key: str) -> int:
     return int(hashlib.sha1(key.encode("utf-8")).hexdigest(), 16)
 
 
-def split_of(key: str) -> str:
-    return "dev" if digest("split:" + key) % 1000 < DEV_SHARE * 1000 else "test"
+def assign_splits(keys: list[str]) -> dict[str, str]:
+    """30% of each group in dev (the lowest split hashes), the rest in test."""
+    ranked = sorted(keys, key=lambda k: digest("split:" + k))
+    n_dev = round(DEV_SHARE * len(keys))
+    return {k: "dev" if i < n_dev else "test" for i, k in enumerate(ranked)}
 
 
 def get(client: httpx.Client, url: str, **params) -> httpx.Response:
@@ -118,14 +122,14 @@ def omnidocbench(args: argparse.Namespace) -> None:
         manifest = []
         for kind, items in sorted(by_kind.items()):
             items.sort(key=lambda p: digest(p["page_info"]["image_path"]))
-            for page in items[: args.per_kind]:
+            chosen = [p for p in items if len(omnidocbench_markdown(p)) >= 20][: args.per_kind]
+            splits = assign_splits(["omnidocbench:" + p["page_info"]["image_path"] for p in chosen])
+            for page in chosen:
                 path = page["page_info"]["image_path"]
                 gt = omnidocbench_markdown(page)
-                if len(gt) < 20:
-                    continue
                 image = get(client, OMNIDOCBENCH.format(rev=args.revision, path=f"images/{path}")).content
                 name = Path(path).stem
-                split = split_of("omnidocbench:" + path)
+                split = splits["omnidocbench:" + path]
                 write(out, split, f"omnidocbench/{kind}", name, Path(path).suffix.lower(), image, gt)
                 manifest.append({"source": "omnidocbench", "kind": kind, "image": path, "split": split})
                 print(f"omnidocbench {kind}: {path} → {split}", flush=True)
@@ -318,17 +322,21 @@ def wikipedia(args: argparse.Namespace) -> None:
     with httpx.Client(headers={"User-Agent": UA}, timeout=120, follow_redirects=True) as client, tempfile.TemporaryDirectory() as tmp:
         titles = sorted(featured_titles(client, lang), key=lambda t: digest(f"wikipedia:{lang}:{t}"))
         print(f"{lang}: {len(titles)} featured articles", flush=True)
+        chosen = []  # (title, revision, blocks)
         for title in titles:
-            if len(manifest) >= args.count:
+            if len(chosen) >= args.count:
                 break
             rest = f"https://{lang}.wikipedia.org/api/rest_v1/page/html/{quote(title.replace(' ', '_'), safe='')}"
             response = get(client, rest)
             revision = response.headers.get("etag", "").strip('W/"').split("/")[0]
             blocks = article_blocks(response.text, title, args.max_chars)
-            if sum(1 for k, _ in blocks if k == "p") < 3:
-                continue
+            if sum(1 for k, _ in blocks if k == "p") >= 3:
+                chosen.append((title, revision, blocks))
+            time.sleep(1)
+        splits = assign_splits([f"wikipedia:{lang}:{title}" for title, _, _ in chosen])
+        for title, revision, blocks in chosen:
             name = f"{lang}_{digest(title) % 10**8:08d}"
-            split = split_of(f"wikipedia:{lang}:{title}")
+            split = splits[f"wikipedia:{lang}:{title}"]
             source = Path(tmp) / f"{name}.html"
             source.write_text(blocks_html(blocks, lang), encoding="utf-8")
             gt = blocks_markdown(blocks)
@@ -342,7 +350,6 @@ def wikipedia(args: argparse.Namespace) -> None:
                  "license": "CC BY-SA 4.0", "url": f"https://{lang}.wikipedia.org/wiki/{title.replace(' ', '_')}"}
             )
             print(f"wikipedia {lang}: {title} (rev {revision}) → {name} {split}", flush=True)
-            time.sleep(1)
     _append_manifest(out, manifest)
 
 

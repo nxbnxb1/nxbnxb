@@ -1,22 +1,35 @@
 name: "Việt + Anh + Nhật · Train OCR model"
 
-# Product vi_en_ja: fine-tune its PaddleOCR recogniser, evaluate against its baseline and publish
-# the Release "vi_en_ja-ocr-<run>".
+# Product vi_en_ja: fine-tune its PaddleOCR recogniser on several GitHub runners at once (rounds of
+# training + averaging, see _train.yml), evaluate against its baseline and publish the Release
+# "vi_en_ja-ocr-<run>".
 
 on:
   workflow_dispatch:
     inputs:
-      samples:
-        description: Synthetic training lines
-        default: "80000"
-      epochs:
-        description: Passes over the training lines
-        default: "4"
-      time_budget_minutes:
-        description: Stop training after this many minutes (the job limit is 6 h)
-        default: "290"
+      compute:
+        description: "github: several free GitHub CPU runners; kaggle: one free Kaggle GPU (needs KAGGLE_* secrets)"
+        type: choice
+        options: [github, kaggle]
+        default: github
+      runners:
+        description: Runners training at the same time (each on its own synthetic lines)
+        type: number
+        default: 8
+      rounds:
+        description: Rounds (1-6); the runners' weights are averaged after each round
+        type: number
+        default: 4
+      round_minutes:
+        description: Training minutes per round (at most 100)
+        type: number
+        default: 50
+      lines:
+        description: New synthetic lines per runner and round
+        type: number
+        default: 24000
       resume_tag:
-        description: Continue from the checkpoint of this release; empty = start from the baseline model
+        description: Continue from the weights of this release; empty = start from the baseline model
         default: ""
       publish:
         description: Publish the model as a GitHub Release
@@ -28,11 +41,22 @@ permissions:
 
 jobs:
   train:
+    if: inputs.compute == 'github'
     uses: ./.github/workflows/_train.yml
     with:
       product: vi_en_ja
-      samples: ${{ inputs.samples }}
-      epochs: ${{ inputs.epochs }}
-      time_budget_minutes: ${{ inputs.time_budget_minutes }}
+      runners: ${{ inputs.runners }}
+      rounds: ${{ inputs.rounds }}
+      round_minutes: ${{ inputs.round_minutes }}
+      lines: ${{ inputs.lines }}
       resume_tag: ${{ inputs.resume_tag }}
       publish: ${{ inputs.publish }}
+
+  train-kaggle:
+    if: inputs.compute == 'kaggle'
+    uses: ./.github/workflows/_train_kaggle.yml
+    with:
+      product: vi_en_ja
+      resume_tag: ${{ inputs.resume_tag }}
+      publish: ${{ inputs.publish }}
+    secrets: inherit

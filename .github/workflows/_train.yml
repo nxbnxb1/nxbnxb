@@ -1,10 +1,15 @@
 name: _train (reusable)
 
 # Fine-tunes the PP-OCRv5 recogniser of one product on synthetic text lines so it reads
-# Vietnamese (stock PaddleOCR dictionaries lack most Vietnamese letters with stacked
-# diacritics) while keeping English and, for vi_en_ja, Japanese. Evaluates against the
-# product's own baseline (the stock model it starts from) and publishes a GitHub Release
-# "<product>-ocr-<run>" that the product's Extract/Benchmark workflows download.
+# Vietnamese (stock PaddleOCR dictionaries lack most Vietnamese letters with stacked diacritics)
+# while keeping English and, for vi_en_ja, Japanese.
+#
+# A GitHub runner has 4 CPU cores and no GPU, so training runs on several runners at once in
+# rounds (local SGD): in each round every runner starts from the same weights, trains on its own
+# fresh synthetic lines, and the weights of all runners are averaged (_train_round.yml). After the
+# last round the average is exported, evaluated against the product's own baseline (the stock
+# model it starts from) and published as the Release "<product>-ocr-<run>", which the product's
+# Extract/Benchmark workflows download.
 
 on:
   workflow_call:
@@ -12,15 +17,18 @@ on:
       product:
         type: string
         required: true
-      samples:
-        type: string
-        default: "60000"
-      epochs:
-        type: string
-        default: "4"
-      time_budget_minutes:
-        type: string
-        default: "290"
+      runners:
+        type: number
+        default: 8
+      rounds:
+        type: number  # 1 to 6
+        default: 4
+      round_minutes:
+        type: number  # at most 100
+        default: 50
+      lines:
+        type: number  # new synthetic lines per runner and round (~9 lines/s are trained)
+        default: 24000
       resume_tag:
         type: string
         default: ""
@@ -35,17 +43,20 @@ env:
   PADDLEOCR_REF: dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf  # training code, pinned
   WORK: ${{ github.workspace }}/vi_ocr_work
   PADDLEOCR_DIR: ${{ github.workspace }}/PaddleOCR
-  # CPU settings measured by the "OCR training · speed probe" workflow (see training/vi_ocr/README.md)
-  THREADS: ""  # all cores
-  NEW_MODEL_FUSE: "1"  # fused backbone for new runs; a resumed checkpoint keeps its own setting
+  LANGS: ${{ inputs.product == 'vi_en_ja' && 'vi,en,ja' || 'vi,en' }}
+  # CPU settings measured by "OCR training · speed probe" (samples/s on a 4-core runner, batch 32):
+  #   vi_en 1.0 as PaddleOCR trains → 2.4 fused backbone → 8.8 fused + CTC branch only
+  #   vi_en_ja 0.8 → 1.6 → 7.1; freezing stages 1-4 adds little, so the whole backbone trains
+  NEW_MODEL_FUSE: "1"  # continued weights keep their own setting
   FREEZE: ""
-  GTC: "1"
-  CHUNK: "6000"  # lines between two checkpoints
+  GTC: "0"
 
 jobs:
-  train:
+  prepare:
     runs-on: ubuntu-latest
-    timeout-minutes: 355
+    timeout-minutes: 60
+    outputs:
+      shards: ${{ steps.plan.outputs.shards }}
     steps:
       - uses: actions/checkout@v4
 
@@ -54,41 +65,160 @@ jobs:
           paddleocr-ref: ${{ env.PADDLEOCR_REF }}
           paddleocr-dir: ${{ env.PADDLEOCR_DIR }}
 
-      - name: Resume checkpoint
+      - name: Weights to continue from
         if: inputs.resume_tag != ''
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          mkdir -p "$WORK/resume_dl"
+          gh release download "${{ inputs.resume_tag }}" -p "checkpoint.tar.gz" -D "$WORK/resume_dl"
+          tar -xzf "$WORK/resume_dl/checkpoint.tar.gz" -C "$WORK/resume_dl"
+          ckpt="$WORK/resume_dl/checkpoint"
+          grep -q "NAME=${{ inputs.product }}_PP-OCRv5" "$ckpt/model.env" \
+            || { echo "::error::${{ inputs.resume_tag }} is not a ${{ inputs.product }} model"; exit 1; }
           mkdir -p "$WORK/resume"
-          gh release download "${{ inputs.resume_tag }}" -p "checkpoint.tar.gz" -D "$WORK/resume"
-          tar -xzf "$WORK/resume/checkpoint.tar.gz" -C "$WORK/resume"
-          echo "RESUME_CHECKPOINT=$WORK/resume/checkpoint/latest" >> "$GITHUB_ENV"
-          # the checkpoint must be continued with the dictionary of the same product
-          ckpt="$WORK/resume/checkpoint"
-          if [ -f "$ckpt/model.env" ]; then
-            grep -q "NAME=${{ inputs.product }}_PP-OCRv5" "$ckpt/model.env" && ok=1 || ok=0
-          else  # early releases: Vietnamese + English checkpoints only
-            [ "${{ inputs.product }}" = "vi_en" ] && [ -f "$ckpt/vi_en_dict.txt" ] && ok=1 || ok=0
-          fi
-          [ "$ok" = 1 ] || { echo "::error::checkpoint of ${{ inputs.resume_tag }} is not a ${{ inputs.product }} model"; exit 1; }
-          echo "RESUME_DICT=$ckpt/$(ls "$ckpt" | grep -m1 'dict.txt$')" >> "$GITHUB_ENV"
-          # a fused checkpoint continues fused, an unfused one unfused
-          echo "RESUME_FUSE=$(sed -n 's/^FUSE=//p' "$ckpt/model.env" 2>/dev/null | head -1 | grep . || echo 0)" >> "$GITHUB_ENV"
+          weights=$(ls "$ckpt"/weights.pdparams "$ckpt"/latest.pdparams 2>/dev/null | head -1)
+          cp "$weights" "$WORK/resume/weights.pdparams"
+          # continued weights keep the dictionary and the structure (fused or not) they were trained with
+          echo "RESUME_DICT=$ckpt/dict.txt" >> "$GITHUB_ENV"
+          echo "RESUME_FUSE=$(sed -n 's/^FUSE=//p' "$ckpt/model.env" | head -1 | grep . || echo 0)" >> "$GITHUB_ENV"
 
-      - name: Train and export
+      - name: Dictionary, initial weights, validation and evaluation lines
         env:
-          LANGS: ${{ inputs.product == 'vi_en_ja' && 'vi,en,ja' || 'vi,en' }}
-          SAMPLES: ${{ inputs.samples }}
-          EPOCHS: ${{ inputs.epochs }}
-          TIME_BUDGET_MIN: ${{ inputs.time_budget_minutes }}
           FUSE: ${{ env.RESUME_FUSE || env.NEW_MODEL_FUSE }}
-        run: training/vi_ocr/run_training.sh
+        run: |
+          training/vi_ocr/run_training.sh prepare
+          cat "$WORK/model.env"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.product }}-prep
+          path: |
+            ${{ env.WORK }}/model.env
+            ${{ env.WORK }}/dict.txt
+            ${{ env.WORK }}/pretrained/init.pdparams
+            ${{ env.WORK }}/resume/
+            ${{ env.WORK }}/data/
+          retention-days: 7
+
+      - id: plan
+        run: echo "shards=$(python -c 'import json; print(json.dumps(list(range(1, ${{ inputs.runners }} + 1))))')" >> "$GITHUB_OUTPUT"
+
+  round1:
+    needs: prepare
+    uses: ./.github/workflows/_train_round.yml
+    with:
+      product: "${{ inputs.product }}"
+      round: 1
+      rounds: ${{ inputs.rounds }}
+      previous: ""
+      shards: "${{ needs.prepare.outputs.shards }}"
+      round_minutes: ${{ inputs.round_minutes }}
+      lines: ${{ inputs.lines }}
+
+  round2:
+    needs: [prepare, round1]
+    if: inputs.rounds >= 2
+    uses: ./.github/workflows/_train_round.yml
+    with:
+      product: "${{ inputs.product }}"
+      round: 2
+      rounds: ${{ inputs.rounds }}
+      previous: "${{ inputs.product }}-avg-r1"
+      shards: "${{ needs.prepare.outputs.shards }}"
+      round_minutes: ${{ inputs.round_minutes }}
+      lines: ${{ inputs.lines }}
+
+  round3:
+    needs: [prepare, round2]
+    if: inputs.rounds >= 3
+    uses: ./.github/workflows/_train_round.yml
+    with:
+      product: "${{ inputs.product }}"
+      round: 3
+      rounds: ${{ inputs.rounds }}
+      previous: "${{ inputs.product }}-avg-r2"
+      shards: "${{ needs.prepare.outputs.shards }}"
+      round_minutes: ${{ inputs.round_minutes }}
+      lines: ${{ inputs.lines }}
+
+  round4:
+    needs: [prepare, round3]
+    if: inputs.rounds >= 4
+    uses: ./.github/workflows/_train_round.yml
+    with:
+      product: "${{ inputs.product }}"
+      round: 4
+      rounds: ${{ inputs.rounds }}
+      previous: "${{ inputs.product }}-avg-r3"
+      shards: "${{ needs.prepare.outputs.shards }}"
+      round_minutes: ${{ inputs.round_minutes }}
+      lines: ${{ inputs.lines }}
+
+  round5:
+    needs: [prepare, round4]
+    if: inputs.rounds >= 5
+    uses: ./.github/workflows/_train_round.yml
+    with:
+      product: "${{ inputs.product }}"
+      round: 5
+      rounds: ${{ inputs.rounds }}
+      previous: "${{ inputs.product }}-avg-r4"
+      shards: "${{ needs.prepare.outputs.shards }}"
+      round_minutes: ${{ inputs.round_minutes }}
+      lines: ${{ inputs.lines }}
+
+  round6:
+    needs: [prepare, round5]
+    if: inputs.rounds >= 6
+    uses: ./.github/workflows/_train_round.yml
+    with:
+      product: "${{ inputs.product }}"
+      round: 6
+      rounds: ${{ inputs.rounds }}
+      previous: "${{ inputs.product }}-avg-r5"
+      shards: "${{ needs.prepare.outputs.shards }}"
+      round_minutes: ${{ inputs.round_minutes }}
+      lines: ${{ inputs.lines }}
+
+  finalize:
+    needs: [prepare, round1, round2, round3, round4, round5, round6]
+    # the last finished round counts, even if a later one failed
+    if: ${{ !cancelled() && needs.round1.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/ocr-train-setup
+        with:
+          paddleocr-ref: ${{ env.PADDLEOCR_REF }}
+          paddleocr-dir: ${{ env.PADDLEOCR_DIR }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.product }}-prep
+          path: ${{ env.WORK }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ inputs.product }}-avg-r*
+          path: averages
+
+      - name: Export the last round
+        id: last
+        run: |
+          last=$(ls -d averages/*-avg-r* | sed 's/.*-avg-r//' | sort -n | tail -1)
+          echo "round=$last" >> "$GITHUB_OUTPUT"
+          mkdir -p "$WORK/output"
+          cp "averages/${{ inputs.product }}-avg-r$last/avg.pdparams" "$WORK/output/final.pdparams"
+          source "$WORK/model.env"
+          export FUSE
+          training/vi_ocr/run_training.sh export
 
       - name: Evaluate against the product baseline
         continue-on-error: true  # never lose a finished training run to an evaluation problem
         working-directory: training/vi_ocr
-        env:
-          LANGS: ${{ inputs.product == 'vi_en_ja' && 'vi,en,ja' || 'vi,en' }}
         run: |
           source "$WORK/model.env"
           sets=()
@@ -99,35 +229,34 @@ jobs:
           cat "$WORK/report.md" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Package
-        if: ${{ !cancelled() }}
         run: |
           source "$WORK/model.env"
           mkdir -p "$WORK/dist/$NAME" "$WORK/dist/checkpoint"
-          # checkpoint first: it allows resuming even if the export below is missing
-          cp "$WORK"/output/latest.* "$WORK/dict.txt" "$WORK/model.env" "$WORK/dist/checkpoint/"
+          cp "$WORK/output/final.pdparams" "$WORK/dist/checkpoint/weights.pdparams"
+          cp "$WORK/dict.txt" "$WORK/model.env" "$WORK/dist/checkpoint/"
           tar -czf "$WORK/dist/checkpoint.tar.gz" -C "$WORK/dist" checkpoint
           cp -r "$WORK/export/." "$WORK/dist/$NAME/"
           tar -czf "$WORK/dist/$NAME.tar.gz" -C "$WORK/dist" "$NAME"
           ls -la "$WORK/dist"
 
       - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
         with:
           name: ${{ inputs.product }}-ocr-model-${{ github.run_number }}
           path: |
             ${{ env.WORK }}/dist/*.tar.gz
             ${{ env.WORK }}/report.*
-            ${{ env.WORK }}/output/train.log
 
       - name: Publish release
-        if: ${{ !cancelled() && inputs.publish && hashFiles('vi_ocr_work/dist/*_PP-OCRv5_mobile_rec.tar.gz') != '' }}
+        if: inputs.publish
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           source "$WORK/model.env"
           {
             echo "Product ${{ inputs.product }}: fine-tuned PP-OCRv5 mobile recognition model $NAME (baseline: $BASE_MODEL)."
-            echo "Trained by run ${{ github.run_id }}: samples=${{ inputs.samples }}, epochs=${{ inputs.epochs }}, resume='${{ inputs.resume_tag }}'."
+            echo "Run ${{ github.run_id }}: ${{ inputs.runners }} runners × ${{ steps.last.outputs.round }} round(s) of"
+            echo "${{ inputs.round_minutes }} min, ${{ inputs.lines }} new synthetic lines per runner and round;"
+            echo "fused=$FUSE frozen='${FREEZE}' gtc=$GTC; continued from '${{ inputs.resume_tag }}'."
             echo
             cat "$WORK/report.md" 2>/dev/null || echo "(evaluation report missing: see the workflow logs)"
           } > "$WORK/notes.md"
