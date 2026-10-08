@@ -3,9 +3,9 @@
 import pytest
 
 from docextract.config import Settings
-from docextract.figures import keep_figure
+from docextract.figures import keep_figure, ungrounded_labels
 from docextract.models import Method, Region, RegionType, ValidationStatus
-from docextract.textutil import Line, extract_numbers, join_lines
+from docextract.textutil import Line, detect_language, extract_numbers, join_lines
 
 
 def _picture(rtype=RegionType.IMAGE, figure=None, figure_text="", chart=None, status=ValidationStatus.UNCHECKED):
@@ -62,3 +62,33 @@ def test_japanese_lines_join_without_spaces():
 
 def test_full_width_numbers_match_ascii():
     assert extract_numbers("売上高は１，２３４．５億円") == extract_numbers("1,234.5")
+
+
+def test_chart_kept_when_the_vlm_adds_words_not_printed():
+    info = {"kind": "chart", "description": "Doanh thu", "lossless": True}
+    printed = "Doanh thu thuần (tỷ đồng) 2024 2025 1.100 1.234,5"
+    rows = [["2024", "1.100"], ["2025", "1.234,5"]]
+    grounded = {"title": "Doanh thu thuần (tỷ đồng)", "columns": ["", "Doanh thu thuần"], "rows": rows}
+    assert not keep_figure(_picture(RegionType.CHART, info, printed, grounded), Settings())[0]
+    translated = {"title": "Net revenue (million USD)", "columns": ["Year", "Sales"], "rows": rows}
+    keep, reason = keep_figure(_picture(RegionType.CHART, info, printed, translated), Settings())
+    assert keep and reason.startswith("chart labels not printed")
+
+
+def test_label_grounding_tolerates_small_ocr_differences_and_cjk():
+    assert ungrounded_labels(["Doanh thu thuần"], "Doanh thu thuan 2024") == []  # one letter differs
+    assert ungrounded_labels(["売上高"], "売上高の推移 2024年") == []
+    assert ungrounded_labels(["利益"], "売上高の推移") == ["利益"]
+
+
+@pytest.mark.parametrize(
+    "text, languages, expected",
+    [
+        ("Hình 1. Doanh thu thuần giai đoạn 2022–2025", ("vi", "en"), "vi"),
+        ("Figure 1. Net revenue from 2022 to 2025", ("vi", "en"), "en"),
+        ("図1 売上高の推移（2022〜2025年）", ("vi", "en", "ja"), "ja"),
+        ("1.234,5", ("vi", "en"), None),  # too little text to tell
+    ],
+)
+def test_document_language_from_script(text, languages, expected):
+    assert detect_language(text, languages) == expected

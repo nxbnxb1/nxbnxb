@@ -30,7 +30,7 @@ from .models import Attempt, BBox, Method, PageKind, Region, RegionType, Validat
 from .preprocessing import pdf as pdfmod
 from .router import RouteFeatures, RuleBasedRouter
 from .tables import Table, parse_html_table, parse_markdown_table, table_from_rows
-from .textutil import garbled_ratio, join_lines
+from .textutil import detect_language, garbled_ratio, join_lines
 from .validation import ValidationReport, validate
 
 log = logging.getLogger(__name__)
@@ -212,6 +212,9 @@ class Executor:
         self.cache = cache
         self.stats = stats or RunStats()
         self.figures: dict[str, bytes] = {}  # region id → PNG of pictures that must be kept
+        self._lang_text: list[str] = []
+        self._lang_chars = 0
+        self._lang_seen: set[int] = set()
         self._handlers: dict[Method, Callable[[list[RegionTask]], list[Extraction]]] = {
             Method.PDF_TEXT: self._pdf_text,
             Method.PDF_TABLE: self._pdf_table,
@@ -266,29 +269,58 @@ class Executor:
         pending = [t for t in tasks if not t.done]
         with ThreadPoolExecutor(max_workers=self.settings.workers, thread_name_prefix="method") as pool:
             while pending:
+                # The VLM works last: it is given the text of each picture read by OCR or the
+                # text layer (exact labels and numbers) and the language of the document.
+                ready = [t for t in pending if t.current != Method.VLM]
+                if not ready:
+                    ready = pending
+                    self._read_figure_text([t for t in ready if t.region.type in FIGURE_TYPES])
+                    self._learn_language(tasks)
                 groups: dict[Method, list[RegionTask]] = defaultdict(list)
-                for task in pending:
+                for task in ready:
                     groups[task.current].append(task)
                 list(pool.map(lambda item: self._run_group(*item), groups.items()))
                 pending = [t for t in pending if not t.done]
+        self._learn_language(tasks)
         self._figure_text(tasks)
         self._keep_figures(tasks)
         for task in tasks:
             self.router.log(task)
 
+    # --- language of the document -----------------------------------------------------
+
+    def _learn_language(self, tasks: list[RegionTask]) -> None:
+        """Language of the document from the text extracted so far (OCR / text layer)."""
+        for task in tasks:
+            if task.done and task.region.type not in FIGURE_TYPES and id(task) not in self._lang_seen:
+                self._lang_seen.add(id(task))
+                if self._lang_chars < 20000 and task.region.content:
+                    self._lang_text.append(task.region.content)
+                    self._lang_chars += len(task.region.content)
+
+    @property
+    def language(self) -> str:
+        """Language VLM descriptions are written in: fixed by settings, else the document's."""
+        if self.settings.vlm_language:
+            return self.settings.vlm_language
+        found = detect_language(" ".join(self._lang_text), self.settings.product_info.languages)
+        return found or self.settings.output_locale
+
     # --- pictures ---------------------------------------------------------------------
 
-    def _figure_text(self, tasks: list[RegionTask]) -> None:
+    def _read_figure_text(self, tasks: list[RegionTask]) -> None:
         """Text inside pictures comes from the PDF text layer or OCR, never from the VLM."""
         need_ocr = []
         for task in tasks:
             region = task.region
             if region.type not in FIGURE_TYPES or region.status == ValidationStatus.SKIPPED:
                 continue
+            if "figure_text" in task.evidence:
+                continue
             if region.type == RegionType.SEAL and region.method == Method.OCR:
-                self._set_figure_text(region, region.content)
+                task.evidence["figure_text"] = region.content
             elif task.evidence.get("text_layer"):
-                self._set_figure_text(region, task.evidence["text_layer"])
+                task.evidence["figure_text"] = task.evidence["text_layer"]
             elif self.engines.ocr is not None:
                 need_ocr.append(task)
         if need_ocr:
@@ -299,7 +331,14 @@ class Executor:
                 return
             for task, ext in zip(need_ocr, results):
                 if not ext.error:
-                    self._set_figure_text(task.region, ext.content)
+                    task.evidence["figure_text"] = ext.content
+
+    def _figure_text(self, tasks: list[RegionTask]) -> None:
+        self._read_figure_text(tasks)
+        for task in tasks:
+            region = task.region
+            if region.type in FIGURE_TYPES and region.status != ValidationStatus.SKIPPED and "figure_text" in task.evidence:
+                self._set_figure_text(region, task.evidence["figure_text"])
 
     @staticmethod
     def _set_figure_text(region: Region, text: str) -> None:
@@ -519,11 +558,17 @@ class Executor:
         assert engine is not None
         self._collect_ocr_evidence(tasks)
 
+        language = self.language
+
         def hint(task: RegionTask) -> str | None:
+            if task.region.type in FIGURE_TYPES:
+                return task.evidence.get("figure_text") or None
             return task.evidence.get("text_layer") or None
 
         def compute(batch: list[RegionTask]) -> list[Extraction]:
-            requests = [VlmRequest(image=t.crop(), task=self._vlm_task(t), hint=hint(t)) for t in batch]
+            requests = [
+                VlmRequest(image=t.crop(), task=self._vlm_task(t), hint=hint(t), language=language) for t in batch
+            ]
             start = time.perf_counter()
             results = engine.run(requests)
             elapsed = (time.perf_counter() - start) * 1000
@@ -541,7 +586,7 @@ class Executor:
 
         def extra(task: RegionTask) -> str:
             text = hint(task) or ""
-            return f"{self._vlm_task(task)}|{PROMPT_VERSION}|{self.settings.vlm_language}|{hashlib.sha1(text.encode()).hexdigest()}"
+            return f"{self._vlm_task(task)}|{PROMPT_VERSION}|{language}|{hashlib.sha1(text.encode()).hexdigest()}"
 
         return self._batched(Method.VLM, engine.name, tasks, compute, extra)
 

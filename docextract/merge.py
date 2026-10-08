@@ -6,17 +6,17 @@ import re
 import unicodedata
 
 from .config import Settings
-from .models import FURNITURE_TYPES, DocumentResult, Region, RegionType, ValidationStatus
+from .models import FURNITURE_TYPES, DocumentResult, Method, Region, RegionType, ValidationStatus
 from .tables import Table, parse_html_table
 from .textutil import is_cjk, is_list_item, join_inline, strip_bullet
 
 LABELS = {
     "vi": {"image": "Hình ảnh", "chart": "Biểu đồ", "seal": "Con dấu", "page": "Trang", "review": "cần kiểm tra",
-           "figure_text": "Chữ trong hình", "original": "Ảnh gốc"},
+           "figure_text": "Chữ trong hình", "original": "Ảnh gốc", "generated": "mô tả tự động"},
     "en": {"image": "Image", "chart": "Chart", "seal": "Seal", "page": "Page", "review": "needs review",
-           "figure_text": "Text in figure", "original": "Original image"},
+           "figure_text": "Text in figure", "original": "Original image", "generated": "automatic description"},
     "ja": {"image": "画像", "chart": "グラフ", "seal": "印影", "page": "ページ", "review": "要確認",
-           "figure_text": "図中の文字", "original": "元の画像"},
+           "figure_text": "図中の文字", "original": "元の画像", "generated": "自動生成の説明"},
 }
 
 _NUMBERED_RE = re.compile(r"^\s*((?:\d+\.)*\d+)[.)]?\s+\S")
@@ -61,7 +61,9 @@ def _figure_markdown(region: Region, labels: dict[str, str]) -> str:
     text = region.content.strip()
     quote = []
     if text:
-        quote.append(f"> **[{label}]** " + text.replace("\n", "\n> "))
+        # a VLM description is generated text, unlike the words printed in the picture below it
+        tag = f"{label} · {labels['generated']}" if region.method == Method.VLM else label
+        quote.append(f"> **[{tag}]** " + text.replace("\n", "\n> "))
     figure_text = (region.data or {}).get("figure_text")
     if figure_text and region.type != RegionType.SEAL:
         quote.append(f"> {labels['figure_text']}: " + _single_line(figure_text))

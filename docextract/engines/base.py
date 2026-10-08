@@ -48,7 +48,8 @@ class FormulaResult:
 class VlmRequest:
     image: Image.Image
     task: str  # see engines.vlm.PROMPTS
-    hint: str | None = None  # e.g. text layer of the region, to anchor exact numbers
+    hint: str | None = None  # text of the region from the text layer / OCR, to anchor exact words and numbers
+    language: str | None = None  # language descriptions are written in (None = settings.vlm_language)
 
 
 @dataclass

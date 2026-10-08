@@ -73,7 +73,14 @@ def prompt_for(
             f"if the image has no text, write it in {LANGUAGE_NAMES.get(fallback, 'Vietnamese')}."
         )
     prompt = PROMPTS[task].replace("{language}", lang)
-    if hint:
+    if hint and task in ("chart", "image"):
+        prompt += (
+            "\n\nThe words and numbers printed in this picture, read by OCR (exact characters; the layout is "
+            f"lost):\n<<<\n{hint[:4000]}\n>>>\nUse them verbatim for the title, labels, units and values. "
+            "Do not translate them and do not add words, units or values that are not printed in the picture; "
+            "use an empty string for a title or column name that is not printed."
+        )
+    elif hint:
         prompt += (
             "\n\nText extracted from the same area of the original file (reliable characters, but layout may be "
             f"lost; use it to get exact spellings and numbers):\n<<<\n{hint[:4000]}\n>>>"
@@ -143,7 +150,16 @@ class OpenAICompatibleVLM:
                     "role": "user",
                     "content": [
                         {"type": "image_url", "image_url": {"url": encode_image(request.image, s.vlm_max_image_side)}},
-                        {"type": "text", "text": prompt_for(request.task, request.hint, s.vlm_language, s.output_locale, s.product_info.languages)},
+                        {
+                            "type": "text",
+                            "text": prompt_for(
+                                request.task,
+                                request.hint,
+                                request.language or s.vlm_language,
+                                s.output_locale,
+                                s.product_info.languages,
+                            ),
+                        },
                     ],
                 }
             ],

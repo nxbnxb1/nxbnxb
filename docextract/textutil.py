@@ -81,6 +81,29 @@ def looks_vietnamese(text: str) -> bool:
     return marks >= 2
 
 
+def detect_language(text: str, languages: Sequence[str] = ("vi", "en", "ja"), min_letters: int = 12) -> str | None:
+    """Language of a text among ``languages`` from its script, or None if there is too little text.
+
+    Kana/kanji → ja; Latin text with Vietnamese letters or tone marks on at least 2% of its
+    letters (Vietnamese has them on most syllables, English on none) → vi; other Latin → en.
+    """
+    text = unicodedata.normalize("NFC", text)
+    cjk = sum(1 for ch in text if is_cjk(ch) and ch.isalpha())
+    latin = [ch for ch in text if ch.isalpha() and not is_cjk(ch)]
+    if 2 * cjk + len(latin) < min_letters:
+        return None
+    scores: dict[str, float] = {}
+    if "ja" in languages:
+        scores["ja"] = cjk * 2.0  # one CJK character carries about a word
+    if latin:
+        decomposed = unicodedata.normalize("NFD", "".join(latin))
+        marked = sum(1 for ch in decomposed if ch in _VI_TONES) + sum(1 for ch in latin if ch in _VI_MARKS)
+        vi = "vi" in languages and marked >= max(2, 0.02 * len(latin))
+        scores["vi" if vi or "en" not in languages else "en"] = float(len(latin))
+    best = max(scores, key=scores.get) if scores else None
+    return best if best in languages else None
+
+
 def _has_vowel(token: str) -> bool:
     base = "".join(ch for ch in unicodedata.normalize("NFD", token.lower()) if not unicodedata.combining(ch))
     return any(ch in "aeiouy" for ch in base)

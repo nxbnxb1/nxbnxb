@@ -126,7 +126,7 @@ def test_docx_structure(settings):
     assert "## 1. Kết quả" in md
     assert "- Mục thứ nhất\n- Mục thứ hai" in md
     assert 'colspan="2"' in md and 'rowspan="2"' in md
-    assert "**[Hình ảnh]** Biểu tượng" in md
+    assert "**[Hình ảnh · mô tả tự động]** Biểu tượng" in md
     assert result.source.format == "docx" and result.pages[0].number is None
     table = next(r for r in result.iter_regions() if r.type == RegionType.TABLE)
     assert table.method == Method.DOCX and table.source.locator == "body/tbl[1]"
@@ -149,8 +149,11 @@ def test_describable_picture_is_replaced_by_text(settings):
     image = next(r for r in result.iter_regions() if r.type == RegionType.IMAGE)
     assert image.figure is None and not result.figures
     assert image.meta["figure_decision"] == "fully described by text"
-    assert "> **[Hình ảnh]** Quy trình gồm ba bước" in result.markdown
+    assert "> **[Hình ảnh · mô tả tự động]** Quy trình gồm ba bước" in result.markdown
     assert "> Chữ trong hình: Nhập Xử lý Xuất" in result.markdown
+    # the VLM ran after OCR: it was given the words OCR read in the picture and the document's language
+    request = next(r for r in vlm.requests if r.task == "image")
+    assert request.hint == "Nhập Xử lý Xuất" and request.language == "vi"
 
 
 def test_page_selection(settings):
