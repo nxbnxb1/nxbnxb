@@ -1,108 +1,33 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="990" viewBox="0 0 1400 990" role="img">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560" role="img">
 <defs><marker id="m475569" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker><marker id="m16a34a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#16a34a"/></marker><marker id="m7c3aed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7c3aed"/></marker></defs>
-<rect x="0" y="0" width="1400" height="990" fill="#ffffff"/>
-<text x="700.0" y="40" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="24" font-weight="700" fill="#0f172a" text-anchor="middle"><tspan x="700.0" dy="0">Hình 3. Xử lý hình ảnh: thay bằng chữ hay giữ lại hình?</tspan></text>
-<text x="700.0" y="68" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="15" font-weight="400" fill="#475569" text-anchor="middle"><tspan x="700.0" dy="0">Nguyên tắc: không được mất thông tin — chỉ thay hình bằng chữ khi chữ mang được toàn bộ nội dung của hình</tspan></text>
-<rect x="150" y="98" width="420" height="56" rx="12" fill="#f1f5f9" stroke="#64748b" stroke-width="1.6"/>
-<text x="360.0" y="124" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="15.5" font-weight="700" fill="#334155" text-anchor="middle"><tspan x="360.0" dy="0">Vùng hình ảnh · biểu đồ · con dấu</tspan></text>
-<path d="M 360 154 L 360 178" fill="none" stroke="#475569" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m475569)"/>
-<polygon points="360,179.0 495.0,215 360,251.0 225.0,215" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.6"/>
-<text x="360" y="220" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="700" fill="#334155" text-anchor="middle"><tspan x="360" dy="0">Nhỏ hơn 0,2% trang?</tspan></text>
-<rect x="565" y="188" width="215" height="56" rx="12" fill="#f1f5f9" stroke="#64748b" stroke-width="1.6"/>
-<text x="672.5" y="214" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="700" fill="#334155" text-anchor="middle"><tspan x="672.5" dy="0">Bỏ qua</tspan></text>
-<text x="672.5" y="235" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1f2937" text-anchor="middle"><tspan x="672.5" dy="0">trang trí: đường kẻ, chấm</tspan></text>
-<path d="M 495 215 L 563 215" fill="none" stroke="#475569" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m475569)"/>
-<rect x="513.9" y="191" width="28.2" height="24" rx="6" fill="#ffffff" stroke="#475569" stroke-width="1"/>
-<text x="528" y="206" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="600" fill="#475569" text-anchor="middle"><tspan x="528" dy="0">có</tspan></text>
-<path d="M 360 251 L 360 286" fill="none" stroke="#475569" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m475569)"/>
-<rect x="373.25" y="257" width="49.5" height="24" rx="6" fill="#ffffff" stroke="#475569" stroke-width="1"/>
-<text x="398" y="272" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="600" fill="#475569" text-anchor="middle"><tspan x="398" dy="0">không</tspan></text>
-<polygon points="360,287.0 465.0,320 360,353.0 255.0,320" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.6"/>
-<text x="360" y="325" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="700" fill="#334155" text-anchor="middle"><tspan x="360" dy="0">Con dấu?</tspan></text>
-<rect x="565" y="292" width="215" height="56" rx="12" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.6"/>
-<text x="672.5" y="318" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="700" fill="#5b21b6" text-anchor="middle"><tspan x="672.5" dy="0">Giữ hình</tspan></text>
-<text x="672.5" y="339" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1f2937" text-anchor="middle"><tspan x="672.5" dy="0">+ OCR chữ trên con dấu</tspan></text>
-<path d="M 465 320 L 563 320" fill="none" stroke="#475569" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m475569)"/>
-<rect x="499.9" y="296" width="28.2" height="24" rx="6" fill="#ffffff" stroke="#475569" stroke-width="1"/>
-<text x="514" y="311" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="600" fill="#475569" text-anchor="middle"><tspan x="514" dy="0">có</tspan></text>
-<path d="M 360 353 L 360 376 L 225 376 L 225 398" fill="none" stroke="#475569" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m475569)"/>
-<path d="M 360 376 L 575 376 L 575 398" fill="none" stroke="#475569" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m475569)"/>
-<text x="395" y="368" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="600" fill="#475569" text-anchor="start"><tspan x="395" dy="0">không</tspan></text>
-<rect x="60" y="400" width="330" height="98" rx="12" fill="#f3e8ff" stroke="#9333ea" stroke-width="1.6"/>
-<text x="225.0" y="426" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="15.5" font-weight="700" fill="#6b21a8" text-anchor="middle"><tspan x="225.0" dy="0">VLM</tspan></text>
-<text x="225.0" y="449" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="400" fill="#1f2937" text-anchor="middle"><tspan x="225.0" dy="0">phân loại hình · mô tả ·</tspan><tspan x="225.0" dy="18">“lossless”: mô tả có mất</tspan><tspan x="225.0" dy="18">thông tin không? (JSON)</tspan></text>
-<rect x="410" y="400" width="330" height="98" rx="12" fill="#dbeafe" stroke="#2563eb" stroke-width="1.6"/>
-<text x="575.0" y="426" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="15.5" font-weight="700" fill="#1e40af" text-anchor="middle"><tspan x="575.0" dy="0">OCR / text layer PDF</tspan></text>
-<text x="575.0" y="449" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="400" fill="#1f2937" text-anchor="middle"><tspan x="575.0" dy="0">đọc chữ và số in trong hình</tspan><tspan x="575.0" dy="18">(chữ không bao giờ lấy</tspan><tspan x="575.0" dy="18">từ VLM)</tspan></text>
-<path d="M 225 498 L 225 528" fill="none" stroke="#475569" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m475569)"/>
-<path d="M 575 498 L 575 528" fill="none" stroke="#475569" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m475569)"/>
-<rect x="60" y="530" width="680" height="178" rx="12" fill="#dcfce7" stroke="#16a34a" stroke-width="1.6"/>
-<text x="76" y="556" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="15.5" font-weight="700" fill="#166534" text-anchor="start"><tspan x="76" dy="0">Điều kiện để thay hình bằng chữ (phải đủ cả 5)</tspan></text>
-<text x="76" y="579" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#1f2937" text-anchor="start"><tspan x="76" dy="0">1. Có mô tả hợp lệ (VLM trả về JSON đọc được)</tspan><tspan x="76" dy="19">2. Loại hình mang tính văn bản: biểu đồ, sơ đồ, lưu đồ, ảnh chụp màn hình, bảng, chữ</tspan><tspan x="76" dy="19">3. VLM xác nhận mô tả không làm mất thông tin (lossless = true)</tspan><tspan x="76" dy="19">4. Chữ trong hình đã được OCR / text layer đọc</tspan><tspan x="76" dy="19">5. Biểu đồ: có bảng số liệu, không giá trị ước lượng (~), mọi số đều in trong hình</tspan></text>
-<path d="M 400 708 L 400 724" fill="none" stroke="#475569" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m475569)"/>
-<polygon points="400,724.0 545.0,762 400,800.0 255.0,762" fill="#dcfce7" stroke="#16a34a" stroke-width="1.6"/>
-<text x="400" y="767" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="700" fill="#166534" text-anchor="middle"><tspan x="400" dy="0">Đủ cả 5 điều kiện?</tspan></text>
-<rect x="60" y="838" width="330" height="118" rx="12" fill="#dcfce7" stroke="#16a34a" stroke-width="1.6"/>
-<text x="76" y="864" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="15" font-weight="700" fill="#166534" text-anchor="start"><tspan x="76" dy="0">Thay bằng chữ</tspan></text>
-<text x="76" y="886" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="400" fill="#1f2937" text-anchor="start"><tspan x="76" dy="0">&gt; **[Biểu đồ]** mô tả</tspan><tspan x="76" dy="18">+ bảng số liệu</tspan><tspan x="76" dy="18">&gt; Chữ trong hình: …</tspan><tspan x="76" dy="18">không lưu file ảnh</tspan></text>
-<rect x="420" y="838" width="340" height="118" rx="12" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.6"/>
-<text x="436" y="864" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="15" font-weight="700" fill="#5b21b6" text-anchor="start"><tspan x="436" dy="0">Giữ hình</tspan></text>
-<text x="436" y="886" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1f2937" text-anchor="start"><tspan x="436" dy="0">![Hình ảnh: mô tả](&lt;tên&gt;_assets/p3-r5.png)</tspan><tspan x="436" dy="17">+ mô tả + chữ trong hình</tspan><tspan x="436" dy="17">JSON: figure, figure_decision (lý do)</tspan></text>
-<path d="M 255 762 L 225 762 L 225 836" fill="none" stroke="#16a34a" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m16a34a)"/>
-<rect x="190.9" y="785" width="28.2" height="24" rx="6" fill="#ffffff" stroke="#16a34a" stroke-width="1"/>
-<text x="205" y="800" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="600" fill="#16a34a" text-anchor="middle"><tspan x="205" dy="0">có</tspan></text>
-<path d="M 545 762 L 590 762 L 590 836" fill="none" stroke="#7c3aed" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m7c3aed)"/>
-<rect x="600.25" y="785" width="49.5" height="24" rx="6" fill="#ffffff" stroke="#7c3aed" stroke-width="1"/>
-<text x="625" y="800" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="600" fill="#7c3aed" text-anchor="middle"><tspan x="625" dy="0">không</tspan></text>
-<rect x="800" y="98" width="570" height="760" rx="16" fill="none" stroke="#7c3aed" stroke-width="1.4" stroke-dasharray="7 5"/>
-<rect x="818" y="84" width="57.0" height="28" rx="14" fill="#7c3aed"/>
-<text x="846.5" y="103" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle"><tspan x="846.5" dy="0">VÍ DỤ</tspan></text>
-<rect x="820" y="128" width="300" height="56" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6"/>
-<text x="970.0" y="160.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="500" fill="#334155" text-anchor="middle"><tspan x="970.0" dy="0">Ảnh chụp nhà máy, con người</tspan></text>
-<path d="M 1122 156 L 1146 156" fill="none" stroke="#475569" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#m475569)"/>
-<rect x="1148" y="128" width="202" height="56" rx="10" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.6"/>
-<text x="1249.0" y="160.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#5b21b6" text-anchor="middle"><tspan x="1249.0" dy="0">Giữ hình</tspan></text>
-<rect x="820" y="208" width="300" height="56" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6"/>
-<text x="970.0" y="240.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="500" fill="#334155" text-anchor="middle"><tspan x="970.0" dy="0">Bản đồ, bản vẽ kỹ thuật</tspan></text>
-<path d="M 1122 236 L 1146 236" fill="none" stroke="#475569" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#m475569)"/>
-<rect x="1148" y="208" width="202" height="56" rx="10" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.6"/>
-<text x="1249.0" y="240.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#5b21b6" text-anchor="middle"><tspan x="1249.0" dy="0">Giữ hình</tspan></text>
-<rect x="820" y="288" width="300" height="56" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6"/>
-<text x="970.0" y="320.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="500" fill="#334155" text-anchor="middle"><tspan x="970.0" dy="0">Logo, chữ ký, chữ viết tay</tspan></text>
-<path d="M 1122 316 L 1146 316" fill="none" stroke="#475569" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#m475569)"/>
-<rect x="1148" y="288" width="202" height="56" rx="10" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.6"/>
-<text x="1249.0" y="320.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#5b21b6" text-anchor="middle"><tspan x="1249.0" dy="0">Giữ hình</tspan></text>
-<rect x="820" y="368" width="300" height="56" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6"/>
-<text x="970.0" y="400.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="500" fill="#334155" text-anchor="middle"><tspan x="970.0" dy="0">Lưu đồ có nhãn rõ (A → B → C)</tspan></text>
-<path d="M 1122 396 L 1146 396" fill="none" stroke="#475569" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#m475569)"/>
-<rect x="1148" y="368" width="202" height="56" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="1.6"/>
-<text x="1249.0" y="400.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#166534" text-anchor="middle"><tspan x="1249.0" dy="0">Thay bằng chữ</tspan></text>
-<rect x="820" y="448" width="300" height="56" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6"/>
-<text x="970.0" y="480.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="500" fill="#334155" text-anchor="middle"><tspan x="970.0" dy="0">Ảnh chụp màn hình toàn chữ</tspan></text>
-<path d="M 1122 476 L 1146 476" fill="none" stroke="#475569" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#m475569)"/>
-<rect x="1148" y="448" width="202" height="56" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="1.6"/>
-<text x="1249.0" y="480.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#166534" text-anchor="middle"><tspan x="1249.0" dy="0">Thay bằng chữ</tspan></text>
-<rect x="820" y="528" width="300" height="56" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6"/>
-<text x="970.0" y="560.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="500" fill="#334155" text-anchor="middle"><tspan x="970.0" dy="0">Biểu đồ cột có in số trên cột</tspan></text>
-<path d="M 1122 556 L 1146 556" fill="none" stroke="#475569" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#m475569)"/>
-<rect x="1148" y="528" width="202" height="56" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="1.6"/>
-<text x="1249.0" y="560.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#166534" text-anchor="middle"><tspan x="1249.0" dy="0">Thay: mô tả + số liệu</tspan></text>
-<rect x="820" y="608" width="300" height="56" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6"/>
-<text x="970.0" y="640.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="500" fill="#334155" text-anchor="middle"><tspan x="970.0" dy="0">Biểu đồ phải ước lượng giá trị (~)</tspan></text>
-<path d="M 1122 636 L 1146 636" fill="none" stroke="#475569" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#m475569)"/>
-<rect x="1148" y="608" width="202" height="56" rx="10" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.6"/>
-<text x="1249.0" y="640.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#5b21b6" text-anchor="middle"><tspan x="1249.0" dy="0">Giữ hình + mô tả</tspan></text>
-<rect x="820" y="688" width="300" height="56" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6"/>
-<text x="970.0" y="720.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="500" fill="#334155" text-anchor="middle"><tspan x="970.0" dy="0">Chưa cấu hình VLM / VLM lỗi</tspan></text>
-<path d="M 1122 716 L 1146 716" fill="none" stroke="#475569" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#m475569)"/>
-<rect x="1148" y="688" width="202" height="56" rx="10" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.6"/>
-<text x="1249.0" y="720.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#5b21b6" text-anchor="middle"><tspan x="1249.0" dy="0">Giữ hình</tspan></text>
-<rect x="820" y="768" width="300" height="56" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6"/>
-<text x="970.0" y="800.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="500" fill="#334155" text-anchor="middle"><tspan x="970.0" dy="0">Bảng, công thức không khôi phục được</tspan></text>
-<path d="M 1122 796 L 1146 796" fill="none" stroke="#475569" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#m475569)"/>
-<rect x="1148" y="768" width="202" height="56" rx="10" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.6"/>
-<text x="1249.0" y="800.55" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#5b21b6" text-anchor="middle"><tspan x="1249.0" dy="0">Giữ ảnh gốc cạnh chữ</tspan></text>
-<rect x="800" y="880" width="570" height="76" rx="12" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.6"/>
-<text x="1085.0" y="906" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="15.5" font-weight="700" fill="#334155" text-anchor="middle"><tspan x="1085.0" dy="0">figure_policy</tspan></text>
-<text x="1085.0" y="929" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="400" fill="#1f2937" text-anchor="middle"><tspan x="1085.0" dy="0">auto (mặc định): theo các điều kiện bên trái</tspan><tspan x="1085.0" dy="18">always: luôn giữ hình · never: không lưu hình</tspan></text>
+<rect x="0" y="0" width="1200" height="560" fill="#ffffff"/>
+<text x="600.0" y="40" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="24" font-weight="700" fill="#0f172a" text-anchor="middle"><tspan x="600.0" dy="0">Hình 3. Hình ảnh: thay bằng chữ hay giữ hình?</tspan></text>
+<text x="600.0" y="68" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="15" font-weight="400" fill="#475569" text-anchor="middle"><tspan x="600.0" dy="0">Nguyên tắc: không được mất thông tin</tspan></text>
+<rect x="40" y="250" width="210" height="76" rx="14" fill="#f1f5f9" stroke="#64748b" stroke-width="1.6"/>
+<text x="145.0" y="284.0" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="700" fill="#334155" text-anchor="middle"><tspan x="145.0" dy="0">Hình ảnh</tspan></text>
+<text x="145.0" y="306.0" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="400" fill="#475569" text-anchor="middle"><tspan x="145.0" dy="0">ảnh · biểu đồ · sơ đồ</tspan></text>
+<path d="M 250 288 L 298 288" fill="none" stroke="#475569" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m475569)"/>
+<rect x="300" y="250" width="250" height="76" rx="14" fill="#f3e8ff" stroke="#9333ea" stroke-width="1.6"/>
+<text x="425.0" y="284.0" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="700" fill="#6b21a8" text-anchor="middle"><tspan x="425.0" dy="0">Mô tả + đọc chữ</tspan></text>
+<text x="425.0" y="306.0" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="400" fill="#475569" text-anchor="middle"><tspan x="425.0" dy="0">VLM mô tả · OCR đọc chữ</tspan></text>
+<path d="M 550 288 L 588 288" fill="none" stroke="#475569" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m475569)"/>
+<polygon points="710,236.0 830.0,288 710,340.0 590.0,288" fill="#fef3c7" stroke="#d97706" stroke-width="1.6"/>
+<text x="710" y="293" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="700" fill="#92400e" text-anchor="middle"><tspan x="710" dy="0">Chữ thay được hết?</tspan></text>
+<path d="M 710 236 L 710 175 L 858 175" fill="none" stroke="#16a34a" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m16a34a)"/>
+<rect x="725.9" y="190" width="28.2" height="24" rx="6" fill="#ffffff" stroke="#16a34a" stroke-width="1"/>
+<text x="740" y="205" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="600" fill="#16a34a" text-anchor="middle"><tspan x="740" dy="0">có</tspan></text>
+<rect x="860" y="138" width="300" height="76" rx="14" fill="#dcfce7" stroke="#16a34a" stroke-width="1.6"/>
+<text x="1010.0" y="172.0" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="700" fill="#166534" text-anchor="middle"><tspan x="1010.0" dy="0">Thay bằng chữ</tspan></text>
+<text x="1010.0" y="194.0" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="400" fill="#475569" text-anchor="middle"><tspan x="1010.0" dy="0">mô tả + số liệu</tspan></text>
+<path d="M 710 340 L 710 401 L 858 401" fill="none" stroke="#7c3aed" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m7c3aed)"/>
+<rect x="727.25" y="357" width="49.5" height="24" rx="6" fill="#ffffff" stroke="#7c3aed" stroke-width="1"/>
+<text x="752" y="372" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="600" fill="#7c3aed" text-anchor="middle"><tspan x="752" dy="0">không</tspan></text>
+<rect x="860" y="364" width="300" height="76" rx="14" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.6"/>
+<text x="1010.0" y="398.0" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="700" fill="#5b21b6" text-anchor="middle"><tspan x="1010.0" dy="0">Giữ hình</tspan></text>
+<text x="1010.0" y="420.0" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="400" fill="#475569" text-anchor="middle"><tspan x="1010.0" dy="0">kèm mô tả và chữ trong hình</tspan></text>
+<text x="1010" y="240" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#475569" text-anchor="middle"><tspan x="1010" dy="0">VD: lưu đồ, biểu đồ có in số</tspan></text>
+<text x="1010" y="466" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#475569" text-anchor="middle"><tspan x="1010" dy="0">VD: ảnh chụp, bản đồ, chữ ký, logo</tspan></text>
+<text x="1010" y="488" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#475569" text-anchor="middle"><tspan x="1010" dy="0">chưa có VLM → luôn giữ hình</tspan></text>
+<text x="300" y="410" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="15" font-weight="700" fill="#1f2937" text-anchor="start"><tspan x="300" dy="0">Thay khi đủ cả 3:</tspan></text>
+<text x="300" y="438" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="400" fill="#1f2937" text-anchor="start"><tspan x="300" dy="0">① hình mang tính văn bản</tspan><tspan x="300" dy="24">② mô tả không mất thông tin</tspan><tspan x="300" dy="24">③ chữ và số đọc được bằng OCR</tspan></text>
 </svg>
