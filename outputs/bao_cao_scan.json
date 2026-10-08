@@ -1,0 +1,364 @@
+{
+  "schema_version": "1.0",
+  "source": {
+    "filename": "bao_cao_scan.pdf",
+    "sha256": "2bdb8fdc39b38ca6dbd731b1a2cc08c7afcbc2639cd757f26a6f8256ef4fade5",
+    "size_bytes": 316870,
+    "format": "pdf",
+    "page_count": 1
+  },
+  "pages": [
+    {
+      "number": 1,
+      "kind": "scanned",
+      "width": 595.08,
+      "height": 842.04,
+      "unit": "pt",
+      "regions": [
+        {
+          "id": "p1-r1",
+          "page": 1,
+          "type": "title",
+          "order": 0,
+          "bbox": {
+            "x0": 58.28,
+            "y0": 51.57,
+            "x1": 426.64,
+            "y1": 70.69
+          },
+          "layout_score": 0.5878,
+          "level": 1,
+          "content": "BÁO CÁO KT QU KINH DOANH NM 2025",
+          "html": null,
+          "data": null,
+          "method": "ocr",
+          "engine": "paddle:ocr:PP-OCRv5:vi",
+          "confidence": 0.9772,
+          "status": "passed",
+          "issues": [],
+          "attempts": [
+            {
+              "method": "ocr",
+              "engine": "paddle:ocr:PP-OCRv5:vi",
+              "confidence": 0.9772,
+              "passed": true,
+              "score": 1.0,
+              "issues": [],
+              "duration_ms": 2617.8,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "bao_cao_scan.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 58.28,
+              "y0": 51.57,
+              "x1": 426.64,
+              "y1": 70.69
+            },
+            "locator": null
+          },
+          "meta": {
+            "layout_label": "doc_title"
+          }
+        },
+        {
+          "id": "p1-r2",
+          "page": 1,
+          "type": "heading",
+          "order": 1,
+          "bbox": {
+            "x0": 58.29,
+            "y0": 97.86,
+            "x1": 196.41,
+            "y1": 111.58
+          },
+          "layout_score": 0.9175,
+          "level": 2,
+          "content": "1. Kt qu hot đng",
+          "html": null,
+          "data": null,
+          "method": "ocr",
+          "engine": "paddle:ocr:PP-OCRv5:vi",
+          "confidence": 0.9483,
+          "status": "passed",
+          "issues": [],
+          "attempts": [
+            {
+              "method": "ocr",
+              "engine": "paddle:ocr:PP-OCRv5:vi",
+              "confidence": 0.9483,
+              "passed": true,
+              "score": 1.0,
+              "issues": [],
+              "duration_ms": 2617.8,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "bao_cao_scan.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 58.29,
+              "y0": 97.86,
+              "x1": 196.41,
+              "y1": 111.58
+            },
+            "locator": null
+          },
+          "meta": {
+            "layout_label": "paragraph_title"
+          }
+        },
+        {
+          "id": "p1-r3",
+          "page": 1,
+          "type": "text",
+          "order": 2,
+          "bbox": {
+            "x0": 56.93,
+            "y0": 121.0,
+            "x1": 516.06,
+            "y1": 167.16
+          },
+          "layout_score": 0.9404,
+          "level": null,
+          "content": "Năm 2025, doanh thu thun ca Công ty đt 1.234,5 t đông, tăng 12,3% so vi năm 2024. Li nhun sau thu đt 156,8 t đng, vưt 4,2% k hoch đưc Đi hi đông c đông thông qua. The Board of Directors proposes a cash dividend of 15% for the 2025 financial year.",
+          "html": null,
+          "data": null,
+          "method": "ocr",
+          "engine": "paddle:ocr:PP-OCRv5:vi",
+          "confidence": 0.9793,
+          "status": "needs_review",
+          "issues": [
+            "Vietnamese letters missing (50% of words without vowels): use the Vietnamese recognition model (ocr_rec_model_dir)"
+          ],
+          "attempts": [
+            {
+              "method": "ocr",
+              "engine": "paddle:ocr:PP-OCRv5:vi",
+              "confidence": 0.9793,
+              "passed": false,
+              "score": 0.6,
+              "issues": [
+                "Vietnamese letters missing (50% of words without vowels): use the Vietnamese recognition model (ocr_rec_model_dir)"
+              ],
+              "duration_ms": 2617.8,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "bao_cao_scan.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 56.93,
+              "y0": 121.0,
+              "x1": 516.06,
+              "y1": 167.16
+            },
+            "locator": null
+          },
+          "meta": {
+            "layout_label": "text"
+          }
+        },
+        {
+          "id": "p1-r4",
+          "page": 1,
+          "type": "table",
+          "order": 3,
+          "bbox": {
+            "x0": 59.11,
+            "y0": 242.91,
+            "x1": 531.65,
+            "y1": 332.23
+          },
+          "layout_score": 0.9854,
+          "level": null,
+          "content": "| Chi tieu | Nam 2024 | Nam 2025 | Tang truong |\n|---|---|---|---|\n| Doanh thu thuän | 1.099,2 | 1.234,5 | 12,3% |\n| Lqinhuan góp | 312,4 | 355,0 | 13,6% |\n| Lgi nhuan sau thue | 140,1 | 156,8 | 11,9% |",
+          "html": "<table><tr><td>Chi tieu</td><td>Nam 2024</td><td>Nam 2025</td><td>Tang truong</td></tr><tr><td>Doanh thu thuän</td><td>1.099,2</td><td>1.234,5</td><td>12,3%</td></tr><tr><td>Lqinhuan góp</td><td>312,4</td><td>355,0</td><td>13,6%</td></tr><tr><td>Lgi nhuan sau thue</td><td>140,1</td><td>156,8</td><td>11,9%</td></tr></table>",
+          "data": null,
+          "method": "table_recognition",
+          "engine": "paddle:table:TableRecognitionPipelineV2",
+          "confidence": 0.9697,
+          "status": "passed",
+          "issues": [],
+          "attempts": [
+            {
+              "method": "table_recognition",
+              "engine": "paddle:table:TableRecognitionPipelineV2",
+              "confidence": 0.9697,
+              "passed": true,
+              "score": 1.0,
+              "issues": [],
+              "duration_ms": 41787.8,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "bao_cao_scan.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 59.11,
+              "y0": 242.91,
+              "x1": 531.65,
+              "y1": 332.23
+            },
+            "locator": null
+          },
+          "meta": {
+            "layout_label": "table"
+          }
+        },
+        {
+          "id": "p1-r5",
+          "page": 1,
+          "type": "heading",
+          "order": 4,
+          "bbox": {
+            "x0": 57.54,
+            "y0": 355.52,
+            "x1": 207.02,
+            "y1": 368.74
+          },
+          "layout_score": 0.9048,
+          "level": 2,
+          "content": "2. K hoch năm 2026",
+          "html": null,
+          "data": null,
+          "method": "ocr",
+          "engine": "paddle:ocr:PP-OCRv5:vi",
+          "confidence": 0.9772,
+          "status": "passed",
+          "issues": [],
+          "attempts": [
+            {
+              "method": "ocr",
+              "engine": "paddle:ocr:PP-OCRv5:vi",
+              "confidence": 0.9772,
+              "passed": true,
+              "score": 1.0,
+              "issues": [],
+              "duration_ms": 2617.8,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "bao_cao_scan.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 57.54,
+              "y0": 355.52,
+              "x1": 207.02,
+              "y1": 368.74
+            },
+            "locator": null
+          },
+          "meta": {
+            "layout_label": "paragraph_title"
+          }
+        },
+        {
+          "id": "p1-r6",
+          "page": 1,
+          "type": "text",
+          "order": 5,
+          "bbox": {
+            "x0": 67.09,
+            "y0": 380.29,
+            "x1": 345.24,
+            "y1": 408.6
+          },
+          "layout_score": 0.9469,
+          "level": null,
+          "content": "- M rng h thng phân phi ti 12 tnh, thành ph.\n- Đu tư dây chuyn sn xut mi tr giá 85 t đng.",
+          "html": null,
+          "data": null,
+          "method": "ocr",
+          "engine": "paddle:ocr:PP-OCRv5:vi",
+          "confidence": 0.9778,
+          "status": "needs_review",
+          "issues": [
+            "Vietnamese letters missing (50% of words without vowels): use the Vietnamese recognition model (ocr_rec_model_dir)"
+          ],
+          "attempts": [
+            {
+              "method": "ocr",
+              "engine": "paddle:ocr:PP-OCRv5:vi",
+              "confidence": 0.9778,
+              "passed": false,
+              "score": 0.6,
+              "issues": [
+                "Vietnamese letters missing (50% of words without vowels): use the Vietnamese recognition model (ocr_rec_model_dir)"
+              ],
+              "duration_ms": 2617.8,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "bao_cao_scan.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 67.09,
+              "y0": 380.29,
+              "x1": 345.24,
+              "y1": 408.6
+            },
+            "locator": null
+          },
+          "meta": {
+            "layout_label": "text"
+          }
+        }
+      ],
+      "preprocessing": {
+        "text_chars": 0,
+        "garbled_ratio": 0.0,
+        "image_coverage": 1.0,
+        "deskew": -1.2,
+        "autocontrast": true
+      },
+      "layout_backend": "paddle:PP-DocLayout_plus-L",
+      "duration_ms": 46118.3
+    }
+  ],
+  "stats": {
+    "pages_processed": 1,
+    "regions": 6,
+    "regions_by_type": {
+      "title": 1,
+      "heading": 2,
+      "text": 2,
+      "table": 1
+    },
+    "regions_by_method": {
+      "ocr": 5,
+      "table_recognition": 1
+    },
+    "regions_by_status": {
+      "passed": 4,
+      "needs_review": 2
+    },
+    "escalations": 0,
+    "vlm_calls": 0,
+    "vlm_input_tokens": 0,
+    "vlm_output_tokens": 0,
+    "estimated_cost": 0.0,
+    "cache_hits": 0,
+    "duration_ms": 47362.5,
+    "ms_per_page": 47362.5,
+    "cost_per_page": 0.0
+  },
+  "created_at": "2026-10-08T05:20:51.791423+00:00",
+  "engines": {
+    "layout": "paddle:PP-DocLayout_plus-L",
+    "ocr": "paddle:ocr:PP-OCRv5:vi",
+    "table": "paddle:table:TableRecognitionPipelineV2",
+    "formula": "paddle:PP-FormulaNet_plus-M",
+    "vlm": null,
+    "orientation": "paddle:PP-LCNet_x1_0_doc_ori",
+    "router": "rules-v1",
+    "docextract": "0.1.0"
+  }
+}
