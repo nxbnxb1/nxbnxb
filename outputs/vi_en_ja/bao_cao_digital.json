@@ -1,0 +1,364 @@
+{
+  "schema_version": "1.0",
+  "source": {
+    "filename": "bao_cao_digital.pdf",
+    "sha256": "e617b0e83e4e5943bb21c422316e44b0fc6a6349d049f122f8c116fa7806b415",
+    "size_bytes": 413595,
+    "format": "pdf",
+    "page_count": 1
+  },
+  "pages": [
+    {
+      "number": 1,
+      "kind": "digital",
+      "width": 595.0,
+      "height": 842.0,
+      "unit": "pt",
+      "regions": [
+        {
+          "id": "p1-r1",
+          "page": 1,
+          "type": "title",
+          "order": 0,
+          "bbox": {
+            "x0": 58.34,
+            "y0": 51.45,
+            "x1": 426.71,
+            "y1": 70.82
+          },
+          "layout_score": 0.5534,
+          "level": 1,
+          "content": "BÁO CÁO KẾT QUẢ KINH DOANH NĂM 2025",
+          "html": null,
+          "data": null,
+          "method": "pdf_text",
+          "engine": "pymupdf",
+          "confidence": null,
+          "status": "passed",
+          "issues": [],
+          "attempts": [
+            {
+              "method": "pdf_text",
+              "engine": "pymupdf",
+              "confidence": null,
+              "passed": true,
+              "score": 1.0,
+              "issues": [],
+              "duration_ms": 0.0,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "bao_cao_digital.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 58.34,
+              "y0": 51.45,
+              "x1": 426.71,
+              "y1": 70.82
+            },
+            "locator": null
+          },
+          "figure": null,
+          "meta": {
+            "layout_label": "doc_title",
+            "font_size": 17.0
+          }
+        },
+        {
+          "id": "p1-r2",
+          "page": 1,
+          "type": "heading",
+          "order": 1,
+          "bbox": {
+            "x0": 58.22,
+            "y0": 97.98,
+            "x1": 196.53,
+            "y1": 111.64
+          },
+          "layout_score": 0.9135,
+          "level": 2,
+          "content": "1. Kết quả hoạt động",
+          "html": null,
+          "data": null,
+          "method": "pdf_text",
+          "engine": "pymupdf",
+          "confidence": null,
+          "status": "passed",
+          "issues": [],
+          "attempts": [
+            {
+              "method": "pdf_text",
+              "engine": "pymupdf",
+              "confidence": null,
+              "passed": true,
+              "score": 1.0,
+              "issues": [],
+              "duration_ms": 0.0,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "bao_cao_digital.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 58.22,
+              "y0": 97.98,
+              "x1": 196.53,
+              "y1": 111.64
+            },
+            "locator": null
+          },
+          "figure": null,
+          "meta": {
+            "layout_label": "paragraph_title",
+            "font_size": 13.0
+          }
+        },
+        {
+          "id": "p1-r3",
+          "page": 1,
+          "type": "text",
+          "order": 2,
+          "bbox": {
+            "x0": 56.89,
+            "y0": 120.87,
+            "x1": 516.18,
+            "y1": 166.91
+          },
+          "layout_score": 0.9138,
+          "level": null,
+          "content": "Năm 2025, doanh thu thuần của Công ty đạt 1.234,5 tỷ đồng, tăng 12,3% so với năm 2024. Lợi nhuận sau thuế đạt 156,8 tỷ đồng, vượt 4,2% kế hoạch được Đại hội đồng cổ đông thông qua. The Board of Directors proposes a cash dividend of 15% for the 2025 financial year.",
+          "html": null,
+          "data": null,
+          "method": "pdf_text",
+          "engine": "pymupdf",
+          "confidence": null,
+          "status": "passed",
+          "issues": [],
+          "attempts": [
+            {
+              "method": "pdf_text",
+              "engine": "pymupdf",
+              "confidence": null,
+              "passed": true,
+              "score": 1.0,
+              "issues": [],
+              "duration_ms": 0.0,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "bao_cao_digital.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 56.89,
+              "y0": 120.87,
+              "x1": 516.18,
+              "y1": 166.91
+            },
+            "locator": null
+          },
+          "figure": null,
+          "meta": {
+            "layout_label": "text"
+          }
+        },
+        {
+          "id": "p1-r4",
+          "page": 1,
+          "type": "table",
+          "order": 3,
+          "bbox": {
+            "x0": 58.98,
+            "y0": 242.74,
+            "x1": 531.7,
+            "y1": 332.46
+          },
+          "layout_score": 0.9858,
+          "level": null,
+          "content": "| Chỉ tiêu | Năm 2024 | Năm 2025 | Tăng trưởng |\n|---|---|---|---|\n| Doanh thu thuần | 1.099,2 | 1.234,5 | 12,3% |\n| Lợi nhuận gộp | 312,4 | 355,0 | 13,6% |\n| Lợi nhuận sau thuế | 140,1 | 156,8 | 11,9% |",
+          "html": "<table><tr><th>Chỉ tiêu</th><th>Năm 2024</th><th>Năm 2025</th><th>Tăng trưởng</th></tr><tr><td>Doanh thu thuần</td><td>1.099,2</td><td>1.234,5</td><td>12,3%</td></tr><tr><td>Lợi nhuận gộp</td><td>312,4</td><td>355,0</td><td>13,6%</td></tr><tr><td>Lợi nhuận sau thuế</td><td>140,1</td><td>156,8</td><td>11,9%</td></tr></table>",
+          "data": null,
+          "method": "pdf_table",
+          "engine": "pymupdf",
+          "confidence": null,
+          "status": "passed",
+          "issues": [],
+          "attempts": [
+            {
+              "method": "pdf_table",
+              "engine": "pymupdf",
+              "confidence": null,
+              "passed": true,
+              "score": 1.0,
+              "issues": [],
+              "duration_ms": 11.9,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "bao_cao_digital.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 58.98,
+              "y0": 242.74,
+              "x1": 531.7,
+              "y1": 332.46
+            },
+            "locator": null
+          },
+          "figure": null,
+          "meta": {
+            "layout_label": "table",
+            "figure_decision": "structure recovered"
+          }
+        },
+        {
+          "id": "p1-r5",
+          "page": 1,
+          "type": "heading",
+          "order": 4,
+          "bbox": {
+            "x0": 57.91,
+            "y0": 355.54,
+            "x1": 207.03,
+            "y1": 369.0
+          },
+          "layout_score": 0.9019,
+          "level": 2,
+          "content": "2. Kế hoạch năm 2026",
+          "html": null,
+          "data": null,
+          "method": "pdf_text",
+          "engine": "pymupdf",
+          "confidence": null,
+          "status": "passed",
+          "issues": [],
+          "attempts": [
+            {
+              "method": "pdf_text",
+              "engine": "pymupdf",
+              "confidence": null,
+              "passed": true,
+              "score": 1.0,
+              "issues": [],
+              "duration_ms": 0.0,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "bao_cao_digital.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 57.91,
+              "y0": 355.54,
+              "x1": 207.03,
+              "y1": 369.0
+            },
+            "locator": null
+          },
+          "figure": null,
+          "meta": {
+            "layout_label": "paragraph_title",
+            "font_size": 13.0
+          }
+        },
+        {
+          "id": "p1-r6",
+          "page": 1,
+          "type": "text",
+          "order": 5,
+          "bbox": {
+            "x0": 67.38,
+            "y0": 380.37,
+            "x1": 345.43,
+            "y1": 408.64
+          },
+          "layout_score": 0.9484,
+          "level": null,
+          "content": "- Mở rộng hệ thống phân phối tại 12 tỉnh, thành phố.\n- Đầu tư dây chuyền sản xuất mới trị giá 85 tỷ đồng.",
+          "html": null,
+          "data": null,
+          "method": "pdf_text",
+          "engine": "pymupdf",
+          "confidence": null,
+          "status": "passed",
+          "issues": [],
+          "attempts": [
+            {
+              "method": "pdf_text",
+              "engine": "pymupdf",
+              "confidence": null,
+              "passed": true,
+              "score": 1.0,
+              "issues": [],
+              "duration_ms": 0.0,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "bao_cao_digital.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 67.38,
+              "y0": 380.37,
+              "x1": 345.43,
+              "y1": 408.64
+            },
+            "locator": null
+          },
+          "figure": null,
+          "meta": {
+            "layout_label": "text"
+          }
+        }
+      ],
+      "preprocessing": {
+        "text_chars": 473,
+        "garbled_ratio": 0.0,
+        "image_coverage": 0.0
+      },
+      "layout_backend": "paddle:PP-DocLayout_plus-L",
+      "duration_ms": 6610.9
+    }
+  ],
+  "stats": {
+    "pages_processed": 1,
+    "regions": 6,
+    "regions_by_type": {
+      "title": 1,
+      "heading": 2,
+      "text": 2,
+      "table": 1
+    },
+    "regions_by_method": {
+      "pdf_text": 5,
+      "pdf_table": 1
+    },
+    "regions_by_status": {
+      "passed": 6
+    },
+    "escalations": 0,
+    "vlm_calls": 0,
+    "vlm_input_tokens": 0,
+    "vlm_output_tokens": 0,
+    "estimated_cost": 0.0,
+    "cache_hits": 0,
+    "duration_ms": 6628.3,
+    "ms_per_page": 6628.3,
+    "cost_per_page": 0.0
+  },
+  "created_at": "2026-10-08T05:50:10.287574+00:00",
+  "engines": {
+    "layout": "paddle:PP-DocLayout_plus-L",
+    "ocr": "paddle:ocr:vi_en_ja:PP-OCRv5_mobile_rec",
+    "table": "paddle:table:TableRecognitionPipelineV2",
+    "formula": "paddle:PP-FormulaNet_plus-M",
+    "vlm": null,
+    "orientation": "paddle:PP-LCNet_x1_0_doc_ori",
+    "product": "vi_en_ja",
+    "router": "rules-v1",
+    "docextract": "0.1.0"
+  }
+}

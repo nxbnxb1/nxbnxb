@@ -1,0 +1,412 @@
+{
+  "schema_version": "1.0",
+  "source": {
+    "filename": "houkoku_digital.pdf",
+    "sha256": "fc3e0e803c12903cc220082570ea3013f46554cd2b336c5d37563b73d9a2c435",
+    "size_bytes": 6254,
+    "format": "pdf",
+    "page_count": 1
+  },
+  "pages": [
+    {
+      "number": 1,
+      "kind": "digital",
+      "width": 595.0,
+      "height": 842.0,
+      "unit": "pt",
+      "regions": [
+        {
+          "id": "p1-r1",
+          "page": 1,
+          "type": "heading",
+          "order": 0,
+          "bbox": {
+            "x0": 57.9,
+            "y0": 54.56,
+            "x1": 263.15,
+            "y1": 70.55
+          },
+          "layout_score": 0.8862,
+          "level": 2,
+          "content": "2025年度 事業報告書",
+          "html": null,
+          "data": null,
+          "method": "pdf_text",
+          "engine": "pymupdf",
+          "confidence": null,
+          "status": "passed",
+          "issues": [],
+          "attempts": [
+            {
+              "method": "pdf_text",
+              "engine": "pymupdf",
+              "confidence": null,
+              "passed": true,
+              "score": 1.0,
+              "issues": [],
+              "duration_ms": 0.0,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "houkoku_digital.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 57.9,
+              "y0": 54.56,
+              "x1": 263.15,
+              "y1": 70.55
+            },
+            "locator": null
+          },
+          "figure": null,
+          "meta": {
+            "layout_label": "paragraph_title",
+            "font_size": 17.0
+          }
+        },
+        {
+          "id": "p1-r2",
+          "page": 1,
+          "type": "heading",
+          "order": 1,
+          "bbox": {
+            "x0": 58.3,
+            "y0": 98.42,
+            "x1": 163.87,
+            "y1": 110.67
+          },
+          "layout_score": 0.9331,
+          "level": 2,
+          "content": "1. 業績の概要",
+          "html": null,
+          "data": null,
+          "method": "pdf_text",
+          "engine": "pymupdf",
+          "confidence": null,
+          "status": "passed",
+          "issues": [],
+          "attempts": [
+            {
+              "method": "pdf_text",
+              "engine": "pymupdf",
+              "confidence": null,
+              "passed": true,
+              "score": 1.0,
+              "issues": [],
+              "duration_ms": 0.0,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "houkoku_digital.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 58.3,
+              "y0": 98.42,
+              "x1": 163.87,
+              "y1": 110.67
+            },
+            "locator": null
+          },
+          "figure": null,
+          "meta": {
+            "layout_label": "paragraph_title",
+            "font_size": 13.0
+          }
+        },
+        {
+          "id": "p1-r3",
+          "page": 1,
+          "type": "text",
+          "order": 2,
+          "bbox": {
+            "x0": 57.47,
+            "y0": 127.76,
+            "x1": 373.95,
+            "y1": 155.63
+          },
+          "layout_score": 0.9553,
+          "level": null,
+          "content": "当期の売上高は1,234億円となり、前期比12.3%の増加となりました。営業利益は156億円でした。",
+          "html": null,
+          "data": null,
+          "method": "pdf_text",
+          "engine": "pymupdf",
+          "confidence": null,
+          "status": "passed",
+          "issues": [],
+          "attempts": [
+            {
+              "method": "pdf_text",
+              "engine": "pymupdf",
+              "confidence": null,
+              "passed": true,
+              "score": 1.0,
+              "issues": [],
+              "duration_ms": 0.0,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "houkoku_digital.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 57.47,
+              "y0": 127.76,
+              "x1": 373.95,
+              "y1": 155.63
+            },
+            "locator": null
+          },
+          "figure": null,
+          "meta": {
+            "layout_label": "text"
+          }
+        },
+        {
+          "id": "p1-r4",
+          "page": 1,
+          "type": "table",
+          "order": 3,
+          "bbox": {
+            "x0": 58.89,
+            "y0": 183.02,
+            "x1": 531.68,
+            "y1": 250.6
+          },
+          "layout_score": 0.9864,
+          "level": null,
+          "content": "| 項目 | 2024年度 | 2025年度 | 増減率 |\n|---|---|---|---|\n| 売上高 | 1,099 | 1,234 | 12.3% |\n| 営業利益 | 140 | 156 | 11.4% |",
+          "html": "<table><tr><th>項目</th><th>2024年度</th><th>2025年度</th><th>増減率</th></tr><tr><td>売上高</td><td>1,099</td><td>1,234</td><td>12.3%</td></tr><tr><td>営業利益</td><td>140</td><td>156</td><td>11.4%</td></tr></table>",
+          "data": null,
+          "method": "pdf_table",
+          "engine": "pymupdf",
+          "confidence": null,
+          "status": "passed",
+          "issues": [],
+          "attempts": [
+            {
+              "method": "pdf_table",
+              "engine": "pymupdf",
+              "confidence": null,
+              "passed": true,
+              "score": 1.0,
+              "issues": [],
+              "duration_ms": 9.7,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "houkoku_digital.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 58.89,
+              "y0": 183.02,
+              "x1": 531.68,
+              "y1": 250.6
+            },
+            "locator": null
+          },
+          "figure": null,
+          "meta": {
+            "layout_label": "table",
+            "figure_decision": "structure recovered"
+          }
+        },
+        {
+          "id": "p1-r5",
+          "page": 1,
+          "type": "heading",
+          "order": 4,
+          "bbox": {
+            "x0": 57.16,
+            "y0": 274.31,
+            "x1": 190.3,
+            "y1": 286.4
+          },
+          "layout_score": 0.9086,
+          "level": 2,
+          "content": "2. 今後の取り組み",
+          "html": null,
+          "data": null,
+          "method": "pdf_text",
+          "engine": "pymupdf",
+          "confidence": null,
+          "status": "passed",
+          "issues": [],
+          "attempts": [
+            {
+              "method": "pdf_text",
+              "engine": "pymupdf",
+              "confidence": null,
+              "passed": true,
+              "score": 1.0,
+              "issues": [],
+              "duration_ms": 0.0,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "houkoku_digital.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 57.16,
+              "y0": 274.31,
+              "x1": 190.3,
+              "y1": 286.4
+            },
+            "locator": null
+          },
+          "figure": null,
+          "meta": {
+            "layout_label": "paragraph_title",
+            "font_size": 13.0
+          }
+        },
+        {
+          "id": "p1-r6",
+          "page": 1,
+          "type": "text",
+          "order": 5,
+          "bbox": {
+            "x0": 67.72,
+            "y0": 299.16,
+            "x1": 273.38,
+            "y1": 309.28
+          },
+          "layout_score": 0.906,
+          "level": null,
+          "content": "- ベトナム市場での販売網を拡大します。",
+          "html": null,
+          "data": null,
+          "method": "pdf_text",
+          "engine": "pymupdf",
+          "confidence": null,
+          "status": "passed",
+          "issues": [],
+          "attempts": [
+            {
+              "method": "pdf_text",
+              "engine": "pymupdf",
+              "confidence": null,
+              "passed": true,
+              "score": 1.0,
+              "issues": [],
+              "duration_ms": 0.0,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "houkoku_digital.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 67.72,
+              "y0": 299.16,
+              "x1": 273.38,
+              "y1": 309.28
+            },
+            "locator": null
+          },
+          "figure": null,
+          "meta": {
+            "layout_label": "text"
+          }
+        },
+        {
+          "id": "p1-r7",
+          "page": 1,
+          "type": "text",
+          "order": 6,
+          "bbox": {
+            "x0": 67.72,
+            "y0": 315.48,
+            "x1": 241.84,
+            "y1": 325.53
+          },
+          "layout_score": 0.8951,
+          "level": null,
+          "content": "- 新工場に85億円を投資します。",
+          "html": null,
+          "data": null,
+          "method": "pdf_text",
+          "engine": "pymupdf",
+          "confidence": null,
+          "status": "passed",
+          "issues": [],
+          "attempts": [
+            {
+              "method": "pdf_text",
+              "engine": "pymupdf",
+              "confidence": null,
+              "passed": true,
+              "score": 1.0,
+              "issues": [],
+              "duration_ms": 0.0,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "houkoku_digital.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 67.72,
+              "y0": 315.48,
+              "x1": 241.84,
+              "y1": 325.53
+            },
+            "locator": null
+          },
+          "figure": null,
+          "meta": {
+            "layout_label": "text"
+          }
+        }
+      ],
+      "preprocessing": {
+        "text_chars": 163,
+        "garbled_ratio": 0.0,
+        "image_coverage": 0.0
+      },
+      "layout_backend": "paddle:PP-DocLayout_plus-L",
+      "duration_ms": 3246.6
+    }
+  ],
+  "stats": {
+    "pages_processed": 1,
+    "regions": 7,
+    "regions_by_type": {
+      "heading": 3,
+      "text": 3,
+      "table": 1
+    },
+    "regions_by_method": {
+      "pdf_text": 6,
+      "pdf_table": 1
+    },
+    "regions_by_status": {
+      "passed": 7
+    },
+    "escalations": 0,
+    "vlm_calls": 0,
+    "vlm_input_tokens": 0,
+    "vlm_output_tokens": 0,
+    "estimated_cost": 0.0,
+    "cache_hits": 0,
+    "duration_ms": 3249.7,
+    "ms_per_page": 3249.7,
+    "cost_per_page": 0.0
+  },
+  "created_at": "2026-10-08T05:50:42.882572+00:00",
+  "engines": {
+    "layout": "paddle:PP-DocLayout_plus-L",
+    "ocr": "paddle:ocr:vi_en_ja:PP-OCRv5_mobile_rec",
+    "table": "paddle:table:TableRecognitionPipelineV2",
+    "formula": "paddle:PP-FormulaNet_plus-M",
+    "vlm": null,
+    "orientation": "paddle:PP-LCNet_x1_0_doc_ori",
+    "product": "vi_en_ja",
+    "router": "rules-v1",
+    "docextract": "0.1.0"
+  }
+}
