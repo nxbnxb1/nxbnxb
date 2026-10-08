@@ -43,6 +43,13 @@ class RouteFeatures:
         return data
 
 
+@dataclass
+class Route:
+    plan: list[Method]
+    note: str | None = None  # why the plan is empty / what happens instead
+    drop: bool = False  # region is intentionally left out (decoration)
+
+
 class RuleBasedRouter:
     name = "rules-v1"
 
@@ -64,8 +71,8 @@ class RuleBasedRouter:
             Method.NONE: False,
         }[method]
 
-    def plan(self, f: RouteFeatures) -> tuple[list[Method], str | None]:
-        """Ordered methods to try, and a reason when the region is deliberately skipped."""
+    def plan(self, f: RouteFeatures) -> Route:
+        """Ordered methods to try for a region."""
         s = self.settings
         has_text = f.page_kind == PageKind.DIGITAL and f.text_layer_chars > 0
         text_source = [Method.PDF_TEXT] if has_text else [Method.OCR]
@@ -80,17 +87,19 @@ class RuleBasedRouter:
                 chain += [Method.VLM, Method.TABLE_RECOGNITION]
             else:
                 chain += [Method.TABLE_RECOGNITION, Method.VLM]
-            chain += text_source  # last resort: keep the text, flag the region
+            chain += text_source  # last resort: keep the text, flag the region (and keep its picture)
         elif t == RegionType.FORMULA:
             chain = [Method.FORMULA_RECOGNITION, Method.VLM] + text_source
-        elif t == RegionType.CHART:
-            chain = [Method.VLM] + text_source
-        elif t == RegionType.IMAGE:
+        elif t in (RegionType.CHART, RegionType.IMAGE):
+            # Pictures: the VLM describes them; the text inside is read separately by OCR / the
+            # text layer, and the picture itself is kept unless text carries all of it (figures.py).
+            if t == RegionType.IMAGE and f.area_ratio < s.min_figure_area_ratio:
+                return Route([], "decorative image", drop=True)
             if not s.describe_images:
-                return [], "image description disabled"
-            if f.area_ratio < s.min_image_area_ratio:
-                return [], "small image (logo/icon)"
-            chain = [Method.VLM, Method.OCR]
+                return Route([], "kept as figure: image description disabled")
+            if t == RegionType.IMAGE and f.area_ratio < s.min_image_area_ratio:
+                return Route([], "kept as figure: small image (logo/icon)")
+            chain = [Method.VLM]
         else:  # text-like regions and seals: PDF text layer when usable, otherwise OCR. Never the VLM.
             chain = text_source + [Method.OCR]
 
@@ -100,7 +109,10 @@ class RuleBasedRouter:
             if method not in seen and self.available(method):
                 seen.add(method)
                 plan.append(method)
-        return plan, None
+        note = None
+        if not plan and t in (RegionType.CHART, RegionType.IMAGE):
+            note = "kept as figure: no VLM configured"
+        return Route(plan, note)
 
     def log(self, task: RegionTask) -> None:
         path = self.settings.route_log_path

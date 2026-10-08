@@ -13,10 +13,10 @@ _VI_LATIN1 = set("àáâãèéêìíòóôõùúýÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚ
 _COMMON_LATIN1_SYMBOLS = set("°±×÷©®§«»µ¼½¾²³¹¢£¥¤¦¬¯´·¸¿¡ªº")
 _LEGACY_FONT_PREFIXES = (".vn", "vni-", "vni_", "vn-", "abc")
 _CID_RE = re.compile(r"\(cid:\d+\)")
-_NUMBER_RE = re.compile(r"(?<![\w])[-+−]?\d+(?:[.,  ]\d+)*%?")
+_NUMBER_RE = re.compile(r"(?<![0-9A-Za-z])[-+−]?\d+(?:[.,  ]\d+)*%?")
 _BULLET_RE = re.compile(r"^\s*(?:[-•●▪◦‣∙*+]|\d{1,3}[.)]|[a-zA-Z][.)]|[ivxIVX]{1,5}[.)])\s+")
 
-SPECIAL_CHARS = set("%$€£¥₫±≤≥≠≈×÷°§©®™→←↑↓↔⇒√∞∑∏∫∂∆∇µπσΩαβγδλ‰′″")
+SPECIAL_CHARS = set("%$€£¥₫円±≤≥≠≈×÷°§©®™→←↑↓↔⇒√∞∑∏∫∂∆∇µπσΩαβγδλ‰′″※〒")
 
 
 def normalize(text: str) -> str:
@@ -112,9 +112,9 @@ def vietnamese_dropout_ratio(text: str) -> float:
 
 
 def extract_numbers(text: str) -> list[str]:
-    """Numbers reduced to their digits, so '1.234,5' and '1,234.5' compare equal."""
+    """Numbers reduced to their digits, so '1.234,5', '1,234.5' and full-width '１，２３４．５' compare equal."""
     out = []
-    for match in _NUMBER_RE.findall(text):
+    for match in _NUMBER_RE.findall(unicodedata.normalize("NFKC", text)):
         digits = re.sub(r"\D", "", match)
         if digits:
             out.append(digits)
@@ -178,6 +178,29 @@ class Line:
         return (self.y0 + self.y1) / 2
 
 
+def is_cjk(ch: str) -> bool:
+    """Japanese/CJK characters, which are written without spaces between words."""
+    code = ord(ch)
+    return (
+        0x3000 <= code <= 0x30FF  # CJK punctuation, hiragana, katakana
+        or 0x3400 <= code <= 0x4DBF
+        or 0x4E00 <= code <= 0x9FFF
+        or 0xF900 <= code <= 0xFAFF
+        or 0xFF00 <= code <= 0xFFEF  # full-width forms
+    )
+
+
+def join_inline(left: str, right: str) -> str:
+    """Concatenate two pieces of one line/paragraph: no space between CJK characters."""
+    if not left:
+        return right
+    if not right:
+        return left
+    if is_cjk(left[-1]) and is_cjk(right[0]):
+        return left + right
+    return left + " " + right
+
+
 def group_rows(lines: Sequence[Line]) -> list[list[Line]]:
     """Group fragments that sit on the same visual row, rows top-to-bottom, fragments left-to-right."""
     rows: list[list[Line]] = []
@@ -207,7 +230,10 @@ def join_lines(lines: Sequence[Line], keep_line_breaks: bool = False) -> str:
     prev_bottom = None
     prev_height = None
     for row in rows:
-        text = normalize(" ".join(ln.text for ln in row))
+        text = ""
+        for ln in row:
+            text = join_inline(text, normalize(ln.text))
+        text = normalize(text)
         if not text:
             continue
         top = min(ln.y0 for ln in row)
@@ -238,7 +264,7 @@ def _glue(parts: list[str]) -> str:
         elif out.endswith("-") and len(out) > 1 and out[-2].isalpha() and part[:1].islower():
             out = out[:-1] + part
         else:
-            out += " " + part
+            out = join_inline(out, part)
     return out
 
 

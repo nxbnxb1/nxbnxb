@@ -24,7 +24,7 @@ from ..textutil import is_list_item
 from .labels import Candidate
 
 _CAPTION_RE = re.compile(
-    r"^\s*(figure|fig\.|table|chart|hình|bảng|biểu đồ|sơ đồ|đồ thị|ảnh)\s*[\dIVX]+", re.IGNORECASE
+    r"^\s*(figure|fig\.|table|chart|hình|bảng|biểu đồ|sơ đồ|đồ thị|ảnh|図|表|グラフ|写真)\s*[\dIVX０-９]+", re.IGNORECASE
 )
 
 
@@ -92,7 +92,7 @@ def classify_text_block(
     short = len(text) <= 150 and len(lines) <= 3
     margin = 0.07 * page_height
     if short and (bbox.y1 <= margin or bbox.y0 >= page_height - margin):
-        if re.fullmatch(r"(?:(?:page|trang)\s*)?\d{1,4}(?:\s*(?:/|of|trên)\s*\d{1,4})?", text, re.IGNORECASE):
+        if re.fullmatch(r"[-–\s]*(?:(?:page|trang)\s*)?\d{1,4}(?:\s*(?:/|of|trên)\s*\d{1,4})?\s*(?:ページ|頁)?[-–\s]*", text, re.IGNORECASE):
             return RegionType.PAGE_NUMBER, meta
         return (RegionType.HEADER if bbox.y1 <= margin else RegionType.FOOTER), meta
     if sum(1 for ln in lines if is_math_line(ln)) > 0.5 * len(lines):

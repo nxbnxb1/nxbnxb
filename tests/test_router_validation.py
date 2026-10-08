@@ -21,30 +21,36 @@ def _features(rtype: RegionType, kind: PageKind = PageKind.SCANNED, area: float 
 def test_text_is_never_sent_to_the_vlm():
     router = _router()
     for rtype in (RegionType.TEXT, RegionType.TITLE, RegionType.HEADING, RegionType.LIST, RegionType.SEAL, RegionType.FOOTER):
-        assert router.plan(_features(rtype))[0] == [Method.OCR]
-        assert router.plan(_features(rtype, PageKind.DIGITAL, chars=200))[0] == [Method.PDF_TEXT, Method.OCR]
-    assert router.plan(_features(RegionType.TEXT, full_page=True))[0] == [Method.OCR]
+        assert router.plan(_features(rtype)).plan == [Method.OCR]
+        assert router.plan(_features(rtype, PageKind.DIGITAL, chars=200)).plan == [Method.PDF_TEXT, Method.OCR]
+    assert router.plan(_features(RegionType.TEXT, full_page=True)).plan == [Method.OCR]
 
 
 def test_table_formula_chart_image_plans():
     router = _router()
-    assert router.plan(_features(RegionType.TABLE, PageKind.DIGITAL, chars=50))[0] == [
+    assert router.plan(_features(RegionType.TABLE, PageKind.DIGITAL, chars=50)).plan == [
         Method.PDF_TABLE,
         Method.TABLE_RECOGNITION,
         Method.VLM,
         Method.PDF_TEXT,
     ]
-    assert router.plan(_features(RegionType.TABLE, area=0.6))[0][:2] == [Method.VLM, Method.TABLE_RECOGNITION]
-    assert router.plan(_features(RegionType.FORMULA))[0][:2] == [Method.FORMULA_RECOGNITION, Method.VLM]
-    assert router.plan(_features(RegionType.CHART))[0] == [Method.VLM, Method.OCR]
-    plan, reason = router.plan(_features(RegionType.IMAGE, area=0.001))
-    assert plan == [] and "small" in reason
+    assert router.plan(_features(RegionType.TABLE, area=0.6)).plan[:2] == [Method.VLM, Method.TABLE_RECOGNITION]
+    assert router.plan(_features(RegionType.FORMULA)).plan[:2] == [Method.FORMULA_RECOGNITION, Method.VLM]
+    # pictures: only the VLM describes them (their text is read by OCR separately)
+    assert router.plan(_features(RegionType.CHART)).plan == [Method.VLM]
+    assert router.plan(_features(RegionType.IMAGE)).plan == [Method.VLM]
+    small = router.plan(_features(RegionType.IMAGE, area=0.005))
+    assert small.plan == [] and not small.drop and "kept as figure" in small.note
+    decoration = router.plan(_features(RegionType.IMAGE, area=0.0005))
+    assert decoration.plan == [] and decoration.drop
 
 
 def test_unavailable_engines_are_dropped():
     router = RuleBasedRouter(Settings(), Engines())
-    assert router.plan(_features(RegionType.TEXT))[0] == []
-    assert router.plan(_features(RegionType.TABLE, PageKind.DIGITAL, chars=10))[0] == [Method.PDF_TABLE, Method.PDF_TEXT]
+    assert router.plan(_features(RegionType.TEXT)).plan == []
+    assert router.plan(_features(RegionType.TABLE, PageKind.DIGITAL, chars=10)).plan == [Method.PDF_TABLE, Method.PDF_TEXT]
+    no_vlm = router.plan(_features(RegionType.CHART))
+    assert no_vlm.plan == [] and "kept as figure" in no_vlm.note
 
 
 def _task(rtype: RegionType) -> RegionTask:

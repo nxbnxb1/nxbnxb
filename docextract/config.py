@@ -37,7 +37,9 @@ class Settings(BaseModel):
 
     # --- OCR / table / formula (PaddleOCR) -------------------------------------
     ocr_backend: Backend = "auto"
-    ocr_lang: Literal["vi", "en"] = Field("vi", description="Documents are Vietnamese and/or English")
+    ocr_lang: Literal["vi", "en", "ja"] = Field(
+        "vi", description="Main document language for the stock model (a fine-tuned vi_en_ja model reads all three)"
+    )
     ocr_version: str | None = Field("PP-OCRv5", description="PP-OCRv5, PP-OCRv6, ...; None = PaddleOCR default")
     ocr_det_model: str | None = Field(None, description="Override text detection model name")
     ocr_rec_model: str | None = Field(None, description="Override text recognition model name")
@@ -68,13 +70,18 @@ class Settings(BaseModel):
     vlm_max_image_side: int = Field(1600, description="Crops sent to the VLM are downscaled to this")
     vlm_price_input_per_1m: float = Field(0.0, description="Cost per 1M input tokens, for cost/page")
     vlm_price_output_per_1m: float = 0.0
-    vlm_language: Literal["vi", "en"] | None = Field(
-        None, description="Language of image/chart descriptions; None = Vietnamese if the image has Vietnamese text"
+    vlm_language: Literal["vi", "en", "ja"] | None = Field(
+        None, description="Language of image/chart descriptions; None = language of the text in the image"
     )
 
     # --- Router / validation ---------------------------------------------------
     describe_images: bool = True
-    min_image_area_ratio: float = Field(0.01, description="Smaller images (logos, icons) are not described")
+    min_image_area_ratio: float = Field(0.01, description="Smaller images (logos, icons) are kept as figures, not described")
+    min_figure_area_ratio: float = Field(0.002, description="Smaller images are decoration and are dropped")
+    figure_policy: Literal["auto", "always", "never"] = Field(
+        "auto",
+        description="auto: keep the image file whenever text cannot carry all of its information; always/never",
+    )
     prefer_vlm_for_complex_tables: bool = True
     complex_table_cells: int = Field(120, description="Tables with more cells count as complex")
     verify_vlm_with_ocr: bool = Field(True, description="Cross-check VLM numbers against OCR tokens")
@@ -88,7 +95,7 @@ class Settings(BaseModel):
     recover_orphan_text: bool = Field(True, description="Keep PDF text that no layout box covered")
 
     # --- Output ----------------------------------------------------------------
-    output_locale: Literal["vi", "en"] = "vi"
+    output_locale: Literal["vi", "en", "ja"] = "vi"
     table_format: Literal["auto", "markdown", "html"] = "auto"
     markdown_page_markers: bool = True
     markdown_include_furniture: bool = False

@@ -8,6 +8,7 @@ run in parallel threads (the VLM client additionally sends its requests concurre
 from __future__ import annotations
 
 import hashlib
+import io
 import logging
 import threading
 import time
@@ -23,6 +24,7 @@ from .cache import ResultCache
 from .config import Settings
 from .engines.base import Engines, VlmRequest
 from .engines.vlm import PROMPTS
+from .figures import FIGURE_TYPES, keep_figure
 from .models import Attempt, BBox, Method, PageKind, Region, RegionType, ValidationStatus
 from .preprocessing import pdf as pdfmod
 from .router import RouteFeatures, RuleBasedRouter
@@ -208,6 +210,7 @@ class Executor:
         self.router = router
         self.cache = cache
         self.stats = stats or RunStats()
+        self.figures: dict[str, bytes] = {}  # region id → PNG of pictures that must be kept
         self._handlers: dict[Method, Callable[[list[RegionTask]], list[Extraction]]] = {
             Method.PDF_TEXT: self._pdf_text,
             Method.PDF_TABLE: self._pdf_table,
@@ -242,15 +245,17 @@ class Executor:
             known_cells=region.meta.get("known_cells"),
             full_page=bool(region.meta.get("full_page")),
         )
-        task.plan, skip_reason = self.router.plan(task.features)
+        route = self.router.plan(task.features)
+        task.plan = route.plan
         if not task.plan:
             region.method = Method.NONE
-            if skip_reason:
+            if route.drop:
                 region.status = ValidationStatus.SKIPPED
-                region.issues = [skip_reason]
+            elif region.type in FIGURE_TYPES:
+                region.status = ValidationStatus.UNCHECKED  # the picture itself is kept
             else:
                 region.status = ValidationStatus.NEEDS_REVIEW
-                region.issues = [f"no engine available for {region.type.value}"]
+            region.issues = [route.note or f"no engine available for {region.type.value}"]
             task.done = True
 
     def run(self, tasks: list[RegionTask]) -> None:
@@ -265,8 +270,55 @@ class Executor:
                     groups[task.current].append(task)
                 list(pool.map(lambda item: self._run_group(*item), groups.items()))
                 pending = [t for t in pending if not t.done]
+        self._figure_text(tasks)
+        self._keep_figures(tasks)
         for task in tasks:
             self.router.log(task)
+
+    # --- pictures ---------------------------------------------------------------------
+
+    def _figure_text(self, tasks: list[RegionTask]) -> None:
+        """Text inside pictures comes from the PDF text layer or OCR, never from the VLM."""
+        need_ocr = []
+        for task in tasks:
+            region = task.region
+            if region.type not in FIGURE_TYPES or region.status == ValidationStatus.SKIPPED:
+                continue
+            if region.type == RegionType.SEAL and region.method == Method.OCR:
+                self._set_figure_text(region, region.content)
+            elif task.evidence.get("text_layer"):
+                self._set_figure_text(region, task.evidence["text_layer"])
+            elif self.engines.ocr is not None:
+                need_ocr.append(task)
+        if need_ocr:
+            try:
+                results = self._ocr(need_ocr)
+            except Exception as exc:  # the picture is kept anyway when its text is unknown
+                log.warning("OCR of pictures failed: %s", exc)
+                return
+            for task, ext in zip(need_ocr, results):
+                if not ext.error:
+                    self._set_figure_text(task.region, ext.content)
+
+    @staticmethod
+    def _set_figure_text(region: Region, text: str) -> None:
+        region.data = {**(region.data or {}), "figure_text": text.strip()}
+
+    def _keep_figures(self, tasks: list[RegionTask]) -> None:
+        for task in tasks:
+            region = task.region
+            if region.type not in FIGURE_TYPES and region.type not in (RegionType.TABLE, RegionType.FORMULA):
+                continue
+            keep, reason = keep_figure(region, self.settings)
+            region.meta["figure_decision"] = reason
+            if not keep:
+                continue
+            image = task.crop()
+            if image is None:
+                continue
+            buf = io.BytesIO()
+            image.convert("RGB").save(buf, format="PNG", optimize=True)
+            self.figures[region.id] = buf.getvalue()
 
     def _run_group(self, method: Method, tasks: list[RegionTask]) -> None:
         start = time.perf_counter()
@@ -308,7 +360,9 @@ class Executor:
         ext, report = task.results[-1]
         if not report.passed:
             ext, report = max(task.results, key=lambda r: r[1].score)
-            report = ValidationReport(False, ValidationStatus.NEEDS_REVIEW, report.score, report.issues)
+            # A picture whose description failed is kept as a figure: nothing is lost, nothing to review.
+            status = ValidationStatus.UNCHECKED if task.region.type in FIGURE_TYPES else ValidationStatus.NEEDS_REVIEW
+            report = ValidationReport(False, status, report.score, report.issues)
         region = task.region
         region.content = ext.content
         region.html = ext.html
@@ -496,7 +550,21 @@ class Executor:
             latex = latex.removeprefix("\\[").removesuffix("\\]").strip()
             return Extraction(method=Method.VLM, engine=engine, content=latex)
         if kind == "chart":
-            return Extraction(method=Method.VLM, engine=engine, content=chart_markdown(data, text), data={"chart": data} if data else None)
+            info = {"kind": "chart", "description": chart_markdown(data, ""), "lossless": (data or {}).get("lossless")}
+            return Extraction(
+                method=Method.VLM,
+                engine=engine,
+                content=chart_markdown(data, text),
+                data={"chart": data, "figure": info} if data else None,
+            )
+        if kind == "image":
+            description = str((data or {}).get("description") or "").strip()
+            return Extraction(
+                method=Method.VLM,
+                engine=engine,
+                content=description or text,
+                data={"figure": data} if data else None,
+            )
         return Extraction(method=Method.VLM, engine=engine, content=text)
 
     def _collect_ocr_evidence(self, tasks: list[RegionTask]) -> None:

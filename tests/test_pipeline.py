@@ -50,7 +50,11 @@ def test_scanned_pdf_routing_and_fallback(settings, tmp_path):
     table = regions[RegionType.TABLE]
     assert [a.method for a in table.attempts] == [Method.TABLE_RECOGNITION, Method.VLM]
     assert table.method == Method.VLM and table.status == ValidationStatus.PASSED
-    assert regions[RegionType.IMAGE].method == Method.VLM
+    image = regions[RegionType.IMAGE]
+    assert image.method == Method.VLM
+    # a logo cannot be replaced by text: the picture is kept and linked from the Markdown
+    assert image.figure == "scan_assets/p1-r4.png" and image.figure in result.figures
+    assert "![Hình ảnh: Biểu tượng công ty ACME màu xám" in result.markdown
     # the VLM never transcribes text
     assert {r.task for r in vlm.requests} <= {"table", "image", "chart", "formula"}
     assert result.stats.escalations == 1 and result.stats.vlm_calls == 2
@@ -127,10 +131,25 @@ def test_docx_structure(settings):
     assert table.method == Method.DOCX and table.source.locator == "body/tbl[1]"
 
 
-def test_docx_image_without_vlm_keeps_alt_text(settings):
+def test_docx_image_without_vlm_is_kept_as_figure(settings):
     result = DocumentPipeline(settings, Engines()).process_bytes(_docx_bytes(), "a.docx", ExtractOptions(use_vlm=False))
     image = next(r for r in result.iter_regions() if r.type == RegionType.IMAGE)
-    assert image.method == Method.NONE and image.status == ValidationStatus.NEEDS_REVIEW
+    assert image.method == Method.NONE and image.status == ValidationStatus.UNCHECKED
+    assert image.figure == f"a_assets/{image.id}.png" and result.figures[image.figure].startswith(b"\x89PNG")
+    assert f"]({image.figure})" in result.markdown
+
+
+def test_describable_picture_is_replaced_by_text(settings):
+    """A labelled flowchart whose description is lossless and whose labels OCR read: no picture kept."""
+    vlm = FakeVLM({"kind": "flowchart", "description": "Quy trình gồm ba bước: Nhập → Xử lý → Xuất.", "lossless": True})
+    texts = {60: ("BÁO CÁO", 0.99), 110: ("Doanh thu tăng.", 0.99), 160: ("", 0.0), 210: ("Nhập Xử lý Xuất", 0.97)}
+    engines = Engines(layout=FakeLayout(), ocr=FakeOCR(texts), vlm=vlm)
+    result = DocumentPipeline(settings, engines).process_bytes(make_scanned_pdf(), "scan.pdf")
+    image = next(r for r in result.iter_regions() if r.type == RegionType.IMAGE)
+    assert image.figure is None and not result.figures
+    assert image.meta["figure_decision"] == "fully described by text"
+    assert "> **[Hình ảnh]** Quy trình gồm ba bước" in result.markdown
+    assert "> Chữ trong hình: Nhập Xử lý Xuất" in result.markdown
 
 
 def test_page_selection(settings):

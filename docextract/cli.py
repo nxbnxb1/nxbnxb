@@ -22,6 +22,10 @@ def write_outputs(result, out_dir: Path, stem: str, formats: set[str]) -> list[P
         path = out_dir / f"{stem}.json"
         path.write_text(result.to_json(indent=2), encoding="utf-8")
         written.append(path)
+    for rel, png in result.figures.items():  # pictures that text cannot replace, linked from the .md
+        target = out_dir / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(png)
     return written
 
 
@@ -66,7 +70,8 @@ def cmd_extract(args: argparse.Namespace) -> int:
         review = s.regions_by_status.get("needs_review", 0)
         print(
             f"{path} -> {', '.join(str(w) for w in written)} "
-            f"({s.pages_processed} pages, {s.regions} regions, {review} need review, {s.ms_per_page:.0f} ms/page)"
+            f"({s.pages_processed} pages, {s.regions} regions, {review} need review, "
+            f"{len(result.figures)} figures kept, {s.ms_per_page:.0f} ms/page)"
         )
     return 1 if failures else 0
 

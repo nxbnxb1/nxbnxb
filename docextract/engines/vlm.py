@@ -41,26 +41,35 @@ PROMPTS: dict[str, str] = {
     "chart": (
         "Analyse this chart for a document search index. Respond with JSON only, using the keys: "
         '"chart_type", "title", "description" (2-4 factual sentences: what is measured, trends, extremes), '
-        '"columns" (list of column names) and "rows" (list of rows with the data values). '
+        '"columns" (list of column names), "rows" (list of rows with the data values) and '
+        '"lossless" (true only if the description and the rows together contain ALL the information of the '
+        "chart, so the picture is no longer needed). "
         "Only report values printed on the chart or clearly readable from the axes; prefix estimated values "
         "with ~. Copy labels exactly. {language}"
     ),
     "image": (
-        "Describe this image from a document in 1-3 factual sentences for a search index, then transcribe "
-        "any text visible in it exactly. Do not speculate beyond what is visible. {language}"
+        "Classify and describe this image from a document. Respond with JSON only, using the keys: "
+        '"kind" (one of: photo, illustration, drawing, map, logo, signature, handwriting, diagram, flowchart, '
+        'screenshot, table, text, other), "description" (1-3 factual sentences for a search index; describe '
+        'structure such as boxes and arrows when relevant; do not transcribe long text, it is read separately) '
+        'and "lossless" (true only if a reader of the description alone would lose NO information compared to '
+        "seeing the image, e.g. a simple labelled flowchart; false for photos, maps, drawings, logos, "
+        "signatures and anything whose look matters). Do not speculate beyond what is visible. {language}"
     ),
 }
 
 
-_LANGUAGES = {"vi": "Vietnamese", "en": "English"}
+LANGUAGES = {"vi": "Vietnamese", "en": "English", "ja": "Japanese"}
 
 
-def prompt_for(task: str, hint: str | None, language: str | None) -> str:
-    lang = (
-        f"Write the description in {_LANGUAGES.get(language, language)}."
-        if language
-        else "Write the description in Vietnamese if the image contains Vietnamese text, otherwise in English."
-    )
+def prompt_for(task: str, hint: str | None, language: str | None, fallback: str = "vi") -> str:
+    if language:
+        lang = f"Write the description in {LANGUAGES.get(language, language)}."
+    else:
+        lang = (
+            "Write the description in the language of the text in the image (Vietnamese, English or Japanese); "
+            f"if the image has no text, write it in {LANGUAGES.get(fallback, 'Vietnamese')}."
+        )
     prompt = PROMPTS[task].replace("{language}", lang)
     if hint:
         prompt += (
@@ -132,12 +141,12 @@ class OpenAICompatibleVLM:
                     "role": "user",
                     "content": [
                         {"type": "image_url", "image_url": {"url": encode_image(request.image, s.vlm_max_image_side)}},
-                        {"type": "text", "text": prompt_for(request.task, request.hint, s.vlm_language)},
+                        {"type": "text", "text": prompt_for(request.task, request.hint, s.vlm_language, s.output_locale)},
                     ],
                 }
             ],
         }
-        if request.task == "chart":
+        if request.task in ("chart", "image"):
             payload["response_format"] = {"type": "json_object"}
         response = self._post(payload)
         body = response.json()
@@ -148,7 +157,7 @@ class OpenAICompatibleVLM:
             input_tokens=int(usage.get("prompt_tokens", 0)),
             output_tokens=int(usage.get("completion_tokens", 0)),
         )
-        if request.task == "chart":
+        if request.task in ("chart", "image"):
             result.data = parse_json(text)
         return result
 

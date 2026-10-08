@@ -8,6 +8,7 @@ GET  /health                engines and settings in use
 
 from __future__ import annotations
 
+import base64
 import threading
 import uuid
 from concurrent.futures import ThreadPoolExecutor
@@ -76,6 +77,7 @@ async def extract(
     pages: str | None = Form(None),
     use_vlm: bool = Form(True),
     include_json: bool = Form(True),
+    include_figures: bool = Form(True),
 ) -> dict:
     data = await _read(file)
     options = _options(pages, use_vlm)
@@ -88,6 +90,8 @@ async def extract(
     body: dict[str, Any] = {"markdown": result.markdown, "stats": result.stats.model_dump()}
     if include_json:
         body["document"] = result.model_dump(mode="json", exclude={"markdown"})
+    if include_figures:  # pictures referenced by the Markdown (relative paths) as base64 PNG
+        body["figures"] = {path: base64.b64encode(png).decode("ascii") for path, png in result.figures.items()}
     return body
 
 

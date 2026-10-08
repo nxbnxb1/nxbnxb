@@ -60,9 +60,11 @@ def test_vlm_client_retries_and_parses_chart(monkeypatch):
     assert result.data["chart_type"] == "bar" and result.input_tokens == 50
 
 
-def test_prompts_are_bilingual_only():
-    assert "Vietnamese" in prompt_for("image", None, None)
-    assert "English" in prompt_for("chart", None, "en")
+def test_prompts_languages():
+    assert "Vietnamese, English or Japanese" in prompt_for("image", None, None)
+    assert "in English." in prompt_for("chart", None, "en")
+    assert "in Japanese." in prompt_for("image", None, "ja")
+    assert "lossless" in prompt_for("image", None, None) and "lossless" in prompt_for("chart", None, None)
     assert "1.234,5" in prompt_for("table", "Doanh thu 1.234,5", None)
 
 

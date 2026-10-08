@@ -43,6 +43,9 @@ def _res(result: Any) -> dict:
     return dict(result)
 
 
+_PADDLE_LANG = {"vi": "vi", "en": "en", "ja": "japan"}
+
+
 def _rec_model(settings: Settings) -> dict[str, str]:
     """Recognition model overrides; a custom model dir carries its architecture name in inference.yml."""
     kwargs: dict[str, str] = {}
@@ -135,7 +138,7 @@ class PaddleTextRecognizer(_PaddleAdapter):
 
         s = self.settings
         kwargs = dict(
-            lang=s.ocr_lang,
+            lang=_PADDLE_LANG[s.ocr_lang],
             ocr_version=s.ocr_version,
             use_doc_orientation_classify=False,  # done once per page in preprocessing
             use_doc_unwarping=False,

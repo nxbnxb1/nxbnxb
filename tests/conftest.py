@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+import json
 
 import numpy as np
 import pymupdf
@@ -128,25 +129,34 @@ class FakeFormula:
 class FakeVLM:
     name = "fake-vlm"
 
-    def __init__(self) -> None:
+    def __init__(self, image_reply: dict | None = None) -> None:
         self.requests = []
+        self.image_reply = image_reply or {
+            "kind": "logo",
+            "description": "Biểu tượng công ty ACME màu xám.",
+            "lossless": False,
+        }
 
     def run(self, requests):
         self.requests.extend(requests)
         out = []
         for request in requests:
+            data = None
             if request.task == "table":
                 text = (
                     "<table><tr><th>Chỉ tiêu</th><th>Năm 2024</th><th>Năm 2025</th></tr>"
                     "<tr><td>Doanh thu</td><td>1.100</td><td>1.234,5</td></tr></table>"
                 )
             elif request.task == "image":
-                text = "Biểu tượng công ty ACME màu xám."
+                data = dict(self.image_reply)
+                text = json.dumps(data, ensure_ascii=False)
             elif request.task == "formula":
                 text = "E = mc^{2}"
             else:
-                text = '{"chart_type": "bar", "title": "Doanh thu", "description": "Tăng đều.", "columns": ["Năm", "Doanh thu"], "rows": [["2024", "1.100"], ["2025", "1.234,5"]]}'
-            out.append(VlmResult(text=text, input_tokens=100, output_tokens=20))
+                data = {"chart_type": "bar", "title": "Doanh thu", "description": "Tăng đều.", "columns": ["Năm", "Doanh thu"],
+                        "rows": [["2024", "1.100"], ["2025", "1.234,5"]], "lossless": True}
+                text = json.dumps(data, ensure_ascii=False)
+            out.append(VlmResult(text=text, input_tokens=100, output_tokens=20, data=data))
         return out
 
 

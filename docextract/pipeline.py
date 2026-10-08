@@ -113,6 +113,12 @@ class DocumentPipeline:
             pages=pages,
             engines={**engines.describe(), "router": router.name, "docextract": __version__},
         )
+        stem = Path(filename).stem or "document"
+        for region in result.iter_regions():
+            png = executor.figures.get(region.id)
+            if png is not None:
+                region.figure = f"{stem}_assets/{region.id}.png"
+                result.figures[region.figure] = png
         assign_heading_levels(list(result.iter_regions()))
         result.markdown = render_markdown(result, settings)
         result.stats = _stats(result, stats, settings, (time.perf_counter() - start) * 1000)

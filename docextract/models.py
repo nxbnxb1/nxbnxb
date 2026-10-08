@@ -176,6 +176,7 @@ class Region(BaseModel):
     issues: list[str] = Field(default_factory=list)
     attempts: list[Attempt] = Field(default_factory=list)
     source: SourceRef | None = None
+    figure: str | None = None  # relative path of the kept image file (see DocumentResult.figures)
     meta: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -224,6 +225,7 @@ class DocumentResult(BaseModel):
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     engines: dict[str, str | None] = Field(default_factory=dict)
     markdown: str | None = None
+    figures: dict[str, bytes] = Field(default_factory=dict, exclude=True)  # path → PNG, written next to the .md
 
     def iter_regions(self):
         for page in self.pages:
