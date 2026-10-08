@@ -1,0 +1,409 @@
+{
+  "schema_version": "1.0",
+  "source": {
+    "filename": "hinh_anh.pdf",
+    "sha256": "7298fe4efa0f491963b5b4274200ec224fda6702e9bdbd6cfb781a7213a6cdfe",
+    "size_bytes": 461819,
+    "format": "pdf",
+    "page_count": 1,
+    "converted_from": null
+  },
+  "pages": [
+    {
+      "number": 1,
+      "kind": "digital",
+      "width": 595.0,
+      "height": 842.0,
+      "unit": "pt",
+      "regions": [
+        {
+          "id": "p1-r1",
+          "page": 1,
+          "type": "heading",
+          "order": 0,
+          "bbox": {
+            "x0": 58.09,
+            "y0": 54.38,
+            "x1": 287.2,
+            "y1": 71.68
+          },
+          "layout_score": 0.5747,
+          "level": 2,
+          "content": "Phụ lục: hình ảnh và biểu đồ",
+          "html": null,
+          "data": null,
+          "method": "pdf_text",
+          "engine": "pymupdf",
+          "confidence": null,
+          "status": "passed",
+          "issues": [],
+          "attempts": [
+            {
+              "method": "pdf_text",
+              "engine": "pymupdf",
+              "confidence": null,
+              "passed": true,
+              "score": 1.0,
+              "issues": [],
+              "duration_ms": 0.0,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "hinh_anh.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 58.09,
+              "y0": 54.38,
+              "x1": 287.2,
+              "y1": 71.68
+            },
+            "locator": null
+          },
+          "figure": null,
+          "meta": {
+            "layout_label": "paragraph_title",
+            "font_size": 16.0
+          }
+        },
+        {
+          "id": "p1-r2",
+          "page": 1,
+          "type": "caption",
+          "order": 1,
+          "bbox": {
+            "x0": 79.25,
+            "y0": 109.41,
+            "x1": 236.47,
+            "y1": 124.44
+          },
+          "layout_score": 0.5154,
+          "level": null,
+          "content": "Doanh thu thun (t đng)",
+          "html": null,
+          "data": null,
+          "method": "ocr",
+          "engine": "paddle:ocr:vi_en:latin_PP-OCRv5_mobile_rec",
+          "confidence": 0.9878,
+          "status": "passed",
+          "issues": [],
+          "attempts": [
+            {
+              "method": "ocr",
+              "engine": "paddle:ocr:vi_en:latin_PP-OCRv5_mobile_rec",
+              "confidence": 0.9878,
+              "passed": true,
+              "score": 1.0,
+              "issues": [],
+              "duration_ms": 1031.9,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "hinh_anh.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 79.25,
+              "y0": 109.41,
+              "x1": 236.47,
+              "y1": 124.44
+            },
+            "locator": null
+          },
+          "figure": null,
+          "meta": {
+            "layout_label": "figure_title",
+            "ocr_agreement": 1.0
+          }
+        },
+        {
+          "id": "p1-r3",
+          "page": 1,
+          "type": "chart",
+          "order": 2,
+          "bbox": {
+            "x0": 105.96,
+            "y0": 139.69,
+            "x1": 512.75,
+            "y1": 370.96
+          },
+          "layout_score": 0.957,
+          "level": null,
+          "content": "Trend of Sales in Million USD — bar\n\nThe chart shows the sales trend in million USD from 2022 to 2025. The sales have been increasing each year, with the highest sales in 2025 at 1,234.5 million USD. The lowest sales were in 2022 at 905.3 million USD.\n\n| Year | Sales (in million USD) |\n|---|---|\n| 2022 | 905.3 |\n| 2023 | 1,012.8 |\n| 2024 | 1,099.2 |\n| 2025 | 1,234.5 |",
+          "html": null,
+          "data": {
+            "chart": {
+              "chart_type": "bar",
+              "title": "Trend of Sales in Million USD",
+              "description": "The chart shows the sales trend in million USD from 2022 to 2025. The sales have been increasing each year, with the highest sales in 2025 at 1,234.5 million USD. The lowest sales were in 2022 at 905.3 million USD.",
+              "columns": [
+                "Year",
+                "Sales (in million USD)"
+              ],
+              "rows": [
+                {
+                  "Year": "2022",
+                  "Sales (in million USD)": "905.3"
+                },
+                {
+                  "Year": "2023",
+                  "Sales (in million USD)": "1,012.8"
+                },
+                {
+                  "Year": "2024",
+                  "Sales (in million USD)": "1,099.2"
+                },
+                {
+                  "Year": "2025",
+                  "Sales (in million USD)": "1,234.5"
+                }
+              ],
+              "lossless": true
+            },
+            "figure": {
+              "kind": "chart",
+              "description": "Trend of Sales in Million USD — bar\n\nThe chart shows the sales trend in million USD from 2022 to 2025. The sales have been increasing each year, with the highest sales in 2025 at 1,234.5 million USD. The lowest sales were in 2022 at 905.3 million USD.\n\n| Year | Sales (in million USD) |\n|---|---|\n| 2022 | 905.3 |\n| 2023 | 1,012.8 |\n| 2024 | 1,099.2 |\n| 2025 | 1,234.5 |",
+              "lossless": true
+            },
+            "figure_text": "1.234,5 1.099,2 1.012,8 905,3\n\n2022 2023 2024 2025"
+          },
+          "method": "vlm",
+          "engine": "vlm:qwen2.5vl:3b",
+          "confidence": null,
+          "status": "unchecked",
+          "issues": [],
+          "attempts": [
+            {
+              "method": "vlm",
+              "engine": "vlm:qwen2.5vl:3b",
+              "confidence": null,
+              "passed": true,
+              "score": 1.0,
+              "issues": [],
+              "duration_ms": 218544.2,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "hinh_anh.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 105.96,
+              "y0": 139.69,
+              "x1": 512.75,
+              "y1": 370.96
+            },
+            "locator": null
+          },
+          "figure": null,
+          "meta": {
+            "layout_label": "chart",
+            "figure_decision": "fully described by text"
+          }
+        },
+        {
+          "id": "p1-r4",
+          "page": 1,
+          "type": "caption",
+          "order": 3,
+          "bbox": {
+            "x0": 57.78,
+            "y0": 404.81,
+            "x1": 290.86,
+            "y1": 415.8
+          },
+          "layout_score": 0.8711,
+          "level": null,
+          "content": "Hình 1. Doanh thu thuần giai đoạn 2022–2025",
+          "html": null,
+          "data": null,
+          "method": "pdf_text",
+          "engine": "pymupdf",
+          "confidence": null,
+          "status": "passed",
+          "issues": [],
+          "attempts": [
+            {
+              "method": "pdf_text",
+              "engine": "pymupdf",
+              "confidence": null,
+              "passed": true,
+              "score": 1.0,
+              "issues": [],
+              "duration_ms": 0.0,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "hinh_anh.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 57.78,
+              "y0": 404.81,
+              "x1": 290.86,
+              "y1": 415.8
+            },
+            "locator": null
+          },
+          "figure": null,
+          "meta": {
+            "layout_label": "figure_title"
+          }
+        },
+        {
+          "id": "p1-r5",
+          "page": 1,
+          "type": "image",
+          "order": 4,
+          "bbox": {
+            "x0": 59.43,
+            "y0": 449.29,
+            "x1": 419.4,
+            "y1": 684.91
+          },
+          "layout_score": 0.9793,
+          "level": null,
+          "content": "The image is a screenshot of a gradient background with a smooth transition from green at the bottom to pink at the top. The gradient appears to be a digital or digitalized effect, possibly used as a backdrop for text or graphics.",
+          "html": null,
+          "data": {
+            "figure": {
+              "kind": "screenshot",
+              "description": "The image is a screenshot of a gradient background with a smooth transition from green at the bottom to pink at the top. The gradient appears to be a digital or digitalized effect, possibly used as a backdrop for text or graphics.",
+              "lossless": false
+            },
+            "figure_text": ""
+          },
+          "method": "vlm",
+          "engine": "vlm:qwen2.5vl:3b",
+          "confidence": null,
+          "status": "unchecked",
+          "issues": [],
+          "attempts": [
+            {
+              "method": "vlm",
+              "engine": "vlm:qwen2.5vl:3b",
+              "confidence": null,
+              "passed": true,
+              "score": 1.0,
+              "issues": [],
+              "duration_ms": 218544.2,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "hinh_anh.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 59.43,
+              "y0": 449.29,
+              "x1": 419.4,
+              "y1": 684.91
+            },
+            "locator": null
+          },
+          "figure": "hinh_anh_assets/p1-r5.png",
+          "meta": {
+            "layout_label": "image",
+            "figure_decision": "description would lose information"
+          }
+        },
+        {
+          "id": "p1-r6",
+          "page": 1,
+          "type": "caption",
+          "order": 5,
+          "bbox": {
+            "x0": 58.0,
+            "y0": 694.69,
+            "x1": 219.28,
+            "y1": 706.23
+          },
+          "layout_score": 0.8908,
+          "level": null,
+          "content": "Hình 2. Toàn cảnh nhà máy mới",
+          "html": null,
+          "data": null,
+          "method": "pdf_text",
+          "engine": "pymupdf",
+          "confidence": null,
+          "status": "passed",
+          "issues": [],
+          "attempts": [
+            {
+              "method": "pdf_text",
+              "engine": "pymupdf",
+              "confidence": null,
+              "passed": true,
+              "score": 1.0,
+              "issues": [],
+              "duration_ms": 0.0,
+              "cached": false
+            }
+          ],
+          "source": {
+            "file": "hinh_anh.pdf",
+            "page": 1,
+            "bbox": {
+              "x0": 58.0,
+              "y0": 694.69,
+              "x1": 219.28,
+              "y1": 706.23
+            },
+            "locator": null
+          },
+          "figure": null,
+          "meta": {
+            "layout_label": "figure_title"
+          }
+        }
+      ],
+      "preprocessing": {
+        "text_chars": 81,
+        "garbled_ratio": 0.0,
+        "image_coverage": 0.449
+      },
+      "layout_backend": "paddle:PP-DocLayout_plus-L",
+      "duration_ms": 257056.7
+    }
+  ],
+  "stats": {
+    "pages_processed": 1,
+    "regions": 6,
+    "regions_by_type": {
+      "heading": 1,
+      "caption": 3,
+      "chart": 1,
+      "image": 1
+    },
+    "regions_by_method": {
+      "pdf_text": 3,
+      "ocr": 1,
+      "vlm": 2
+    },
+    "regions_by_status": {
+      "passed": 4,
+      "unchecked": 2
+    },
+    "escalations": 0,
+    "vlm_calls": 2,
+    "vlm_input_tokens": 2487,
+    "vlm_output_tokens": 321,
+    "estimated_cost": 0.0,
+    "cache_hits": 0,
+    "duration_ms": 257064.4,
+    "ms_per_page": 257064.4,
+    "cost_per_page": 0.0
+  },
+  "created_at": "2026-10-08T06:13:15.839429+00:00",
+  "engines": {
+    "layout": "paddle:PP-DocLayout_plus-L",
+    "ocr": "paddle:ocr:vi_en:latin_PP-OCRv5_mobile_rec",
+    "table": "paddle:table:TableRecognitionPipelineV2",
+    "formula": "paddle:PP-FormulaNet_plus-M",
+    "vlm": "vlm:qwen2.5vl:3b",
+    "orientation": "paddle:PP-LCNet_x1_0_doc_ori",
+    "product": "vi_en",
+    "router": "rules-v1",
+    "docextract": "0.1.0"
+  }
+}

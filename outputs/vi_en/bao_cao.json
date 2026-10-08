@@ -2,10 +2,11 @@
   "schema_version": "1.0",
   "source": {
     "filename": "bao_cao.docx",
-    "sha256": "576c6282c439c8b69b33c5369a649039f6a09fb105ec943854c5fa940da10257",
+    "sha256": "9f5d4f03342c6d29ee4218086902f40db92ea96607b86273cecd3c979b413494",
     "size_bytes": 37356,
     "format": "docx",
-    "page_count": 1
+    "page_count": 1,
+    "converted_from": null
   },
   "pages": [
     {
@@ -200,7 +201,7 @@
       ],
       "preprocessing": {},
       "layout_backend": "python-docx",
-      "duration_ms": 28.4
+      "duration_ms": 17.9
     }
   ],
   "stats": {
@@ -225,17 +226,17 @@
     "vlm_output_tokens": 0,
     "estimated_cost": 0.0,
     "cache_hits": 0,
-    "duration_ms": 30.2,
-    "ms_per_page": 30.2,
+    "duration_ms": 19.5,
+    "ms_per_page": 19.5,
     "cost_per_page": 0.0
   },
-  "created_at": "2026-10-08T05:50:45.469463+00:00",
+  "created_at": "2026-10-08T06:08:58.773763+00:00",
   "engines": {
     "layout": "paddle:PP-DocLayout_plus-L",
     "ocr": "paddle:ocr:vi_en:latin_PP-OCRv5_mobile_rec",
     "table": "paddle:table:TableRecognitionPipelineV2",
     "formula": "paddle:PP-FormulaNet_plus-M",
-    "vlm": null,
+    "vlm": "vlm:qwen2.5vl:3b",
     "orientation": "paddle:PP-LCNet_x1_0_doc_ori",
     "product": "vi_en",
     "router": "rules-v1",

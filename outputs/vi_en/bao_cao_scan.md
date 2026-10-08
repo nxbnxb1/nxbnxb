@@ -8,6 +8,8 @@
 
 Năm 2025, doanh thu thun ca Công ty đt 1.234,5 t đng, tăng 12,3% so vi năm 2024. Li nhun sau thu đt 156,8 t đng, vưt 4,2% k hoch đưc Đi hi đng c đông thông qua. The Board of Directors proposes a cash dividend of 15% for the 2025 financial year.
 
+![Ảnh gốc](bao_cao_scan_assets/p1-r3.png)
+
 | Chí tiêu | Năm 2024 | Năm 2025 | Tăng trưng |
 |---|---|---|---|
 | Doanh thu thun | 1.099,2 | 1.234,5 | 12,3% |
@@ -20,3 +22,5 @@ Năm 2025, doanh thu thun ca Công ty đt 1.234,5 t đng, tăng 12,3% so vi năm
 
 - M rng h thng phân phi ti 12 tnh, thành ph.
 - Đu tư dây chuyn sn xut mi tr giá 85 t đng.
+
+![Ảnh gốc](bao_cao_scan_assets/p1-r6.png)

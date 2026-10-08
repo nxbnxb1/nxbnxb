@@ -2,10 +2,11 @@
   "schema_version": "1.0",
   "source": {
     "filename": "bao_cao_scan.pdf",
-    "sha256": "32f682540f28601e79289d77e2865fd4242b4297efd5bcb463e102a7c084f39e",
+    "sha256": "909e19614ff0d48c3b811cbe4471cf5d1a2a4aecb44598ab036f7620d2c13aa9",
     "size_bytes": 316870,
     "format": "pdf",
-    "page_count": 1
+    "page_count": 1,
+    "converted_from": null
   },
   "pages": [
     {
@@ -44,7 +45,7 @@
               "passed": true,
               "score": 1.0,
               "issues": [],
-              "duration_ms": 5542.9,
+              "duration_ms": 7388.0,
               "cached": false
             }
           ],
@@ -61,7 +62,8 @@
           },
           "figure": null,
           "meta": {
-            "layout_label": "doc_title"
+            "layout_label": "doc_title",
+            "ocr_agreement": 0.9615
           }
         },
         {
@@ -93,7 +95,7 @@
               "passed": true,
               "score": 1.0,
               "issues": [],
-              "duration_ms": 5542.9,
+              "duration_ms": 7388.0,
               "cached": false
             }
           ],
@@ -110,7 +112,8 @@
           },
           "figure": null,
           "meta": {
-            "layout_label": "paragraph_title"
+            "layout_label": "paragraph_title",
+            "ocr_agreement": 1.0
           }
         },
         {
@@ -146,7 +149,7 @@
               "issues": [
                 "Vietnamese letters missing (50% of words without vowels): use the Vietnamese recognition model (ocr_rec_model_dir)"
               ],
-              "duration_ms": 5542.9,
+              "duration_ms": 7388.0,
               "cached": false
             }
           ],
@@ -161,9 +164,11 @@
             },
             "locator": null
           },
-          "figure": null,
+          "figure": "bao_cao_scan_assets/p1-r3.png",
           "meta": {
-            "layout_label": "text"
+            "layout_label": "text",
+            "ocr_agreement": 0.9948,
+            "figure_decision": "uncertain result: original kept for review"
           }
         },
         {
@@ -195,7 +200,7 @@
               "passed": true,
               "score": 1.0,
               "issues": [],
-              "duration_ms": 18473.8,
+              "duration_ms": 19236.4,
               "cached": false
             }
           ],
@@ -212,8 +217,7 @@
           },
           "figure": null,
           "meta": {
-            "layout_label": "table",
-            "figure_decision": "structure recovered"
+            "layout_label": "table"
           }
         },
         {
@@ -245,7 +249,7 @@
               "passed": true,
               "score": 1.0,
               "issues": [],
-              "duration_ms": 5542.9,
+              "duration_ms": 7388.0,
               "cached": false
             }
           ],
@@ -262,7 +266,8 @@
           },
           "figure": null,
           "meta": {
-            "layout_label": "paragraph_title"
+            "layout_label": "paragraph_title",
+            "ocr_agreement": 1.0
           }
         },
         {
@@ -298,7 +303,7 @@
               "issues": [
                 "Vietnamese letters missing (50% of words without vowels): use the Vietnamese recognition model (ocr_rec_model_dir)"
               ],
-              "duration_ms": 5542.9,
+              "duration_ms": 7388.0,
               "cached": false
             }
           ],
@@ -313,9 +318,11 @@
             },
             "locator": null
           },
-          "figure": null,
+          "figure": "bao_cao_scan_assets/p1-r6.png",
           "meta": {
-            "layout_label": "text"
+            "layout_label": "text",
+            "ocr_agreement": 1.0,
+            "figure_decision": "uncertain result: original kept for review"
           }
         }
       ],
@@ -327,7 +334,7 @@
         "autocontrast": true
       },
       "layout_backend": "paddle:PP-DocLayout_plus-L",
-      "duration_ms": 32023.4
+      "duration_ms": 41460.8
     }
   ],
   "stats": {
@@ -353,17 +360,17 @@
     "vlm_output_tokens": 0,
     "estimated_cost": 0.0,
     "cache_hits": 0,
-    "duration_ms": 32567.4,
-    "ms_per_page": 32567.4,
+    "duration_ms": 41998.6,
+    "ms_per_page": 41998.6,
     "cost_per_page": 0.0
   },
-  "created_at": "2026-10-08T05:50:45.438685+00:00",
+  "created_at": "2026-10-08T06:08:58.753189+00:00",
   "engines": {
     "layout": "paddle:PP-DocLayout_plus-L",
     "ocr": "paddle:ocr:vi_en:latin_PP-OCRv5_mobile_rec",
     "table": "paddle:table:TableRecognitionPipelineV2",
     "formula": "paddle:PP-FormulaNet_plus-M",
-    "vlm": null,
+    "vlm": "vlm:qwen2.5vl:3b",
     "orientation": "paddle:PP-LCNet_x1_0_doc_ori",
     "product": "vi_en",
     "router": "rules-v1",

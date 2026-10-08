@@ -2,10 +2,11 @@
   "schema_version": "1.0",
   "source": {
     "filename": "bao_cao_digital.pdf",
-    "sha256": "5d40731b222188b2cfdfb7728df64df82b8f4ac1c20c60dab0240a2984c2f53b",
-    "size_bytes": 413596,
+    "sha256": "e617b0e83e4e5943bb21c422316e44b0fc6a6349d049f122f8c116fa7806b415",
+    "size_bytes": 413595,
     "format": "pdf",
-    "page_count": 1
+    "page_count": 1,
+    "converted_from": null
   },
   "pages": [
     {
@@ -193,7 +194,7 @@
               "passed": true,
               "score": 1.0,
               "issues": [],
-              "duration_ms": 16.7,
+              "duration_ms": 17.8,
               "cached": false
             }
           ],
@@ -210,8 +211,7 @@
           },
           "figure": null,
           "meta": {
-            "layout_label": "table",
-            "figure_decision": "structure recovered"
+            "layout_label": "table"
           }
         },
         {
@@ -320,7 +320,7 @@
         "image_coverage": 0.0
       },
       "layout_backend": "paddle:PP-DocLayout_plus-L",
-      "duration_ms": 8969.5
+      "duration_ms": 8346.2
     }
   ],
   "stats": {
@@ -345,17 +345,17 @@
     "vlm_output_tokens": 0,
     "estimated_cost": 0.0,
     "cache_hits": 0,
-    "duration_ms": 9003.4,
-    "ms_per_page": 9003.4,
+    "duration_ms": 8365.8,
+    "ms_per_page": 8365.8,
     "cost_per_page": 0.0
   },
-  "created_at": "2026-10-08T05:50:12.870238+00:00",
+  "created_at": "2026-10-08T06:08:16.753061+00:00",
   "engines": {
     "layout": "paddle:PP-DocLayout_plus-L",
     "ocr": "paddle:ocr:vi_en:latin_PP-OCRv5_mobile_rec",
     "table": "paddle:table:TableRecognitionPipelineV2",
     "formula": "paddle:PP-FormulaNet_plus-M",
-    "vlm": null,
+    "vlm": "vlm:qwen2.5vl:3b",
     "orientation": "paddle:PP-LCNet_x1_0_doc_ori",
     "product": "vi_en",
     "router": "rules-v1",
