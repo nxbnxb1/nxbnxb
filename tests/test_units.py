@@ -32,6 +32,8 @@ def test_vietnamese_dropout_signal():
     assert vietnamese_dropout_ratio("Cng hòa xã hi ch nghĩa Vit Nam") > 0.08
     assert vietnamese_dropout_ratio("Cộng hòa xã hội chủ nghĩa Việt Nam") == 0.0
     assert vietnamese_dropout_ratio("UBND TP HCM ban hành quyết định số 15/QĐ-UBND") == 0.0
+    assert vietnamese_dropout_ratio("BÁO CÁO KT QU KINH DOANH NM 2025") > 0.08
+    assert vietnamese_dropout_ratio("BÁO CÁO KẾT QUẢ KINH DOANH NĂM 2025 CỦA CTCP ABC") == 0.0
     assert vietnamese_dropout_ratio("The quick brown fox jumps over Mr Smith") == 0.0
 
 

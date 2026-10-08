@@ -67,6 +67,11 @@ def is_legacy_vietnamese_font(font_name: str) -> bool:
 
 
 _VI_MARKS = set("ăâêôơưđĂÂÊÔƠƯĐ")
+VI_ABBREVIATIONS = frozenset(
+    """UBND HĐND MTTQ TNHH CTCP TP HCM QĐ NĐ CP TT TTG BTC BCT BYT BGDĐT BXD BKHĐT NHNN NSNN VN VNĐ VND USD
+    TW KT XH KH BC CV SXKD GTGT TNDN TNCN BHXH BHYT BHTN CBCNV CNTT THPT THCS ĐH PGS TS THS GS STT ĐVT HĐQT
+    ĐHĐCĐ BKS MST CMND CCCD QLDA XDCB HĐ KHCN PCCC ATTP""".split()
+)
 _VI_TONES = {"\u0300", "\u0301", "\u0303", "\u0309", "\u0323"}  # grave, acute, tilde, hook, dot below
 
 
@@ -95,6 +100,11 @@ def vietnamese_dropout_ratio(text: str) -> float:
     if len(tokens) < 3:
         return 0.0
     bad = sum(1 for t in tokens if not t.isupper() and not _has_vowel(t))
+    # ALL-CAPS words without a vowel are usually abbreviations (UBND, TNHH), but in a capitalised
+    # title ("BÁO CÁO KT QU KINH DOANH NM 2025") they are dropped letters.
+    upper = [t for t in tokens if t.isupper() and len(t) >= 2]
+    if sum(1 for t in upper if _has_vowel(t)) >= 3:
+        bad += sum(1 for t in upper if not _has_vowel(t) and t not in VI_ABBREVIATIONS)
     ratio = bad / len(tokens)
     if len(tokens) >= 20 and not any("\u1ea0" <= ch <= "\u1ef9" for ch in text):
         ratio = max(ratio, 0.5)
