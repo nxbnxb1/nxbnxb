@@ -22,6 +22,7 @@ import paddle  # noqa: E402
 
 import tools.program as program  # noqa: E402
 import tools.train as train  # noqa: E402
+from ppocr.losses.rec_multi_loss import MultiLoss  # noqa: E402
 from ppocr.modeling.heads.rec_multi_head import MultiHead  # noqa: E402
 from ppocr.utils.utility import set_seed  # noqa: E402
 
@@ -49,6 +50,14 @@ def _ctc_only_forward(self, x, targets=None, _forward=MultiHead.forward):
     return {"ctc": self.ctc_head(ctc_encoder, targets), "ctc_neck": ctc_encoder}
 
 
+def _ctc_only_loss(self, predicts, batch, _forward=MultiLoss.forward):
+    if "gtc" in predicts or "sar" in predicts:
+        return _forward(self, predicts, batch)
+    loss = self.loss_funcs["CTCLoss"](predicts["ctc"], batch[:2] + batch[3:])["loss"] * self.weight_1
+    self.total_loss = {"CTCLoss": loss, "loss": loss}
+    return self.total_loss
+
+
 def _flags() -> str:
     found = {}
     for flag in ("FLAGS_paddle_num_threads", "FLAGS_use_mkldnn", "FLAGS_use_onednn"):
@@ -63,9 +72,8 @@ if __name__ == "__main__":
     train.build_model = _build_model
     if not GTC:
         MultiHead.forward = _ctc_only_forward
+        MultiLoss.forward = _ctc_only_loss
     config, device, logger, vdl_writer = program.preprocess(is_train=True)
-    if not GTC:
-        config["Loss"]["loss_config_list"] = [{"CTCLoss": None}]
     logger.info(f"train_cpu: {_flags()}, OMP_NUM_THREADS={os.environ.get('OMP_NUM_THREADS')}")
     set_seed(config["Global"].get("seed", 1024))
     train.main(config, device, logger, vdl_writer)

@@ -1,13 +1,19 @@
 name: OCR training · speed probe
 
-# Measures how fast the OCR recogniser trains on a GitHub CPU runner under several settings, all
-# in parallel, a few minutes each: Paddle thread count, oneDNN kernels, static graph, frozen early
-# backbone stages, CTC branch only. The table in the run summary gives samples/s per setting and
-# how many passes over the training set fit in a full training job. Nothing is published.
+# How fast does the OCR recogniser train on a GitHub CPU runner? Nothing is published.
+#   mode=profile  where one training step spends its time (each backbone stage, heads, loss,
+#                 backward), with and without the training-time branches of the backbone, and
+#                 the speed of its convolutions in Paddle (with/without oneDNN) and PyTorch
+#   mode=train    real training for a few minutes per setting, all settings in parallel; the
+#                 summary table gives samples/s and passes over the training set per full job
 
 on:
   workflow_dispatch:
     inputs:
+      mode:
+        type: choice
+        default: profile
+        options: [profile, train]
       products:
         description: products to measure
         type: choice
@@ -26,7 +32,44 @@ env:
   PADDLEOCR_DIR: ${{ github.workspace }}/PaddleOCR
 
 jobs:
+  profile:
+    if: inputs.mode == 'profile'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        product: ${{ fromJSON(inputs.products == 'both' && '["vi_en","vi_en_ja"]' || format('["{0}"]', inputs.products)) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/ocr-train-setup
+        with:
+          paddleocr-ref: ${{ env.PADDLEOCR_REF }}
+          paddleocr-dir: ${{ env.PADDLEOCR_DIR }}
+
+      - name: PyTorch (CPU) for comparison
+        run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Profile one training step
+        env:
+          FLAGS_paddle_num_threads: "4"
+          OMP_NUM_THREADS: "4"
+        run: |
+          dicts="$PADDLEOCR_DIR/ppocr/utils/dict"
+          if [ "${{ matrix.product }}" = vi_en_ja ]; then
+            python training/vi_ocr/charset.py dict.txt --langs vi,en,ja --base-dict "$dicts/ppocrv5_dict.txt"
+          else
+            python training/vi_ocr/charset.py dict.txt --langs vi,en
+          fi
+          classes=$(( $(wc -l < dict.txt) + 2 ))  # + CTC blank + space
+          cd "$PADDLEOCR_DIR"
+          python "$GITHUB_WORKSPACE/training/vi_ocr/profile_cpu.py" -c "$GITHUB_WORKSPACE/training/vi_ocr/vi_en_PP-OCRv5_mobile_rec.yml" \
+            --classes "$classes" --batch 32 --torch | tee profile.md
+          { echo "## ${{ matrix.product }} ($classes classes)"; cat profile.md; } >> "$GITHUB_STEP_SUMMARY"
+
   probe:
+    if: inputs.mode == 'train'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
@@ -37,8 +80,6 @@ jobs:
           - {name: "1 thread (as before)", threads: "1", onednn: "0", static: "0", freeze: "", gtc: "1"}
           - {name: "all cores", threads: "", onednn: "0", static: "0", freeze: "", gtc: "1"}
           - {name: "all cores + oneDNN", threads: "", onednn: "1", static: "0", freeze: "", gtc: "1"}
-          - {name: "all cores + static graph", threads: "", onednn: "0", static: "1", freeze: "", gtc: "1"}
-          - {name: "all cores + oneDNN + static graph", threads: "", onednn: "1", static: "1", freeze: "", gtc: "1"}
           - {name: "all cores + frozen stages 1-4", threads: "", onednn: "0", static: "0", freeze: "conv1,blocks2,blocks3,blocks4", gtc: "1"}
           - {name: "all cores + CTC only", threads: "", onednn: "0", static: "0", freeze: "", gtc: "0"}
           - {name: "all cores + frozen stages 1-4 + CTC only", threads: "", onednn: "0", static: "0", freeze: "conv1,blocks2,blocks3,blocks4", gtc: "0"}
@@ -90,7 +131,7 @@ jobs:
 
   report:
     needs: probe
-    if: always()
+    if: always() && inputs.mode == 'train'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
