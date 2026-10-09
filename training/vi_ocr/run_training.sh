@@ -21,6 +21,10 @@
 #            LR (default per product), LR_CONST=1 (constant LR instead of cosine), WARMUP
 #            (fraction of a chunk), PRINT_STEP, NO_EVAL=1 (no validation during training),
 #            PROBE=1 (speed measurement: keep nothing)
+#   corpus:  CORPUS_MANIFEST + CORPUS_FILES (enterprise documents, scripts/collect_corpus.py):
+#            training lines are then REAL_SHARE (default 0.5) real lines cut from documents of
+#            the training companies (doc_lines.py, documents of shard SHARD=k/n) and the rest
+#            synthetic; validation and evaluation also get real lines of the dev / test companies
 #   loader:  LOADER_WORKERS (data loader processes, default 2)
 #   CPU:     THREADS (default: all cores), FUSE / FREEZE / GTC (see train_cpu.py)
 set -euo pipefail
@@ -52,6 +56,11 @@ fi
 mkdir -p "$WORK/pretrained" "$WORK/output" "$WORK/data"
 
 synth() { (cd "$HERE" && python synth.py "$@" --dict "$DICT" --workers "$WORKERS"); }
+corpus() { [ -n "${CORPUS_MANIFEST:-}" ] && [ -s "$CORPUS_MANIFEST" ] && [ -d "${CORPUS_FILES:-}" ]; }
+real_lines() {  # out split count seed [shard]
+  python "$HERE/doc_lines.py" "$1" --manifest "$CORPUS_MANIFEST" --files "$CORPUS_FILES" --dict "$DICT" \
+    --langs "$LANGS" --split "$2" --count "$3" --seed "$4" --shard "${5:-1/1}" --workers "$WORKERS"
+}
 
 prepare() {
   local val="${VAL_COUNT:-200}" eval_count="${EVAL_COUNT:-1000}"
@@ -87,9 +96,16 @@ prepare() {
     seed=$((seed + 1))
   done
   [ -s "$WORK/data/eval_clean/labels.txt" ] || synth "$WORK/data/eval_clean" --count "$((eval_count * 6 / 10))" --seed 3 --langs "$LANGS" --no-augment
+  if corpus; then  # lines of real documents of companies never trained on
+    [ -s "$WORK/data/eval_real/labels.txt" ] || real_lines "$WORK/data/eval_real" test "$eval_count" 7 || true
+    [ -s "$WORK/data/val_real/labels.txt" ] || real_lines "$WORK/data/val_real" dev "$val" 77 || true
+  fi
   mkdir -p "$WORK/data/val"
   : > "$WORK/data/val/labels.txt"
   for lang in "${LANG_LIST[@]}"; do sed "s#^#../val_$lang/#" "$WORK/data/val_$lang/labels.txt" >> "$WORK/data/val/labels.txt"; done
+  if [ -s "$WORK/data/val_real/labels.txt" ]; then
+    sed "s#^#../val_real/#" "$WORK/data/val_real/labels.txt" >> "$WORK/data/val/labels.txt"
+  fi
   echo "::endgroup::"
 }
 
@@ -100,7 +116,17 @@ train() {
 
   echo "::group::training lines (seed $seed, $samples lines)"
   rm -rf "$WORK/data/train"
-  synth "$WORK/data/train" --count "$samples" --seed "$seed" --langs "$LANGS"
+  local real=0
+  if corpus; then
+    real=$(python -c "print(int($samples * float('${REAL_SHARE:-0.5}')))")
+    real_lines "$WORK/data/train/real" train "$real" "$seed" "${SHARD:-1/1}" || real=0
+  fi
+  synth "$WORK/data/train/synth" --count "$((samples - real))" --seed "$seed" --langs "$LANGS"
+  sed "s#^#synth/#" "$WORK/data/train/synth/labels.txt" > "$WORK/data/train/labels.txt"
+  if [ -s "$WORK/data/train/real/labels.txt" ]; then
+    sed "s#^#real/#" "$WORK/data/train/real/labels.txt" >> "$WORK/data/train/labels.txt"
+  fi
+  echo "$(grep -c '^real/' "$WORK/data/train/labels.txt" || true) real + $(grep -c '^synth/' "$WORK/data/train/labels.txt" || true) synthetic lines"
   echo "::endgroup::"
 
   # PaddleOCR epochs = chunks of CHUNK lines (a fresh random subset each time)

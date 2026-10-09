@@ -1,0 +1,32 @@
+name: Enterprise document corpus
+description: >-
+  Files of corpus/manifest.jsonl (scripts/collect_corpus.py) from the Actions cache, missing ones
+  downloaded again from the companies' publications (checksums verified); sets CORPUS_MANIFEST and
+  CORPUS_FILES. Does nothing when no manifest has been collected yet.
+
+inputs:
+  splits:
+    description: splits needed, e.g. train or dev,test
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Cached corpus files
+      uses: actions/cache/restore@v4
+      with:
+        path: corpus_files
+        key: corpus-files-v1-${{ github.run_id }}
+        restore-keys: corpus-files-v1-
+
+    - name: Missing corpus files
+      shell: bash
+      run: |
+        if [ ! -s corpus/manifest.jsonl ]; then
+          echo "::notice::no enterprise corpus yet (run 'Collect enterprise documents')"
+          exit 0
+        fi
+        python -c "import httpx" 2>/dev/null || pip install -q httpx
+        python scripts/collect_corpus.py fetch corpus/manifest.jsonl --dir corpus_files --split "${{ inputs.splits }}" || true
+        echo "CORPUS_MANIFEST=$GITHUB_WORKSPACE/corpus/manifest.jsonl" >> "$GITHUB_ENV"
+        echo "CORPUS_FILES=$GITHUB_WORKSPACE/corpus_files" >> "$GITHUB_ENV"

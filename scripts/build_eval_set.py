@@ -10,6 +10,9 @@ Sources
                 newspapers, notes, reports) with human annotations of text, tables and formulas
                 (OmniDocBench, English pages; research use only, so pages are downloaded at run
                 time from a pinned revision and never redistributed)
+  enterprise    pages of enterprise documents (scripts/collect_corpus.py) of the companies held out
+                for testing: as the digital PDF and as a scanned copy, ground truth = the
+                page's own text layer
   wikipedia     featured articles in vi / en / ja (CC BY-SA): text, headings, lists and tables of
                 the article are both the ground truth and the content of three renderings — a
                 digital PDF and a DOCX (LibreOffice) and a scanned copy of the PDF (rasterised,
@@ -353,6 +356,79 @@ def wikipedia(args: argparse.Namespace) -> None:
     _append_manifest(out, manifest)
 
 
+# --- enterprise documents ----------------------------------------------------------------
+
+
+def _visible_text_page(page) -> bool:
+    try:
+        traces = page.get_texttrace()
+    except Exception:
+        return True
+    total = sum(len(t.get("chars", ())) for t in traces)
+    invisible = sum(len(t.get("chars", ())) for t in traces if t.get("type") == 3)
+    return total >= 200 and invisible / total < 0.2
+
+
+def page_ground_truth(page) -> str:
+    """Text of a digital page from its own text layer, block by block in reading order."""
+    import unicodedata
+
+    blocks = []
+    for block in page.get_text("blocks", sort=True):
+        if block[6] != 0:  # image block
+            continue
+        text = " ".join(block[4].split())
+        if text:
+            blocks.append(unicodedata.normalize("NFC", text))
+    return "\n\n".join(blocks)
+
+
+def enterprise(args: argparse.Namespace) -> None:
+    """Pages of enterprise documents of the companies held out for testing (and dev).
+
+    Each chosen digital document gives a few pages, as the PDF itself (digital_pdf) and as a
+    scanned copy (scan); the ground truth is the page's own text layer. Real scans of these
+    companies have no ground truth and are not scored.
+    """
+    import pymupdf
+
+    out = Path(args.out)
+    langs = set(args.langs.split(","))
+    items = [json.loads(line) for line in Path(args.manifest).read_text(encoding="utf-8").splitlines() if line]
+    manifest = []
+    for split in ("dev", "test"):
+        for lang in sorted(langs):
+            docs = [i for i in items if i["split"] == split and i["language"] == lang and i["kind"] in ("digital", "mixed")
+                    and (Path(args.files) / i["file"]).exists()]
+            docs.sort(key=lambda i: digest("enterprise:" + i["sha256"]))
+            per_company: dict[str, int] = {}
+            chosen = 0
+            for item in docs:
+                if chosen >= args.docs_per_language or per_company.get(item["company"], 0) >= 2:
+                    continue
+                with pymupdf.open(Path(args.files) / item["file"]) as doc:
+                    order = sorted(range(doc.page_count), key=lambda n: digest(f"{item['sha256']}:{n}"))
+                    pages = [n for n in order if _visible_text_page(doc[n])][: args.pages_per_doc]
+                    if not pages:
+                        continue
+                    sub = pymupdf.open()
+                    gts = []
+                    for n in sorted(pages):
+                        sub.insert_pdf(doc, from_page=n, to_page=n)
+                        gts.append(page_ground_truth(doc[n]))
+                    pdf = sub.tobytes(garbage=3, deflate=True)
+                gt = "\n\n".join(gts)
+                name = f"{item['company'].replace(':', '_')}_{item['sha256'][:10]}"
+                write(out, split, f"enterprise_{lang}/digital_pdf", name, ".pdf", pdf, gt)
+                write(out, split, f"enterprise_{lang}/scan", name, ".pdf", scanned(pdf, digest(name) % 2**32), gt)
+                manifest.append({"source": "enterprise", "lang": lang, "split": split, "id": name, "company": item["company"],
+                                 "doc_type": item["doc_type"], "url": item["url"], "pages": [p + 1 for p in sorted(pages)]})
+                per_company[item["company"]] = per_company.get(item["company"], 0) + 1
+                chosen += 1
+            print(f"enterprise {split} {lang}: {chosen} documents", flush=True)
+    _append_manifest(out, manifest)
+
+
 def _append_manifest(out: Path, items: list[dict], meta: dict | None = None) -> None:
     path = out / "manifest.json"
     data = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"documents": []}
@@ -370,6 +446,14 @@ def main() -> None:
     p.add_argument("--per-kind", type=int, default=8, help="pages per document kind")
     p.add_argument("--revision", default=OMNIDOCBENCH_REV)
     p.set_defaults(func=omnidocbench)
+    p = sub.add_parser("enterprise")
+    p.add_argument("out")
+    p.add_argument("--manifest", default="corpus/manifest.jsonl")
+    p.add_argument("--files", default="corpus_files")
+    p.add_argument("--langs", default="vi,en,ja")
+    p.add_argument("--docs-per-language", type=int, default=15)
+    p.add_argument("--pages-per-doc", type=int, default=2)
+    p.set_defaults(func=enterprise)
     p = sub.add_parser("wikipedia")
     p.add_argument("out")
     p.add_argument("--lang", choices=sorted(FEATURED), required=True)

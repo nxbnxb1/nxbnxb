@@ -51,6 +51,7 @@ runs:
       run: |
         pip install "paddlepaddle==3.3.1" "paddleocr==3.7.0" wordfreq fonttools rapidfuzz
         pip install -r "${{ inputs.paddleocr-dir }}/requirements.txt"
+        pip install -e .  # docextract: text checks and PDF tools used to cut lines from real documents
         # albumentations pulls opencv-python-headless, which shadows the cv2 build PaddleX expects
         pip uninstall -y opencv-python-headless opencv-python || true
         pip install --force-reinstall --no-deps "opencv-contrib-python==4.10.0.84"

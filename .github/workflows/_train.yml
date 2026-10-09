@@ -83,6 +83,10 @@ jobs:
           echo "RESUME_DICT=$ckpt/dict.txt" >> "$GITHUB_ENV"
           echo "RESUME_FUSE=$(sed -n 's/^FUSE=//p' "$ckpt/model.env" | head -1 | grep . || echo 0)" >> "$GITHUB_ENV"
 
+      - uses: ./.github/actions/enterprise-corpus
+        with:
+          splits: dev,test
+
       - name: Dictionary, initial weights, validation and evaluation lines
         env:
           FUSE: ${{ env.RESUME_FUSE || env.NEW_MODEL_FUSE }}
@@ -128,6 +132,10 @@ jobs:
           name: ${{ inputs.product }}-prep
           path: ${{ env.WORK }}
 
+      - uses: ./.github/actions/enterprise-corpus
+        with:
+          splits: train
+
       - name: Train (round 1, runner ${{ matrix.shard }})
         run: |
           source "$WORK/model.env"  # FUSE, FREEZE, GTC, LR of this training
@@ -139,6 +147,7 @@ jobs:
           export LR_CONST=1 NO_EVAL=1 WARMUP=0.1 FUSE FREEZE GTC
           SAMPLES=${{ inputs.lines }} CHUNK=${{ inputs.lines }} EPOCHS=100 BATCH=32 PRINT_STEP=10 \
           SEED=$(( 1 * 1000 + ${{ matrix.shard }} )) TIME_BUDGET_MIN=${{ inputs.round_minutes }} \
+          SHARD="${{ matrix.shard }}/${{ inputs.runners }}" \
             training/vi_ocr/run_training.sh train
           grep -E "avg_batch_cost" "$WORK/output/train.log" | tail -1 || true
 
@@ -226,6 +235,10 @@ jobs:
           name: ${{ inputs.product }}-avg-r1
           path: ${{ env.WORK }}/start
 
+      - uses: ./.github/actions/enterprise-corpus
+        with:
+          splits: train
+
       - name: Train (round 2, runner ${{ matrix.shard }})
         run: |
           source "$WORK/model.env"  # FUSE, FREEZE, GTC, LR of this training
@@ -237,6 +250,7 @@ jobs:
           export LR_CONST=1 NO_EVAL=1 WARMUP=0.03 FUSE FREEZE GTC
           SAMPLES=${{ inputs.lines }} CHUNK=${{ inputs.lines }} EPOCHS=100 BATCH=32 PRINT_STEP=10 \
           SEED=$(( 2 * 1000 + ${{ matrix.shard }} )) TIME_BUDGET_MIN=${{ inputs.round_minutes }} \
+          SHARD="${{ matrix.shard }}/${{ inputs.runners }}" \
             training/vi_ocr/run_training.sh train
           grep -E "avg_batch_cost" "$WORK/output/train.log" | tail -1 || true
 
@@ -324,6 +338,10 @@ jobs:
           name: ${{ inputs.product }}-avg-r2
           path: ${{ env.WORK }}/start
 
+      - uses: ./.github/actions/enterprise-corpus
+        with:
+          splits: train
+
       - name: Train (round 3, runner ${{ matrix.shard }})
         run: |
           source "$WORK/model.env"  # FUSE, FREEZE, GTC, LR of this training
@@ -335,6 +353,7 @@ jobs:
           export LR_CONST=1 NO_EVAL=1 WARMUP=0.03 FUSE FREEZE GTC
           SAMPLES=${{ inputs.lines }} CHUNK=${{ inputs.lines }} EPOCHS=100 BATCH=32 PRINT_STEP=10 \
           SEED=$(( 3 * 1000 + ${{ matrix.shard }} )) TIME_BUDGET_MIN=${{ inputs.round_minutes }} \
+          SHARD="${{ matrix.shard }}/${{ inputs.runners }}" \
             training/vi_ocr/run_training.sh train
           grep -E "avg_batch_cost" "$WORK/output/train.log" | tail -1 || true
 
@@ -422,6 +441,10 @@ jobs:
           name: ${{ inputs.product }}-avg-r3
           path: ${{ env.WORK }}/start
 
+      - uses: ./.github/actions/enterprise-corpus
+        with:
+          splits: train
+
       - name: Train (round 4, runner ${{ matrix.shard }})
         run: |
           source "$WORK/model.env"  # FUSE, FREEZE, GTC, LR of this training
@@ -433,6 +456,7 @@ jobs:
           export LR_CONST=1 NO_EVAL=1 WARMUP=0.03 FUSE FREEZE GTC
           SAMPLES=${{ inputs.lines }} CHUNK=${{ inputs.lines }} EPOCHS=100 BATCH=32 PRINT_STEP=10 \
           SEED=$(( 4 * 1000 + ${{ matrix.shard }} )) TIME_BUDGET_MIN=${{ inputs.round_minutes }} \
+          SHARD="${{ matrix.shard }}/${{ inputs.runners }}" \
             training/vi_ocr/run_training.sh train
           grep -E "avg_batch_cost" "$WORK/output/train.log" | tail -1 || true
 
@@ -520,6 +544,10 @@ jobs:
           name: ${{ inputs.product }}-avg-r4
           path: ${{ env.WORK }}/start
 
+      - uses: ./.github/actions/enterprise-corpus
+        with:
+          splits: train
+
       - name: Train (round 5, runner ${{ matrix.shard }})
         run: |
           source "$WORK/model.env"  # FUSE, FREEZE, GTC, LR of this training
@@ -531,6 +559,7 @@ jobs:
           export LR_CONST=1 NO_EVAL=1 WARMUP=0.03 FUSE FREEZE GTC
           SAMPLES=${{ inputs.lines }} CHUNK=${{ inputs.lines }} EPOCHS=100 BATCH=32 PRINT_STEP=10 \
           SEED=$(( 5 * 1000 + ${{ matrix.shard }} )) TIME_BUDGET_MIN=${{ inputs.round_minutes }} \
+          SHARD="${{ matrix.shard }}/${{ inputs.runners }}" \
             training/vi_ocr/run_training.sh train
           grep -E "avg_batch_cost" "$WORK/output/train.log" | tail -1 || true
 
@@ -618,6 +647,10 @@ jobs:
           name: ${{ inputs.product }}-avg-r5
           path: ${{ env.WORK }}/start
 
+      - uses: ./.github/actions/enterprise-corpus
+        with:
+          splits: train
+
       - name: Train (round 6, runner ${{ matrix.shard }})
         run: |
           source "$WORK/model.env"  # FUSE, FREEZE, GTC, LR of this training
@@ -629,6 +662,7 @@ jobs:
           export LR_CONST=1 NO_EVAL=1 WARMUP=0.03 FUSE FREEZE GTC
           SAMPLES=${{ inputs.lines }} CHUNK=${{ inputs.lines }} EPOCHS=100 BATCH=32 PRINT_STEP=10 \
           SEED=$(( 6 * 1000 + ${{ matrix.shard }} )) TIME_BUDGET_MIN=${{ inputs.round_minutes }} \
+          SHARD="${{ matrix.shard }}/${{ inputs.runners }}" \
             training/vi_ocr/run_training.sh train
           grep -E "avg_batch_cost" "$WORK/output/train.log" | tail -1 || true
 
@@ -732,6 +766,7 @@ jobs:
           source "$WORK/model.env"
           sets=()
           for lang in ${LANGS//,/ }; do sets+=("$WORK/data/eval_$lang"); done
+          [ -s "$WORK/data/eval_real/labels.txt" ] && sets+=("$WORK/data/eval_real")  # lines of test companies' documents
           python evaluate.py --eval "${sets[@]}" "$WORK/data/eval_clean" \
             --baseline "$BASE_MODEL" --model "$NAME (fine-tuned)=$WORK/export" --model-name "$BASE_MODEL" \
             --report "$WORK/report.md"

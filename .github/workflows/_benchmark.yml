@@ -13,9 +13,11 @@ name: _benchmark (reusable)
 # Text lines (CER, line accuracy, Vietnamese letters, ms/line; synthetic lines per language):
 #   fine-tuned, stock, PP-OCRv5_server_rec, PP-OCRv6_medium_rec, Tesseract 5, EasyOCR, VietOCR
 #
-# dataset: eval (held-out set: newest "eval-set-*" Release, Wikipedia articles of the product's
-#          languages as digital PDF / DOCX / scan + OmniDocBench real pages of 9 kinds; split
-#          dev/test), demo (generated demo documents), or a folder with <name>.gt.md files.
+# dataset: eval (held-out set: enterprise documents of companies never trained on, from the
+#          corpus of "Collect enterprise documents", as digital PDF and scan; newest "eval-set-*"
+#          Release, Wikipedia articles of the product's languages as digital PDF / DOCX / scan;
+#          OmniDocBench real pages of 9 kinds; split dev/test), demo (generated demo
+#          documents), or a folder with <name>.gt.md files.
 
 on:
   workflow_call:
@@ -64,7 +66,12 @@ jobs:
           python-version: "3.12"
           cache: pip
 
-      - run: pip install -e . lxml
+      - run: pip install -e . lxml httpx
+
+      - uses: ./.github/actions/enterprise-corpus
+        if: inputs.dataset == 'eval'
+        with:
+          splits: dev,test
 
       - name: Documents with ground truth
         env:
@@ -84,6 +91,10 @@ jobs:
               fi
               python scripts/build_eval_set.py omnidocbench bench_data --per-kind "${{ inputs.omnidocbench_per_kind }}"
               langs=$(python -c "from docextract.products import PRODUCTS; print(' '.join(PRODUCTS['$PRODUCT'].languages))")
+              if [ -n "${CORPUS_MANIFEST:-}" ]; then  # enterprise documents of the held-out companies
+                python scripts/build_eval_set.py enterprise bench_data --manifest "$CORPUS_MANIFEST" --files "$CORPUS_FILES" \
+                  --langs "${langs// /,}"
+              fi
               for dir in bench_data/*/wiki_*; do
                 [ -d "$dir" ] || continue
                 lang=${dir##*/wiki_}
@@ -210,6 +221,10 @@ jobs:
         with:
           paddleocr-ref: ${{ env.PADDLEOCR_REF }}
           paddleocr-dir: ${{ env.PADDLEOCR_DIR }}
+
+      - uses: ./.github/actions/enterprise-corpus
+        with:
+          splits: dev,test
 
       - name: Evaluation lines (same seeds as the evaluation after training)
         env:

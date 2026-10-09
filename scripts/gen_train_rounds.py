@@ -42,6 +42,10 @@ ROUND = """\
           name: ${{{{ inputs.product }}}}-prep
           path: ${{{{ env.WORK }}}}
 {download_previous}
+      - uses: ./.github/actions/enterprise-corpus
+        with:
+          splits: train
+
       - name: Train (round {r}, runner ${{{{ matrix.shard }}}})
         run: |
           source "$WORK/model.env"  # FUSE, FREEZE, GTC, LR of this training
@@ -53,6 +57,7 @@ ROUND = """\
           export LR_CONST=1 NO_EVAL=1 WARMUP={warmup} FUSE FREEZE GTC
           SAMPLES=${{{{ inputs.lines }}}} CHUNK=${{{{ inputs.lines }}}} EPOCHS=100 BATCH=32 PRINT_STEP=10 \\
           SEED=$(( {r} * 1000 + ${{{{ matrix.shard }}}} )) TIME_BUDGET_MIN=${{{{ inputs.round_minutes }}}} \\
+          SHARD="${{{{ matrix.shard }}}}/${{{{ inputs.runners }}}}" \\
             training/vi_ocr/run_training.sh train
           grep -E "avg_batch_cost" "$WORK/output/train.log" | tail -1 || true
 
