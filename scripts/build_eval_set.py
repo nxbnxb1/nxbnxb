@@ -407,7 +407,8 @@ def enterprise(args: argparse.Namespace) -> None:
                 if chosen >= args.docs_per_language or per_company.get(item["company"], 0) >= 2:
                     continue
                 with pymupdf.open(Path(args.files) / item["file"]) as doc:
-                    order = sorted(range(doc.page_count), key=lambda n: digest(f"{item['sha256']}:{n}"))
+                    doc_pages = doc.page_count
+                    order = sorted(range(doc_pages), key=lambda n: digest(f"{item['sha256']}:{n}"))
                     pages = [n for n in order if _visible_text_page(doc[n])][: args.pages_per_doc]
                     if not pages:
                         continue
@@ -421,8 +422,9 @@ def enterprise(args: argparse.Namespace) -> None:
                 name = f"{item['company'].replace(':', '_')}_{item['sha256'][:10]}"
                 write(out, split, f"enterprise_{lang}/digital_pdf", name, ".pdf", pdf, gt)
                 write(out, split, f"enterprise_{lang}/scan", name, ".pdf", scanned(pdf, digest(name) % 2**32), gt)
+                kept = item.get("kept_pages") or list(range(doc_pages))  # page numbers of the original document
                 manifest.append({"source": "enterprise", "lang": lang, "split": split, "id": name, "company": item["company"],
-                                 "doc_type": item["doc_type"], "url": item["url"], "pages": [p + 1 for p in sorted(pages)]})
+                                 "doc_type": item["doc_type"], "url": item["url"], "pages": [kept[p] + 1 for p in sorted(pages)]})
                 per_company[item["company"]] = per_company.get(item["company"], 0) + 1
                 chosen += 1
             print(f"enterprise {split} {lang}: {chosen} documents", flush=True)

@@ -173,6 +173,28 @@ Mỗi sản phẩm được so với cùng một bộ baseline, trên cùng dữ
 Ngôn ngữ của baseline theo sản phẩm: Tesseract `vie+eng` / `vie+eng+jpn`; EasyOCR `vi,en` / theo ngôn ngữ từng tập
 (EasyOCR không ghép được tiếng Việt với tiếng Nhật); PP-StructureV3 `lang=vi` / `lang=japan`.
 
+## Kho tài liệu doanh nghiệp
+
+Dữ liệu huấn luyện và kiểm thử là tài liệu doanh nghiệp tự công bố trên website của chính họ (quan hệ cổ đông,
+công bố thông tin): báo cáo tài chính, báo cáo thường niên, tài liệu và nghị quyết đại hội cổ đông, biên bản, báo cáo
+quản trị, công văn giải trình, tài liệu kết quả kinh doanh… ([`scripts/collect_corpus.py`](scripts/collect_corpus.py),
+workflow *Collect enterprise documents*, chạy mỗi tuần và cộng dồn):
+
+| Nguồn | Danh sách công ty |
+|---|---|
+| Việt Nam | công ty niêm yết ([`corpus/seeds_vn.tsv`](corpus/seeds_vn.tsv)) và doanh nghiệp Việt Nam có website chính thức trên Wikidata ([`corpus/seeds_vn_wikidata.tsv`](corpus/seeds_vn_wikidata.tsv); bỏ trường học, cơ quan nhà nước) |
+| Nhật Bản | công ty niêm yết trên Sở Giao dịch Chứng khoán Tokyo có website trên Wikidata ([`corpus/seeds_jp_wikidata.tsv`](corpus/seeds_jp_wikidata.tsv)) |
+
+- 8 runner cùng thu thập; từ trang chủ, crawler đi theo các liên kết quan hệ cổ đông / công bố thông tin và gom link
+  PDF; website dựng trang bằng JavaScript được mở lại bằng Chromium.
+- Tôn trọng `robots.txt` của mọi host (kể cả mẫu `*`, `$`), kiểm tra lại mỗi lần chạy; tài liệu bị cấm thì bỏ khỏi kho.
+  Nguồn cấm thu thập tự động (ví dụ TDnet) không được dùng.
+- Repo chỉ lưu manifest ([`corpus/manifest.jsonl`](corpus/manifest.jsonl): URL, sha256, công ty, loại tài liệu, ngôn
+  ngữ, số/scan) và [thống kê](corpus/STATS.md); file nằm trong cache của Actions, không phát tán lại. Tài liệu dài giữ
+  tối đa 20 trang (scan: 5), chọn theo checksum nên lần tải lại cho đúng các trang đó.
+- Chia theo công ty: 70% `train`, 10% `dev`, 20% `test` — không công ty nào vừa được học vừa được kiểm thử. `train` cho
+  dòng chữ thật để huấn luyện OCR; `dev`/`test` cho trang kiểm thử (bản PDF số và bản scan, đáp án = lớp text của trang).
+
 ## Thành phần khác
 
 - **API FastAPI** (`docextract/api.py`): `POST /v1/extract`, `POST /v1/jobs`, `GET /v1/jobs/{id}`,

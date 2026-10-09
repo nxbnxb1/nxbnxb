@@ -1,0 +1,2069 @@
+# JP companies from Wikidata (https://query.wikidata.org/sparql): id <TAB> industry <TAB> official website.
+# Regenerate: python scripts/collect_corpus.py seeds-wikidata JP <this file>
+1301	other	http://www.kyokuyo.co.jp/
+1332	other	https://www.nissui.co.jp/
+1333	other	https://www.umios.com/en/
+1375	other	https://www.yukiguni-factory.co.jp/
+1376	other	http://www.kanekoseeds.jp/
+1379	Vegetable farming, including mushrooms	https://www.hokto-kinoko.co.jp/
+1380	other	http://www.akikawabokuen.co.jp/
+1381	other	http://www.axyz-grp.co.jp/
+1382	other	http://www.hob.co.jp/
+1383	other	http://www.bergearth.co.jp/
+1384	other	http://www.hokuryo.co.jp/
+138A	other	https://hikari-food-service.jp
+1401	other	https://www.homemakeup.co.jp/
+1407	other	http://www.west-gr.co.jp/
+1414	other	https://www.sho-bondhd.jp
+1417	telecommunications construction business	https://www.mirait-one.com/
+1419	construction industry	http://www.tamahome.jp/
+141A	other	https://www.trial-net.co.jp/
+141A0	other	https://trial-holdings.inc/
+1420	other	http://www.sanyohomes.co.jp/index.html
+1431	other	https://www.libwork.co.jp/
+1435	other	https://corp.robothome.jp/
+1436	other	https://green-energy.co.jp/
+1438	other	https://www.gifu-zohen.co.jp
+1446	other	https://www.candeal.co.jp/
+1447	other	https://www.itbook-hd.co.jp/
+1491	other	http://www.chugaikogyo.co.jp/
+1514	other	http://www.sumiseki.co.jp/
+151A	other	https://dive.design/
+157A	other	https://greenmonster.co.jp/
+1605	petroleum industry	https://www.inpex.co.jp/
+1711	other	http://www.shodensya.com/
+1712	other	https://www.daiseki-eco.co.jp/
+1716	other	https://www.daiichi-cutter.co.jp/
+1718	other	http://www.mikikogyo.co.jp/
+1720	other	https://www.tokyu-cnst.co.jp/
+1724	other	http://www.synclayer.com/
+173A	other	https://www.hammock.jp/
+1743	other	http://www.koatsuind.co.jp/
+1757	construction industry	https://www.souken-a.jp/
+1758	other	http://www.taiyoukiso.co.jp/
+175A	other	https://willsmart.co.jp/
+1762	other	http://www.takamatsu-cg.co.jp/
+1768	other	https://www.sonec-const.co.jp/
+176A	other	https://rezil.co.jp/
+1770	other	https://www.fujita-eng.co.jp/
+1773	public utility	http://www.ytl.com.my/
+1775	other	https://www.fujielectric.co.jp/feec/
+1776	other	http://www.smrc.co.jp/
+177A	other	https://kohjin-bio.jp/
+1780	other	http://www.yamaura.co.jp/
+1783	other	https://fantasista-tokyo.jp/
+1788	other	https://www.santo.co.jp/
+1793	other	https://www.ohmoto.co.jp/
+1798	other	http://www.moriya-s.co.jp/
+1799	other	http://www.daiichi-kensetsu.co.jp/
+1801	construction	http://www.taisei.co.jp/
+1802	construction	http://www.obayashi.co.jp/
+1803	architecture	https://www.shimz.co.jp/
+1807	other	http://www.watanabesato.co.jp/
+1810	other	http://www.matsui-ken.co.jp/
+1812	construction	http://www.kajima.co.jp/
+18130	construction industry	http://www.fudotetra.co.jp/
+1814	construction	http://www.daisue.co.jp/
+1820	other	https://www.nishimatsu.co.jp
+1822	other	https://www.daiho.co.jp/
+1826	other	https://www.sata.co.jp/
+1827	construction	http://www.wave-nakano.co.jp/
+1828	other	http://www.tanabe-ind.co.jp/
+1833	construction	https://www.okumuragumi.co.jp/
+1840	other	http://www.tsuchiya.co.jp/
+1844	other	http://www.ohmori.co.jp/
+1847	other	https://www.ichiken.co.jp
+1848	other	http://www.fujips.co.jp/
+1850	other	http://www.nantatsu.co.jp/
+1853	other	http://www.morigumi.co.jp/index.html
+1861	construction	https://www.kumagaigumi.co.jp
+1865	other	http://www.aaconst.co.jp/
+1866	other	http://www.kitano.co.jp/
+1867	other	http://www.uekigumi.co.jp/
+1871	other	https://www.psc.co.jp/
+1878	construction industry	https://www.kentaku.co.jp/
+187A	other	https://www.samty-holdings.com/
+1884	Construction industry of Japan	https://www.nipponroad.co.jp/
+1887	other	http://www.n-kokudo.co.jp/
+1897	other	http://www.kaneshita.co.jp/
+1904	other	http://www.taisei-oncho.co.jp/
+1909	other	http://www.ndc-group.co.jp/
+1911	other	https://sfc.jp/
+1914	other	http://www.jafec.co.jp/
+1921	other	http://www.tomoe-corporation.co.jp/
+1925	construction	https://www.daiwahouse.co.jp
+1928	other	https://www.sekisuihouse.co.jp/
+192A	other	https://www.integroup.jp/
+1944	other	http://www.kinden.co.jp/
+1948	other	http://www.kk-kodensha.co.jp/
+1949	Construction	https://www.sem.co.jp/
+1959	other	https://www.kraftia.co.jp/
+1960	other	http://www.suntec-sec.jp/
+1963	engineering	https://www.jgc.com/
+1966	other	http://www.takada.co.jp/
+1967	other	http://www.yamato-se.co.jp/
+1972	other	http://www.sankometal.co.jp/
+198A	information technology	https://corp.postprime.com/
+1997	other	http://www.eazima.co.jp/
+2001	food industry	http://www.nippn.co.jp/
+2003	food industry	http://www.nittofuji.co.jp/
+2009	food industry	http://www.the-torigoe.co.jp/
+2055	other	http://www.nichiwasangyo.co.jp/
+208A	other	https://www.kke.co.jp
+2107	other	http://www.toyosugar.co.jp/
+2112	other	http://www.ensuiko.co.jp/
+2114	other	https://www.fuji-nihon.com/
+211A	other	https://cados.jp/
+2120	other	https://lifull.com
+2121	other	https://mixi.co.jp/
+2122	other	http://www.interspace.ne.jp/index.html
+2127	other	https://www.nihon-ma.co.jp/
+212A	other	https://fiteasy.co.jp/
+2134	other	https://kitahamabank.co.jp/
+2138	other	http://crooz.co.jp/
+2139	other	http://www.chuco.co.jp/
+2148	journalism	https://www.itmedia.co.jp/
+2149	other	http://www.asiamedia.jp/
+2151	other	http://www.takeei.co.jp/
+2152	other	http://www.youji.co.jp
+2156	advertising	http://www.saylor.co.jp/
+21580	other	https://www.fronteo.com/
+215A	other	https://timee.co.jp/
+2169	other	https://www.cds-japan.jp/en/
+2183	other	https://www.linical.com/
+2185	other	http://www.cmc.co.jp/
+2186	other	http://www.sobal.co.jp/
+2193	Internet	https://cookpad.com/
+2201	food industry	https://www.morinaga.co.jp/
+2202	confectionery	http://www.meiji.co.jp/
+2204	other	https://www.nakamuraya.co.jp/
+2206	food industry	https://www.glico.com/th
+2207	other	https://www.meito-abc.co.jp/
+2208	confectionery	https://www.bourbon.co.jp/
+2209	food industry	https://www.imuraya-group.com/
+2211	confectionery	https://www.fujiya-peko.co.jp/
+2212	food industry	https://www.yamazakipan.co.jp/
+2215	food industry	http://www.daiichipan.co.jp/
+2216	confectionery	http://www.kanro.co.jp/
+2220	confectionery	https://www.kamedaseika.co.jp
+2221	other	https://www.iwatsukaseika.co.jp
+2224	other	http://www.como.co.jp/
+2226	confectionery	https://koikeya.co.jp/
+2229	confectionery	http://www.calbee.co.jp/index.php
+2264	food processing	http://www.morinagamilk.co.jp/
+2266	other	http://www.qbb.co.jp/
+2267	other	http://www.yakult.co.jp/
+2269	other	https://www.meiji.com/
+2270	dairy	http://www.meg-snow.com/
+2281	food industry	http://www.primaham.co.jp/
+2282	food industry	https://www.nipponham.co.jp/index.html
+2286	other	http://www.hayashikane.co.jp/
+2288	food industry	http://www.marudai.jp/
+2291	food service	https://www.fukutome.com
+2293	food industry	http://www.takizawaham.co.jp/
+2296	other	http://www.itoham-yonekyu-holdings.com/
+2300	other	http://www.cl-kyokuto.co.jp/
+2303	other	http://www.dawn-corp.co.jp/
+2304	other	http://www.css-holdings.jp/
+2305	other	https://www.studio-alice.co.jp/
+2315	other	https://www.caica.jp/
+2323	video game industry	http://www.fonfun.co.jp/
+2327	information technology	https://www.nssol.nipponsteel.com/
+2329	film distributor	https://www.tfc.co.jp/
+2330	other	https://www.forside.co.jp
+2331	private security company	https://www.alsok.co.jp/
+2334	tertiary sector of the economy	https://www.eole.co.jp/
+2341	other	http://www.atimes.co.jp/
+2344	other	http://www.heian-group.co.jp/
+2345	other	https://hodl1.jp/
+2351	other	http://www.asj.ad.jp/
+2354	other	http://www.ysknet.co.jp/
+2370	other	https://www.medinet-inc.co.jp
+2371	other	http://corporate.kakaku.com/
+2373	other	http://www.care21.co.jp/
+2375	other	http://www.threepro.co.jp/
+2376	other	http://www.scinex.co.jp/
+2379	other	https://www.dip-net.co.jp/
+2393	renting	http://www.caresupply.co.jp/
+2397	research	http://www.dna-chip.co.jp/
+2404	other	https://www.tetsujin.ne.jp/
+2408	other	http://www.kg-net.co.jp/
+24150	other	http://www.athuman.com
+2424	other	https://brass.ne.jp/
+2428	other	http://www.well-net.jp/
+2432	software development	https://dena.com/
+2435	other	http://www.cedar-web.com/
+2436	public relations	http://www.kyodo-pr.co.jp/
+2449	other	http://www.prap.co.jp/
+2454	other	http://corp.allabout.co.jp/
+2459	other	http://www.auncon.co.jp/
+2464	other	http://www.bbt757.com/
+2469	other	http://www.hibino.co.jp/
+2477	other	http://www.temairazu.com/
+2480	other	http://www.slc.jp/
+2481	other	http://www.townnews.co.jp/
+2483	other	http://www.honyakuctr.com/
+2484	other	https://demae-can.com
+2485	other	https://www.tear.co.jp/
+2489	advertising	https://www.adways.net
+2491	other	https://www.valuecommerce.co.jp
+2498	other	https://www.oriconhd.jp/
+2499	other	http://www.wasou.com/
+2501	other	https://www.sapporoholdings.jp/
+2502	beverage industry	http://www.asahigroup-holdings.com/
+2503	beverage industry	https://www.kirinholdings.com/
+2531	beverage industry	https://www.takara.co.jp/
+2536	other	http://www.mercian.co.jp
+253A	other	https://ets-group.co.jp/
+2540	other	http://www.yomeishu.co.jp/
+254A	other	https://aifcg.jp/
+255A	other	https://www.gltechno.co.jp/
+256A	other	https://www.tobishima.co.jp/
+2573	beverage industry	http://www.hokkaido.ccbc.co.jp/
+2579	beverage industry	https://www.ccbj-holdings.com/
+2585	other	https://www.ld-company.com/
+2588	other	http://premiumwater-hd.co.jp/
+2593	beverage industry	https://www.itoen.co.jp/
+2594	other	https://www.keycoffee.co.jp/
+2597	other	http://www.unicafe.com/
+2599	other	http://www.japanfoods.co.jp/
+2602	other	http://www.nisshin-oillio.com/
+2607	food industry	https://www.fujioil.co.jp/
+260A	artificial intelligence	https://alt.ai/
+2612	food industry	http://www.kadoya.com/
+2613	other	http://www.j-oil.com
+261A	other	https://www.nissuicon.co.jp
+2651	food retail sector	https://www.lawson.co.jp/
+2652	antiquarian bookstore	http://www.mandarake.co.jp/
+2654	other	https://www.asmo1.co.jp/
+2656	software industry	https://www.vector.co.jp/
+2664	retail	https://www.cawachi.co.jp/
+2666	other	http://www.auto-wave.co.jp
+2668	other	https://tabio.com/jp/
+2669	food industry	https://www.kanemi-foods.co.jp/
+2670	retail	https://www.abc-mart.net/
+2678	mail order	https://www.askul.co.jp
+2681	other	https://2nd-rtl.com/
+2683	other	https://www.uog.co.jp/
+2686	other	https://www.g-foot.co.jp/
+2687	other	http://www.cvs-bayarea.co.jp/
+268A	precision mechanics	https://rigaku.com/ja/
+2694	other	https://ys-holdings.co.jp/
+2695	food service	https://www.kurasushi.co.jp/
+2698	other	https://www.cando-web.co.jp/
+2700	other	http://www.kitoku-shinryo.co.jp/
+2702	other	http://www.mcd-holdings.co.jp/
+2705	food service	http://www.ootoya.jp/
+2708	other	http://www.kuze.co.jp/
+2722	other	http://www.ai-kei.co.jp/
+2730	retail	https://www.edion.co.jp
+2735	other	https://www.watts-jp.com/
+2742	retail	http://www.halows.com/
+2747	retail	https://www.hokuyu-lucky.co.jp/
+274A	other	https://gardengroup.co.jp/
+2760	other	http://www.teldevice.co.jp/
+2762	other	http://sankofoods.com/
+2766	other	http://www.jwd.co.jp/
+2768	sōgō shōsha	https://www.sojitz.com/
+2776	other	http://www.crymson.co.jp/
+2780	other	http://www.komehyo.co.jp/
+2782	other	https://www.seria-group.com/
+2788	other	http://www.apple-international.com/
+2789	food service	http://re-marumatu.co.jp/
+2790	other	http://www.nafco.tv
+2791	retail	https://www.e-dkt.co.jp/
+2794	retail	https://www.create-sd.co.jp/corpo/tabid/91/Default.aspx
+2796	other	https://www.pharmarise.com/
+2798	other	http://www.ystable.co.jp/
+2801	food processing	http://www.kikkoman.co.jp/enjoys/factory/noda.html
+2802	food industry	https://www.ajinomoto.co.jp/
+2804	other	https://www.bulldog.co.jp/
+2805	other	http://www.sbfoods.co.jp/
+2806	other	https://www.yutakafoods.co.jp/
+2809	other	http://www.kewpie.co.jp/
+280A	other	https://www.tmh-inc.co.jp/
+2810	other	http://housefoods-group.com/
+2811	other	http://www.kagome.co.jp/
+2812	other	http://www.yskf.jp/
+2813	food industry	http://www.wakoushokuhin.co.jp/
+2814	other	http://www.sato-foods.co.jp/
+2816	other	http://www.daisho.co.jp/
+2818	other	https://www.pietro.co.jp/
+2819	food industry	http://www.ebarafoods.com/
+2820	other	http://www.yamami.co.jp
+2830	other	http://www.aohata.co.jp/
+2831	other	http://www.hagoromofoods.co.jp/
+285A	semiconductor industry	https://www.kioxia.com
+286A	other	https://eucalia.jp/
+2871	food industry	http://www.nichirei.co.jp/
+2872	other	http://www.seihyo.co.jp/
+2875	food processing	https://www.maruchan.co.jp/
+2877	other	https://www.nittobest.co.jp/
+287A	wholesale	http://www.kuroda-electric.co.jp/
+2883	other	https://www.dai-rei.co.jp/
+288A	other	https://corp.laxus.co/
+2892	other	http://www.nisshoku.co.jp/
+2894	food industry	http://www.ishiifood.co.jp/
+2897	other	https://www.nissin.com/jp/about/nissinfoods-holdings/
+2899	other	http://www.nagatanien-hd.co.jp/
+2901	other	https://wel-dish.co.jp/
+2903	food industry	http://www.shinobufoods.co.jp/
+2904	other	http://www.ichimasa.co.jp/
+2907	other	http://www.ahjikan.co.jp/
+2908	other	https://www.fujicco.co.jp
+290A	space industry	https://synspective.com
+2911	other	http://www.asahimatsu.co.jp/
+2914	tobacco industry	https://www.jti.co.jp/
+2915	food industry	http://www.kenkomayo.co.jp/ir
+2916	other	https://www.sembatohka.co.jp/
+2917	food industry	http://www.ohmoriya.com/
+291A	Corporate Education	https://www.recurrent.jp/
+2922	food industry	https://www.natori.co.jp/
+2923	food industry	https://www.satosyokuhin.co.jp/
+2924	food industry	http://www.ifuji.co.jp/
+2926	other	http://www.shinozakiya.com/
+2927	other	https://www.ams-life.co.jp
+2933	other	http://www.kibun.co.jp/
+2935	other	https://www.pickles.co.jp/
+2936	other	https://basefood.co.jp/corporate
+2938	other	http://okamurashokuhin.co.jp/
+2953	food industry	https://www.pepsico.com/
+2961	other	https://www.nitcho.co.jp/
+297A	other	https://www.alpico.co.jp/
+298A	other	https://gvatech.co.jp/
+2991	other	https://landnet.co.jp/
+3001	other	https://www.katakura.co.jp/
+3002	other	http://www.gunze.co.jp/
+3003	real estate development	https://www.hulic.co.jp/
+3004	other	http://www.shinyei.co.jp/
+300A	other	https://www.mic-p.com/
+3010	other	http://www.kachikaihatsu.co.jp/
+3011	other	http://www.banners.jp/
+3020	other	http://www.applied-g.jp/
+3023	other	https://www.rasaco.co.jp/
+3028	other	http://www.alpen-group.jp/
+302A	other	https://www.bstylegroup.co.jp/
+3030	food service	http://pub-hub.co.jp/
+3035	other	http://www.ktk.gr.jp/
+3038	wholesale	https://www.kobebussan.co.jp/
+3041	other	http://www.beauty-kadan.com/
+3045	other	https://www.kawasaki-corp.co.jp/
+3046	other	http://www.jin-co.com/
+3048	retail	https://www.biccamera.co.jp/
+3050	other	http://www.dcm-hldgs.co.jp/
+3053	food service	https://www.pepper-fs.co.jp/
+3054	other	http://www.hyperpc.co.jp/
+3059	other	https://company.hiraki.co.jp/
+3064	e-commerce	http://www.monotaro.id/
+3065	other	http://www.meshiya.co.jp/
+3067	food service	http://www.tokyo-ichiban-foods.co.jp/
+3068	other	http://www.wdi.co.jp/
+3069	other	http://www.asrapport-dining.com/
+3071	other	http://www.stream-jp.com/
+3080	other	http://www.jason.co.jp/
+3082	other	https://www.kichiri.co.jp/
+3086	retail	https://www.j-front-retailing.com/
+3087	retail	http://www.dnh.co.jp/
+3089	other	http://www.technoalpha.co.jp/
+3092	other	https://corp.zozo.com/
+3094	other	https://www.supervalue.jp/
+3096	other	http://www.ocean-system.com/
+3099	other	https://www.imhds.co.jp/
+3101	textile industry	http://www.toyobo.co.jp/
+3103	textile industry	http://www.unitika.co.jp/
+3105	industrial manufacturing	http://www.nisshinbo.co.jp/
+3106	textile industry	https://www.kurabo.co.jp/
+3111	other	http://www.omikenshi.co.jp/
+3113	other	https://univahld.com/
+3116	automotive supplier	http://www.toyota-boshoku.co.jp/en
+3121	other	http://mbkworld.co.jp/
+3123	other	https://www.saibo.co.jp/
+3134	other	https://hamee.co.jp/
+3138	other	http://www.fujisan.co.jp/
+3141	other	http://www.welcia.co.jp/en/
+3143	other	https://owill.co.jp/
+3148	retail	https://www.createsdhd.co.jp
+3159	other	https://www.maruzen-chi.co.jp/
+3160	other	http://www.oomitsu.com/
+3161	other	http://www.azearth.co.jp/
+3166	other	http://www.ochiholdings.co.jp/
+3168	other	https://www.kurotani.co.jp/
+3172	other	http://www.tealifeir.com/
+3173	other	https://www.cominix.jp/
+3175	food service	https://www.tsukadanojo.jp/
+3177	other	http://www.arigatou-s.com
+3178	other	http://www.chimney.co.jp/
+3181	other	https://www.okoku.jp/
+3189	other	http://www.anap.co.jp/
+3191	other	http://www.joyfulhonda.com/
+3192	other	https://www.shirohato.co.jp/
+3193	food service	http://www.torikizoku.co.jp/
+3196	other	https://gindaco.com
+3198	other	https://sfpdining.jp/
+319A	other	https://ngt-g.com/
+3201	other	http://www.nikke.co.jp/
+3202	other	http://www.daitobo.co.jp/
+3204	other	http://www.toabo.co.jp/
+3205	other	http://www.daidoh-limited.com/
+3222	other	https://usmh.co.jp/
+3223	food service	http://www.sld-inc.com/
+3231	other	http://www.nomura-re-hd.co.jp/
+3232	other	https://holdings.sanco.co.jp/
+3236	other	http://www.properst.co.jp/
+3238	other	http://www.central-gd.co.jp/
+323A	other	https://www.flierinc.com/
+3242	other	http://www.urbanet.jp/
+3246	other	http://www.kose-re.jp/
+3254	other	http://www.pressance.co.jp/
+3264	other	http://www.ascotcorp.co.jp/
+3267	other	http://philpark.jp/
+3271	other	http://www.the-g.co.jp/
+3275	other	http://www.housecom.jp/
+3277	other	http://www.sansei-l.co.jp/
+3280	other	http://www.strust.co.jp/
+3286	other	http://trust-hd.co.jp/
+3287	real estate investment trust	http://www.hoshinoresorts-reit.com/
+3289	other	https://www.tokyu-fudosan-hd.co.jp/
+3292	other	http://www.aeon-jreit.co.jp/index.html
+3293	other	https://azumahouse.com/
+3299	other	http://www.mugen-estate.co.jp/
+3300	real estate agent	https://am-bition.jp/
+3306	other	http://www.nihonseima.co.jp/
+3317	other	http://www.fgarden.co.jp/
+331A	other	http://www.medix-inc.co.jp/
+3320	other	http://www.crossplus.co.jp/
+3321	other	https://www.mitachi.co.jp/
+3323	other	http://www.recomm.co.jp
+3326	other	http://www.runsystem.co.jp/
+3329	other	http://www.towafood-net.co.jp/
+332A	information technology	https://www.meeq.com/
+3341	other	https://www.nicho.co.jp/
+3347	other	http://www.trust-ltd.co.jp/
+3352	other	http://www.buffalo.co.jp/
+3355	other	http://www.kuriyama-holdings.com/
+3358	other	http://www.ys-food.jp/
+3361	other	https://www.toell.co.jp/
+336A	other	https://www.dynamic-maps.co.jp/
+3370	other	http://www.fujitacorp.co.jp/
+3372	other	http://www.kanmonkai.co.jp/
+3377	other	https://www.8190.co.jp
+3382	retail	http://www.7andi.com/
+3386	other	https://www.cosmobio.co.jp/
+3391	other	https://www.tsuruha-hd.com/
+3396	mail order	http://www.felissimo.co.jp/
+3397	other	https://www.toridoll.com/
+3399	other	https://maruchiyo.yamaokaya.com/
+3402	chemical industry	http://www.toray.co.jp/
+3407	chemical industry	http://asahi-kasei.co.jp/
+3409	other	https://www.ktbo.co.jp/
+340A	other	https://www.zig-zag.co.jp/
+3416	other	https://pixta.co.jp/
+3417	other	http://www.ohki-net.co.jp/
+3420	other	https://www.kfc-net.co.jp/
+3421	other	http://www.inaba-ss.co.jp/
+3422	other	https://www.marujun.jp
+3434	other	https://www.kk-alpha.com/
+3435	other	http://www.sanko-techno.co.jp/
+3436	semiconductor industry	https://www.sumcosi.com/english/
+3439	other	http://www.mitsuchi.co.jp/
+343A	other	http://www.iace.co.jp/index.html
+3440	other	http://www.kakou-nisso.co.jp/
+3441	other	http://www.sanno.co.jp/ir/index.html
+3447	other	http://www.shinwa-jp.com/
+3457	other	https://www.housedo.co.jp/and-do/
+3461	other	https://www.palma.jp/
+3469	other	http://www.dualtap.co.jp/
+3479	other	https://www.tkp.jp/
+3484	other	https://www.ihd.co.jp/
+3489	other	https://faithnetwork.co.jp/
+3496	other	https://azoom.jp/
+3498	real property	https://kasumigaseki.co.jp/
+3512	other	https://www.felt.co.jp/
+3513	other	https://www.ik-felt.co.jp/
+3521	other	https://thermae-yu-hd.co.jp/
+3524	other	http://www.nittoseimo.co.jp/
+3526	other	http://www.ashimori.co.jp/
+3529	other	http://www.atsugi.co.jp/
+3538	other	http://www.willplus.co.jp/
+3540	other	https://ci-medical.co.jp/
+3544	other	https://satudora-hd.co.jp/
+3547	other	https://unisia.co.jp/
+3551	other	http://www.dynic.co.jp/
+3553	other	http://www.kyowale.co.jp/
+3558	other	https://jade-group.jp/
+3559	other	http://www.p-ban.com/
+3560	other	https://www.hobonichi.co.jp/
+3563	food service	https://www.akindo-sushiro.co.jp/
+3571	other	https://www.sotoh.co.jp/
+3577	other	http://www.tokai-senko.co.jp/
+3583	other	http://www.aubex.co.jp/
+3593	other	https://www.hogy.co.jp
+3597	other	http://www.jichodo.co.jp/
+3598	other	http://www.e-yamaki.co.jp/
+3604	other	https://www.kawamoto-sangyo.co.jp/
+3606	other	https://www.renown.co.jp/
+3607	other	https://www.kuraudia.co.jp/
+3611	textile manufacturer	https://www.matuoka.co.jp
+3622	other	http://www.netyear.net/
+3627	information technology	https://www.neoscorp.jp/
+3632	other	https://hd.gree.net/jp/ja/
+3633	other	https://pepabo.com/
+3634	other	http://www.sockets.co.jp/
+3635	video game industry	https://www.koeitecmo.co.jp/
+3639	visual novel	http://www.voltage.co.jp
+3640	other	http://www.ndensan.co.jp/
+3641	publication	http://www.papy.co.jp/info/
+3648	other	http://www.ags.co.jp/
+3656	video game development	http://www.klab.jp/
+365A	other	https://www.izawa-towel.com/
+3662	massively multiplayer online role-playing game	https://www.a-tm.co.jp/
+3663	other	https://www.celsys.com/
+3664	other	https://wize-inc.jp/
+3668	video game industry	https://colopl.co.jp/
+3671	other	http://www.s-max.co.jp/
+3672	other	https://www.altplus.co.jp/
+3673	other	http://www.broadleaf.co.jp/
+3678	other	https://mediado.jp/
+3681	other	https://www.vcube.com
+3686	anime industry	http://www.dle.jp/
+3687	other	http://www.fixstars.com/
+3688	other	https://cartaholdings.co.jp/
+3694	other	https://www.optim.co.jp/
+3698	video game industry	http://www.cri-mw.co.jp/
+3710	software development	https://www.jorudan.co.jp/company/
+3713	other	http://www.netmarks.co.jp/
+3723	video game industry	https://www.falcom.co.jp/
+3727	other	https://www.aplix.co.jp/
+372A	other	https://www.rent.co.jp/
+3741	information and communications industry	https://www.sec.co.jp/en/index.html
+3750	other	https://adr.co.jp/
+3753	other	http://www.flight-hd.co.jp/
+3758	other	http://www.aeria.jp/
+3760	video game industry	https://www.cave.co.jp/
+3768	other	http://www.riskmonster.co.jp/
+3770	other	http://www.zappallas.com/
+3772	other	http://www.wealth-mngt.com/
+3774	other	http://www.iij.ad.jp/
+3776	other	http://www.bbtower.co.jp/
+3778	other	https://www.sakura.ad.jp/
+378A	other	http://www.hit-ad.co.jp/
+3791	video game industry	http://www.igport.co.jp/
+3796	other	http://www.e-seikatsu.info/
+3802	other	http://www.ecomic.jp/
+3810	video game industry	https://cshd.cyberstep.com/
+3825	other	http://www.remixpoint.co.jp/
+3826	other	https://www.sint.co.jp
+3845	other	http://renewal.i-freek.co.jp/
+3847	other	http://www.pacific-systems.co.jp/
+3848	other	http://www.dal.co.jp
+3850	software industry	http://www.intra-mart.jp/
+3851	video game industry	http://www.nippon1.co.jp/index.html
+3852	other	http://www.cy-com.co.jp/
+3856	other	http://www.realcom.co.jp/
+3857	other	http://www.lac.co.jp/
+3858	other	https://www.ubiquitous-ai.com/
+3863	pulp and paper industry	http://www.nipponpapergroup.com
+3864	pulp and paper industry	http://www.mpm.co.jp/
+3865	pulp and paper industry	http://www.hokuetsu-kishu.jp/
+386A	other	https://www.machioka.co.jp/company/index.html
+3878	other	http://www.tomoegawa.co.jp/
+3880	pulp and paper industry	http://www.daio-paper.co.jp/
+3891	other	http://www.kodoshi.co.jp/
+3892	other	http://www.okayamaseishi.co.jp/
+3895	other	http://www.havix.co.jp/
+3896	pulp and paper industry	http://www.awapaper.co.jp/
+3907	video game industry	https://www.siliconstudio.co.jp/
+3909	other	http://www.showcase-tv.com/
+3910	other	http://www.mks.jp/company/
+3912	other	https://www.mobilefactory.jp/
+3913	other	https://www.greenbee.co.jp/
+3915	information technology industry	https://www.terrasky.co.jp/
+3920	other	https://www.ibc21.co.jp/
+3926	other	https://www.opendoor.co.jp/
+3927	other	https://www.fuva-brain.co.jp/
+3928	other	http://mynet.co.jp/
+3930	web service	https://www.hatena.ne.jp/
+3933	other	https://www.chieru.co.jp/
+3943	other	http://www.osk.co.jp/
+3947	pulp and paper industry	http://www.dynapac-gr.co.jp/
+3951	other	https://www.asahi-pp.co.jp/
+3954	other	http://www.showa-paxxs.co.jp/
+3955	other	http://www.imura.co.jp/
+3966	information technology	https://www.uzabase.com/
+3979	other	https://www.uluru.biz/
+3981	other	https://www.beaglee.com/
+3983	other	https://www.oro.com/
+3992	other	https://www.needswell.com/
+3993	other	https://www.pkshatech.com/
+3994	other	https://corp.moneyforward.com/
+4004	chemical industry	https://www.resonac.com/
+4005	other	https://www.sumitomo-chem.co.jp/
+4021	chemical industry	https://www.nissanchem.co.jp/
+4023	chemical industry	http://www.kureha.co.jp/en/
+4025	chemical industry	https://www.takichem.co.jp
+4026	other	http://www.konoshima.co.jp/
+4028	other	http://www.iskweb.co.jp/
+4031	other	http://www.katakuraco-op.com/
+4040	other	http://www.nankai-chem.co.jp/
+4042	other	http://www.tosoh.com/home
+4045	chemical industry	https://www.toagosei.co.jp/
+4055	other	https://www.tecsvc.co.jp/
+4058	other	https://toyokumo.co.jp/
+4059	other	https://www.mag2.co.jp/
+4062	electronics	http://www.ibiden.co.jp/
+4063	chemical industry	http://www.shinetsu.co.jp/
+4080	other	https://www.tanaka-chem.co.jp/
+4088	other	https://www.awi.co.jp/
+4091	chemical industry	https://jp.nipponsanso.com/
+4092	chemical industry	http://www.nippon-chem.co.jp/
+4093	other	https://www.toho-ace.co.jp/
+4098	other	http://www.titankogyo.co.jp
+4100	other	http://www.todakogyo.co.jp/
+4102	other	http://www.maruo-cal.co.jp/
+4107	other	https://www.isechem.co.jp
+4112	chemical industry	http://www.hodogaya.co.jp/
+4113	other	http://www.taoka-chem.co.jp/
+4114	chemical industry	https://www.shokubai.co.jp/ja/
+4118	chemistry	https://www.kaneka.co.jp/
+4119	other	https://www.pigment.co.jp/
+4120	chemical industry	http://www.sugai-chem.co.jp/
+4124	other	https://www.osaka-yuka.co.jp/
+4125	other	https://www.sanwayuka.co.jp/
+4151	other	http://www.kyowa-kirin.co.jp/
+4172	software development	https://hi-crates.jp/
+4173	other	https://wacul.co.jp/
+4180	technology industry	https://www.appier.com/
+4182	chemical industry	http://www.mgc.co.jp/
+4183	chemical industry	https://www.mitsuichemicals.com/
+4188	chemical industry	https://www.mcgc.com/english/index.html
+4193	other	https://www.fabrica-hd.co.jp/
+4199	video game industry	https://wonderpla.net/
+4202	chemical industry	http://www.daicel.com
+4203	other	http://www.sumibe.co.jp/
+4206	other	http://www.aica.co.jp/
+4208	chemical industry	https://www.ube.com/ube/
+4218	other	https://www.nichiban.co.jp/
+4222	other	http://www.kodama-chemical.co.jp/
+4224	other	https://www.lonseal.co.jp
+4231	other	http://tigers.jp/
+4234	other	https://www.sun-a-kaken.co.jp/
+4237	other	http://www.fujipream.co.jp/
+4238	other	http://www.miraial.co.jp/
+4240	other	http://www.cluster-tech.co.jp/
+4242	other	https://www.takagi-seiko.co.jp/
+4245	other	http://www.daiki-axis.com/
+4247	other	http://www.poval.co.jp/
+42550	information technology	https://thecoo.co.jp/
+4262	other	https://niftylifestyle.co.jp/
+4274	other	https://hosoya-pyro.co.jp/
+4275	other	https://www.carlithd.co.jp/
+4284	other	http://www.solxyz.co.jp/
+4293	other	http://www.septeni-holdings.co.jp/
+4295T	other	https://www.faith.co.jp/
+4299	information technology	https://www.himacs.jp/
+4301	tertiary sector of the economy	https://www.amuse.co.jp/
+4304	other	http://Estore.jp/
+4311	video game industry	https://www.d3p.co.jp/
+4316	information technology	http://www.bemap.co.jp/
+4319	other	http://www.tac-school.co.jp/
+4324	marketing	https://www.dentsu.co.jp
+4334	video game industry	http://www.yukes.co.jp
+4337	other	http://www.pia.co.jp/
+4341	other	http://www.seiryodenki.co.jp/
+4344	software industry	https://www.sourcenext.com/
+4346	other	https://www.nexyzgroup.jp/
+4347	other	http://www.broadmedia.co.jp/
+4350	other	https://www.msnw.co.jp
+4360	other	https://mcps.co.jp/
+4361	chemical industry	http://www.kawachem.co.jp/
+4365	other	http://www.mtmtys.co.jp/
+4366	other	http://www.daitochemix.co.jp/
+4376	other	https://kufu.co.jp/
+4378	information and communications industry	https://cinc-j.co.jp/
+4388	other	https://www.ai-j.jp/
+4393	video game development	https://boi.jp/
+4394	information and communications industry	https://www.corporate.exmotion.co.jp/
+4396	other	https://www.sts-inc.co.jp/
+4404	other	https://www.miyoshi-yushi.co.jp
+4406	other	http://www.nj-chem.co.jp/
+4409	other	http://www.toho-chem.co.jp/
+4413	other	https://www.baudroie.jp/
+4415	other	http://www.broad-e.co.jp/
+4418	other	https://jdsc.ai/
+4425	other	https://www.kudan.io/
+4431	information technology	https://smaregi.jp/
+4434	information and communications industry	https://www.serverworks.co.jp/
+4439	other	https://www.toumei.co.jp/
+4448	other	https://www.kubell.com/
+4452	cosmetics industry	https://www.kao.com/cn/
+4463	other	https://www.nicca.co.jp
+4464	other	http://www.soft99.co.jp/
+4465	other	http://www.niitaka.co.jp/
+4477	other	https://binc.jp/
+4494	other	http://www.variosecure.net/
+4499	other	https://speee.jp/
+4502	pharmaceutical industry	http://www.takeda.co.jp/
+4503	pharmaceutical industry	https://www.astellas.com/jp/
+4506	biotechnology	https://www.sumitomo-pharma.co.jp/
+4507	biotechnology	https://www.shionogi.com/jp/ja/
+4508	other	https://www.tanabe-pharma.com/
+4512	pharmaceutical industry	http://www.wakamoto-pharm.co.jp/
+4519	other	https://www.chugai-pharm.co.jp
+4523	pharmaceutical industry	https://www.eisai.co.jp/
+4524	pharmaceutical industry	http://www.jintan.co.jp/
+4526	other	http://www.rikenvitamin.jp/
+4527	pharmaceutical industry	http://www.rohto.co.jp
+4528	pharmaceutical industry	https://www.ono.co.jp/
+4530	pharmaceutical industry	https://www.hisamitsu.co.jp/
+4531	other	http://yuki-gosei.co.jp/
+4536	other	http://www.santen.com/en/
+4539	other	http://www.chemiphar.co.jp/
+4540	other	http://www.tsumura.co.jp/
+4541	other	https://www.nichiiko.co.jp/
+4543	medical device	http://www.terumo.co.jp/
+4554	pharmaceutical industry	https://www.fujipharma.jp/
+4555	pharmaceutical industry	http://www.sawai.co.jp/
+4556	other	http://www.kainos.co.jp/
+4558	other	http://www.chukyoiyakuhin.co.jp/
+4559	other	http://www.zeria.co.jp/
+4565	other	https://www.nxera.life/jp
+4569	pharmaceutical industry	http://www.kyorin-pharm.co.jp/
+456A	other	https://humanmade.co.jp/
+4574	pharmaceutical industry	http://www.seirogan.co.jp/
+4581	other	https://www.taisho-holdings.co.jp/
+4587	biotechnology	http://www.peptidream.com/
+4595	other	https://www.mizuho-m.co.jp/
+4613	chemical industry	https://www.kansai.co.jp/
+4615	other	https://www.shintopaint.co.jp/
+4616	other	http://www.kawakami-paint.co.jp/
+4619	other	http://www.nttoryo.co.jp/
+4620	other	http://www.fkkasei.co.jp/
+4623	other	http://www.asahipen.jp/
+4624	other	https://www.isamu.co.jp
+4627	other	http://www.natoco.co.jp/
+4628	other	https://www.sk-kaken.co.jp
+4631	chemical industry	http://www.dic-global.com
+4633	other	http://www.inx.co.jp/
+4634	other	https://www.artiencegroup.com
+463A	other	https://www.intellex-hd.co.jp
+4641	Dispatched labor	https://www.alpsgiken.co.jp/
+4642	other	http://www.oec-solution.co.jp/
+4644	video game industry	http://www.imagineer.co.jp
+4645	other	http://ir.ichishin.co.jp/
+464A	other	https://qpshd.com/
+4650	other	https://sdentertainment.jp/
+4651	other	http://www.sanix.jp/
+4657	other	http://www.kankyo-kanri.co.jp/
+4661	tourism	https://www.olc.co.jp/
+4664	other	http://www.trsc.co.jp/
+4665	other	https://www.duskin.co.jp/
+4667	other	https://www.aisantec.co.jp/
+4668	tertiary sector of the economy	http://www.meikonet.co.jp/
+4671	other	http://www.falco-hd.co.jp/
+4673	other	https://www.kge.co.jp/
+4676	other	https://www.fujimediahd.co.jp/
+4678	other	http://www.shuei-yobiko.co.jp/
+4679	other	https://tayanet.jp/
+4680	other	http://www.round1.co.jp/
+4681	other	https://www.resorttrust.co.jp/
+4686	software industry	https://www.justsystems.com
+4687	information technology	https://www.tdc.co.jp/
+4689	web portal	https://www.yahoo.co.jp/
+4690	other	https://www.npp-web.co.jp/
+4691	other	https://www.washingtonhotel.co.jp/
+4694	tertiary sector of the economy	http://www.bml.co.jp/
+4704	internet security	https://www.trendmicro.com/
+4705	other	http://www.clip-cor.co.jp/
+4707	other	http://kitac.co.jp/
+4712	other	http://www.keyholder.co.jp/
+4720	other	https://www.johnan.co.jp/
+4726	other	https://www.softbanktech.co.jp
+4728	video game industry	https://www.tose.co.jp/
+472A	other	https://www.mirrativ.co.jp/
+4735	other	http://www.kyoshin.co.jp/
+4745	other	http://www.kobetsu.co.jp/
+4746	other	http://www.toukei.co.jp/
+4750	other	http://www.daisan-g.co.jp/
+4751	Internet industry	https://www.cyberagent.co.jp/
+4754	private security company	http://www.tosnet.co.jp/
+4755	Internet industry	https://corp.rakuten.co.jp/
+4760	other	http://www.popalpha.co.jp/
+4761	other	http://www.kcs.co.jp/
+4762	other	https://www.xnet.co.jp/
+4765	tertiary sector of the economy	https://www.sbiglobalam.co.jp/
+4771	other	http://www.fmltd.co.jp/
+4776	software industry	https://cybozu.co.jp/
+4777	video game industry	https://www.gala.biz/
+4781	other	http://www.housing.co.jp/
+4784	other	https://internet.gmo/
+4792	other	https://www.yamada-cg.co.jp/
+4825	other	https://jp.weathernews.com/
+4829	other	http://www.nihon-e.co.jp/
+4832	other	http://www.jfe-systems.com/
+4833	other	https://def-consulting.co.jp/
+4837	other	https://www.shidax.co.jp/
+4838T	other	https://sssk-hd.com/
+4840	other	http://www.triis.co.jp/
+4848	other	https://www.fullcastholdings.co.jp/
+4849	Dispatched labor	https://corp.en-japan.com/
+4850	chemical industry	http://www.dow.com
+4852	pharmaceutical industry	http://www.pg.com/
+4857	pharmaceutical industry	https://www.lilly.com/
+485A	other	https://power-x.jp/
+4863	plastic	https://bayer.com
+4886	pharmaceutical industry	http://www.aska-pharma.co.jp/
+4887	other	https://www.sawaigroup.holdings/
+4901	photographic process	https://www.fujifilm.com/
+4902	electronics	https://kmbs.konicaminolta.us/
+4911	cosmetics industry	https://corp.shiseido.com/
+4912	other	http://www.lion.co.jp/
+4917	other	https://www.mandom.co.jp/
+4918	other	http://www.ivy.co.jp
+4920	other	https://shikizai.com/
+4921	cosmetics industry	http://www.fancl.co.jp/
+4922	personal care product	http://www.kose.co.jp/
+4925	other	http://www.haba.co.jp/
+4926	chemical industry	http://www.cbon.co.jp/
+4927	other	https://www.pola.co.jp/
+4928	other	http://www.noevirholdings.co.jp/
+4936	other	https://axxzia.co.jp/
+4951	other	https://www.st-c.co.jp/
+4955	other	http://www.agrokanesho.co.jp/
+4957	other	http://www.yschem.co.jp/
+4960	other	https://www.chemipro.co.jp/ja/index.html
+4967	other	http://www.kobayashi.co.jp/
+4970	other	http://www.toyogosei.co.jp/
+4974	other	https://www.takara-bio.co.jp/
+4976	other	https://www.drilube.co.jp/
+4977	other	https://www.nitta-gelatin.co.jp/
+4979	chemical industry	https://www.oat-agrio.co.jp/
+4985	chemical industry	https://www.earth.jp/
+4987	other	http://www.teraokatape.co.jp/
+4989	chemical industry	http://www.iharachem.co.jp/
+4992	other	http://www.hokkochem.co.jp/english/
+4994	other	http://www.lamick.co.jp/
+4998	other	https://www.fumakilla.co.jp/
+5002	petroleum industry	http://www.showa-shell.co.jp/
+5007	petroleum industry	http://www.cosmo-oil.co.jp/
+5009	other	http://www.fkoil.co.jp/
+500A	other	http://www.tobooks.jp/
+5013	other	http://www.yushiro.co.jp/
+5016	mining industry	https://www.jx-nmm.com/
+5018	other	https://www.moresco.co.jp/
+5019	petroleum industry	https://www.idemitsu.com/jp/
+5020	petroleum industry	https://www.hd.eneos.co.jp/
+5021	energy industry	https://www.cosmo-energy.co.jp/
+5032	information and communications industry	https://www.anycolor.co.jp/
+5033	software industry	https://nulab.com/
+5036	other	http://www.jbs.co.jp/
+5051	petroleum industry	https://bp.com
+505A	other	https://www.geekly.co.jp/
+5078	other	http://www.cel-co.com/
+5079	other	https://www.novac-cnst.co.jp/
+5103	other	https://www.showa-holdings.co.jp/
+5105	automotive industry	https://www.toyotires.co.jp/
+5108	industrial manufacturing	https://www.bridgestone.com/
+5110	automotive industry	http://www.srigroup.co.jp
+5122	other	http://www.okamoto-inc.jp/
+5139	other	https://www.openwork.co.jp/
+5161	other	http://www.nishikawa-rbr.co.jp/
+5162	other	http://www.asahi-rubber.co.jp
+5184	other	http://www.nichirin.co.jp/
+5194	other	http://www.sagami-gomu.co.jp
+5199	other	http://www.fujilatex.co.jp/
+5202	glass	https://www.nsg.co.jp/
+5204	other	http://www.ishizuka.co.jp/
+5210	other	http://www.yamamura.co.jp/
+5212	other	http://www.silicox.co.jp/
+5216	other	http://www.kuramoto.co.jp/
+5217	other	http://www.techno-q.com/
+5218	other	http://www.ohara-inc.co.jp/
+5232	other	http://www.soc.co.jp/
+5233	cement industry	https://www.taiheiyo-cement.co.jp
+5237	other	https://www.nozawa-kobe.co.jp/
+5254	other	https://arent.co.jp/
+5256	other	https://fusic.co.jp/
+5261	other	http://www.resol.jp/
+5273	other	http://www.m-sekisan.co.jp/
+5279	other	http://www.nihon-kogyo.co.jp/index.html
+5280	other	http://www.yoshicon.co.jp/
+5282	other	http://www.geostr.co.jp
+5283	other	https://www.kk-takamisawa.co.jp/
+5285	other	http://www.yamax.co.jp/
+5287	other	http://www.itoyogyo.co.jp/
+5290	other	https://www.vertex-grp.jp/
+5304	other	https://sec-carbon.com/
+5331	other	https://www.noritake.co.jp/eng/
+5332	industrial manufacturing	https://jp.toto.com/
+5333	other	http://www.ngk.co.jp/
+5337	other	http://www.danto.co.jp/
+5341	other	https://www.asahieito-holdings.co.jp/
+5344T	retail	https://www.maruwa-g.com/
+5356	other	http://www.mino-ceramic.co.jp/
+5363	other	http://www.tyk.co.jp/
+5367	other	https://www.nikkato.co.jp/
+5368	other	http://www.jic-bestork.co.jp/
+5380	other	http://www.shintokawara.co.jp/
+5381	other	https://www.mipox.co.jp/
+5386	other	http://www.try110.com/
+5391	other	http://www.aa-material.co.jp/
+5395	other	http://www.rikencorundum.co.jp/
+5401	iron and steel industry	https://www.nipponsteel.com/
+5406	iron and steel industry	http://www.kobelco.co.jp/english/
+5410	other	http://www.godo-steel.co.jp/
+5411	iron and steel industry	https://www.jfe-holdings.co.jp/
+5412	iron and steel industry	http://www.posco.com
+543A	automotive industry	https://archion.co.jp/
+5446	other	http://www.hokume.co.jp/
+5449	iron and steel industry	http://www.osaka-seitetu.co.jp/
+544A	other	https://www.globalmolding-solutions.com/
+5451	iron and steel industry	https://www.yodoko.co.jp/
+5458	other	http://www.takasago-t.co.jp/
+5464	other	https://www.mory.co.jp
+5471	iron and steel industry	http://www.daido.co.jp/
+5476	other	http://www.koshuha.co.jp/
+547A	alternative financial service	http://www.aiful.co.jp/
+5481	iron and steel industry	http://www.sanyo-steel.co.jp/
+5484	iron and steel industry	https://www.tohokusteel.com/
+548A	other	http://www.system-exe.co.jp
+5491	other	https://www.nipponkinzoku.co.jp/
+549A	other	https://hitotohito-hd.co.jp/
+5542	other	http://www.shst.co.jp/
+554A	other	https://batonz.jp/company/
+5571	other	http://www.excite.co.jp/
+5588	other	https://www.fastaccounting.jp/
+5602	other	https://www.kurimoto.co.jp/
+5603	other	http://www.kogi.co.jp/
+5606	other	https://www.asahitec.co.jp/
+5609	other	http://www.nipponchuzo.co.jp/
+5610	other	http://www.daiwajuko.co.jp/
+5644	other	https://www.metalart.co.jp
+5658	other	http://www.nichiasteel.co.jp/
+5660	other	http://www.shinko-wire.co.jp/
+5699	other	https://www.ibokin.co.jp/
+5703	other	http://www.nikkeikinholdings.co.jp/
+5706	other	https://www.mitsui-kinzoku.com/
+5711	other	http://www.mmc.co.jp/
+5713	metal industry	http://www.smm.co.jp/
+5714	environmental resource management	http://www.dowa.co.jp/
+5715	other	http://www.furukawakk.co.jp/
+5721	other	https://s-cryptoenergy.jp/
+5724	other	http://www.asaka.co.jp/
+5729	other	http://www.nihonseiko.co.jp
+5753	other	http://www.nippon-shindo.co.jp/
+5781	other	http://www.tohokinzoku.co.jp/
+5801	other	http://www.furukawa.co.jp/
+5802	non-ferrous metal	https://sumitomoelectric.com
+5807	other	http://www.totoku.co.jp/
+5817	other	http://www.jmacs-j.co.jp/
+5819	other	http://www.canare.co.jp/
+5820	other	https://www.kk-mitsuboshi.co.jp/
+5830	financial services	https://www.iyogin-hd.co.jp/
+5832	other	https://www.chugin-fg.co.jp/
+5838	economics of banking	https://www.rakuten-bank.co.jp/
+5845	other	https://www.zenhoren.jp/
+5851	manufacture of machinery and equipment	http://www.ryobi-group.co.jp/
+5856	other	http://www.tori-holdings.co.jp/
+5858	other	https://www.stgroup.jp/
+5869	other	https://www.wasedazemi.com/
+5871	other	https://www.solize.com/
+5889	other	https://www.japan-eyewear-holdings.co.jp/
+5891	other	https://www.kairikiya.co.jp/
+5892	other	https://yutori.tokyo/
+5893	retail	https://ravipa.co.jp/
+5900	other	http://www.daiken.ne.jp/
+5903	other	https://www.shinpo.jp/
+5905	other	http://www.nihonseikan.co.jp/
+5906	other	http://www.mkseiko.co.jp/
+5909	other	http://www.corona.co.jp/
+5915	other	http://www.komaihaltec.co.jp/
+5918	other	http://www.takigami.co.jp/
+5922	other	http://www.nasudenki.co.jp/
+5923	other	http://www.takadakiko.com/
+5928	metal fabrication	https://www.almetax.co.jp
+5932	other	http://www.st-grp.co.jp/
+5933	other	https://www.alinco.co.jp/
+5935	other	http://www.gantan.co.jp/index.html
+5936	other	http://www.toyo-shutter.co.jp/
+5938	metalware	https://www.lixil.co.jp/
+5939	other	https://www.otanikogyo.com/
+5940	industrial manufacturing	http://www.fujisash.co.jp/
+5942	pulp and paper industry	http://www.filcon.co.jp/
+5945	other	http://www.tenryu-saw.com/
+5946	other	http://www.chofu.co.jp/
+5947	other	https://www.rinnai.co.jp/
+5950	other	http://www.jpf-net.co.jp/
+5951	other	https://www.dainichi-net.co.jp/
+5952	other	http://www.amatei.co.jp/
+5955	other	https://wiseholdings.co.jp/
+5956	other	https://www.toso.co.jp/
+5962	other	http://www.asaka-ind.co.jp/
+5965	other	https://en.fujimak.co.jp
+5966	other	http://ktc.co.jp/
+5967	other	http://www.tonetool.co.jp/
+5969	other	https://www.lobtex.co.jp/
+5971	other	https://www.kyowakogyosyo.co.jp/
+5973	other	http://www.wolfgang.co.jp/
+5982	other	http://www.maruzen-kitchen.co.jp/
+5983	other	https://www.iwabuchi.co.jp/
+5984	other	http://www.kanefusa.co.jp/
+5985	other	http://www.suncall.co.jp/
+5990	other	http://www.supertool.co.jp/
+5992	other	http://www.chkk.co.jp/
+5994	other	http://www.fine-sinter.com/
+5997	other	http://www.kak-net.co.jp/
+5998	other	http://www.advanex.co.jp/
+6016	other	http://www.kobe-diesel.co.jp/
+6018	other	http://www.hanshin-dw.co.jp/
+6022	other	http://www.akasaka-diesel.jp/
+6023	other	https://www.d-infi.com/
+6027	other	https://www.bengo4.com/
+6030	other	https://jp.adventurekk.com/
+6031	other	https://zeta.inc/
+6037	other	https://rakumachi.co.jp/
+6044	other	https://www.sanki-s.co.jp/
+6047	tertiary sector of the economy	https://gunosy.co.jp/
+6054	other	https://www.livesense.co.jp/
+6059	other	http://www.uchiyama-gr.jp/
+6060	other	https://cocolonet.jp/
+6061	horticulture industry	https://uni-green.co.jp/
+6072	other	http://jiban-holdings.jp/
+6074	other	https://www.jss-group.co.jp/
+6082	other	https://www.rideonexpresshd.co.jp/
+6083	other	http://www.h-eri.co.jp/
+6085	other	https://corporate.asj-net.com/
+6086	other	http://www.shin-pro.com/
+6091	other	http://www.wescohd.co.jp/
+6092	other	http://enbio-holdings.com/
+6093	other	https://www.mitra.co.jp/
+6096	other	http://www.rarejob.com/rarejob.php
+6098	tertiary sector of the economy	https://recruit-holdings.com/en/
+6103	other	https://www.okuma.co.jp/english/
+6118	other	http://www.aida.co.jp/index.html
+6121	other	http://www.takisawa.co.jp/
+6125	other	https://www.okamoto.co.jp/
+6131	other	http://www.hamai.com/
+6135	other	https://www.makino.co.jp/
+6136	other	http://www.osg.co.jp/
+6138	other	http://www.dijet.co.jp/
+6144	other	http://www.seibudenki.co.jp/
+6145	other	https://nittoku.co.jp/
+6146	other	http://www.disco.co.jp/
+6149	other	https://odawara-eng.co.jp/
+6150	other	https://www.takeda-mc.co.jp/
+6155	other	https://www.takamaz.co.jp
+6156	other	http://www.a-one-seimitsu.co.jp/
+6157	other	https://www.ns-tool.com/
+6158	other	http://www.waida.co.jp/
+6159	other	http://www.micron-grinder.co.jp/
+6161	other	http://www.estic.co.jp/
+6164	other	http://www.taiyokoki.com/
+6165	other	http://www.punch.co.jp/
+6171	other	https://www.dksiken.co.jp/
+6173	other	https://www.aqualine.jp/
+6178	economics of banking	https://www.japanpost.jp
+6181	wedding	https://tameny.jp/
+6184	other	http://www.takakita-net.co.jp/
+6185	other	http://www.so-netmedia.jp/
+6188	other	http://www.fsisb.co.jp/
+6199	other	http://www.seraku.co.jp/
+619A	interior design	https://www.oliverinc.co.jp/
+6203	mechanical engineering	https://www.howa.co.jp/
+6208	other	https://www.ishiss.co.jp/
+6217	other	http://www.tsudakoma.co.jp/
+6218	other	http://www.enshu.co.jp/
+6223	other	http://www.seibu-giken.com/
+6226	other	http://www.moriya-elevator.co.jp/
+6229	other	https://www.okm-net.jp/
+6230	other	http://www.san-ei-web.co.jp/
+6233	other	https://www.klass-corp.co.jp/
+6238	video game industry	http://www.furyu.jp
+6240	other	https://www.yamashin-filter.co.jp/ja/index.html
+6249	other	http://www.gamecard.co.jp/
+6257	other	https://www.fujimarukun.co.jp/
+6262	other	http://www.pegasus.co.jp/
+6265	other	https://convum.co.jp/
+6266	other	https://tazmo.co.jp
+6267	other	http://www.general-packer.co.jp/
+6268	other	http://www.nabtesco.com/
+6276	other	https://siriusvision.jp/
+6279	other	https://www.zuiko.co.jp/
+6286	other	http://www.seiko-co.com/
+6287	other	http://www.sato.co.jp/
+6289	other	https://www.giken.com/en/
+6292	other	http://www.kawata-mfg.co.jp/
+6293	other	http://www.nisseijushi.co.jp/
+6301	manufacture of machinery and equipment	https://www.komatsu.jp/en
+6302	other	http://www.shi.co.jp/
+6305	other	https://www.hitachicm.com/
+6309	other	https://www.tomo-e.co.jp
+6310	manufacture of machinery and equipment	http://www.iseki.co.jp
+6312	other	http://www.freund.co.jp/
+6316	other	https://www.maruyama.co.jp/
+6317	other	http://www.kiw.co.jp/
+6324	other	http://www.hds.co.jp/
+6326	manufacture of machinery and equipment	https://www.kubota.com/
+6327	other	http://www.kitagawaseiki.co.jp/
+6332	other	https://www.tsk-g.co.jp/
+6333	other	https://www.teikokucp.co.jp/
+6334	other	http://www.meiji-kikai.co.jp/
+6335	other	http://www.tks-net.co.jp/
+6336	other	http://www.ishiihyoki.co.jp/
+6337	other	http://www.tesec.co.jp/
+6338	other	http://www.takatori-g.co.jp/
+6342	other	http://www.taihei-ss.co.jp/
+6343	other	http://www.freesiamacross-extruder.com/jp/index.html
+6346	other	http://www.kikukawa.co.jp/
+6356	other	https://www.nippon-gear.jp/
+6357	industrial manufacturing	http://www.sanseiyusoki.com/eng/
+6360	other	https://www.tam-tokyo.co.jp/
+6361	other	https://www.ebara.co.jp/
+6365	other	http://www.dmw.co.jp/
+6366	construction	https://www.chiyodacorp.com/
+6367	electronics	https://www.daikin.co.jp
+6373	other	http://www.did-daido.co.jp/
+6378	other	http://www.kcpc.co.jp/
+6380	other	https://www.ocm.co.jp/
+6382	other	http://www.trinityind.co.jp/
+6384	other	https://www.showashinku.co.jp/
+6387	other	http://www.samco.co.jp/
+6390	manufacture of machinery and equipment	https://www.kato-works.co.jp/
+6392	manufacture of machinery and equipment	https://yamadacorp.co.jp
+6393	other	http://www.yukeneurope.com
+6395	other	http://www.tadano.com/index.html
+6396	other	https://www.unozawa.co.jp/
+6402	other	http://www.kanematsu-eng.jp/
+6405	other	http://www.suzumo.co.jp/
+6408	other	https://www.oguraclutch.co.jp/
+6411	other	https://nakano-reiki.com/
+6424	other	http://www.tacy.co.jp/
+6425	video game industry	https://www.universal-777.com/
+6428	other	http://www.oizumi.co.jp/
+642A	other	https://www.kyudenhd.co.jp/
+6433	other	http://www.hephaist.co.jp/
+6436	industrial manufacturing	https://www.amano.co.jp/
+6444	automotive industry	https://www.sanden.co.jp/
+6445	other	http://janome.com
+6448	printer	https://global.brother/
+6457	other	http://www.glory.co.jp/
+6459	other	http://www.drk.co.jp/
+6460	video game industry	https://www.segasammy.co.jp/
+6464	manufacture of machinery and equipment	https://www.tsubaki-nakashima.com/
+6466	other	http://www.toavalve.co.jp/
+6469	other	http://www.hsk.co.jp/
+6470	other	http://www.taihonet.co.jp/
+6471	heavy industry	http://www.nsk.com/
+6474	other	http://www.nachi-fujikoshi.co.jp/
+6479	other	https://www.minebeamitsumi.com/
+6482	other	https://www.yushincompany.jp/
+6484	other	https://www.kvk.co.jp/
+6485	other	http://www.qso.co.jp/
+6488	other	http://www.yoshitake.co.jp/
+6489	other	http://www.maezawa.co.jp/
+6490	other	https://www.pillar.co.jp/
+6492	other	http://www.okano-valve.co.jp/
+6493	other	https://www.niv.co.jp/
+6495	other	http://www.miyairi-valve.co.jp/
+6496	other	https://www.nakakita-s.co.jp
+6501	electrical industry	https://www.hitachi.com/
+6502	electrical industry	https://www.toshiba.com/
+6503	electronics	https://www.mitsubishielectric.co.jp/
+6505	other	http://www.toyodenki.co.jp/
+6506	other	http://www.yaskawa.co.jp/
+6508	other	https://www.meidensha.co.jp/
+6513	other	http://www.origin.co.jp/
+6516	other	http://www.sanyodenki.co.jp/
+6517	other	https://www.denyo.co.jp/
+6524	industrial manufacturing	https://www.kohokukogyo.co.jp/
+6532	other	http://www.baycurrent.co.jp
+6537	other	https://www.wash-house.jp/
+6540	other	https://www.semba1008.co.jp/ja/index.html
+6546	other	http://www.fulltech1963.com/
+6547	other	http://www.greens.co.jp/
+6552	other	https://gamewith.co.jp/
+6568	other	https://www.kncweb.co.jp/
+6570	other	https://www.kyowa-corp.co.jp
+6572	other	https://open-group.co.jp/
+6573	other	https://cravia.jp/
+6579	other	https://corp.logly.co.jp/
+6586	other	http://www.makita.co.jp/
+6594	other	https://www.nidec.com/en/
+6614	other	http://www.shikino.co.jp/
+6615	other	https://www.umc.co.jp/
+6627	other	http://www.teraprobe.com/
+6628	electronics	http://www.onkyo.com
+6629	other	http://www.technohorizon.co.jp/
+6634	mobile phone industry	http://www.ncxxgroup.co.jp/
+6637	other	http://www.terasaki.co.jp/
+6643	other	https://www.togami-elec.co.jp/
+6645	electronics industry	https://www.omron.co.jp/
+6647	other	http://www.morio.co.jp
+6648	other	https://www.kawaden.co.jp/
+6652	automation	https://jp.idec.com/
+6656	other	http://www.inspec21.com/
+6658	other	https://www.shiraidenshi.co.jp
+6663	other	https://www.taiyo-tx.com/
+6664	other	http://home.opto.co.jp/
+6666	other	http://www.river-ele.co.jp/
+6670	electronics	http://www.mcj.jp/
+6675	other	https://www.saxa.co.jp
+6676	computer hardware industry	https://melco-hd.jp/
+6677	other	http://www.sk-el.co.jp/
+6678	other	http://www.technomedica.co.jp/
+6680	computer industry	https://www.ibm.com/
+6686	telecommunications industry	http://www.motorola.com/
+6689	software development	https://apple.com/
+6694	electronics industry	http://www.zoom.co.jp/english/index.html/
+6701	electronics	https://www.nec.com/
+6702	telecommunications industry	https://global.fujitsu
+6703	electronics	http://www.oki.com
+6704	other	https://www.iwatsu.co.jp/
+6706	other	http://www.denkikogyo.co.jp/
+6715	other	http://www.nyc.co.jp/
+6718	other	http://www.aiphone.co.jp/
+6721	other	http://www.wintest.co.jp/
+6723	semiconductor industry	https://www.renesas.com/
+6724	precision mechanics	https://corporate.epson/
+6730	other	http://www.axell.co.jp/
+6731	computer hardware industry	http://www.pixela.co.jp/
+6734	other	http://www.newtech.co.jp
+6736	video game industry	https://www.sun-denshi.co.jp/
+6737	computer industry	https://www.eizo.co.jp/
+6740	electronics	http://www.j-display.com/
+6743	other	https://www.daido-signal.co.jp/
+6748	other	http://www.seiwa.co.jp/
+6750	information technology	http://www.elecom.co.jp/
+6752	electronics	https://holdings.panasonic/
+6753	semiconductor industry	https://global.sharp
+6754	telecommunications	https://www.anritsu.com/
+6757	other	http://www.osg-nandemonet.co.jp/
+6758	electrical industry	https://www.sony.co.in/
+6762	electronics	https://www.tdk.com/
+6767	electronics	https://www.mitsumi.co.jp/
+6769	other	http://www.thine.co.jp/
+6771	electronics	http://www.ikegami.co.jp/
+6772	other	http://www.tocos-j.co.jp/
+6777	other	https://www.santec.com/en/
+6786	other	http://rvh.jp/
+6794	other	http://www.foster.co.jp/
+6797	other	https://www.nagoya-denki.co.jp/
+6803	electronics	http://www.teac.co.jp/index.html
+6810	electronics	https://www.maxell.co.jp/
+6819	other	http://www.izu-sr.co.jp/
+6820	electronics	https://www.icom.co.jp/
+6824	other	http://www.new-cosmos.co.jp/
+6832	other	http://www.aoi-electronics.co.jp/
+6834	other	http://www.seikoh-giken.co.jp/
+6835	technology industry	https://www.at-global.com/
+6836	other	http://www.plathome.co.jp/
+6837	other	http://www.kyosha.co.jp/
+6838	other	http://www.tmex.co.jp/
+6839	electronics industry	https://www2.funai.co.jp
+6840	other	http://www.akiba-holdings.co.jp/
+6841	information technology	http://www.yokogawa.com
+6848	other	https://www.toadkk.co.jp/
+6853	other	http://www.kyowa-ei.com/
+6855	other	https://www.jem-net.co.jp/
+6856	electronics	http://www.jp.horiba.com/
+6857	other	https://www.advantest.com/
+6858	other	http://www.onosokki.co.jp/
+6861	electronics	https://www.keyence.com/
+6862	other	http://www.minato.co.jp
+6869	other	https://www.sysmex.co.jp/
+6882	manufacture of electrical equipment	https://www.sansha.co.jp
+6894	other	https://www.pulstec.co.jp/
+6897	other	https://www.twinbird.jp/
+6898	other	http://www.tomita-electric.com/
+6899	other	https://www.asti.co.jp/
+6901	other	https://www.sawafuji.co.jp/
+6902	automotive industry	https://www.denso.com/
+6904	other	http://www.harada.com/jp/
+6908	industrial manufacturing	http://www.iriso.co.jp/
+6912	other	https://global.kikusui.co.jp
+6915	other	http://www.chiyoda-i.co.jp/
+6916	other	https://www.iodata.jp/
+6918	other	http://www.avaldata.co.jp
+6919	other	http://www.kel.jp/
+6926	other	http://www.okayaelec.co.jp/
+6930	other	http://www.nippon-antenna.co.jp/
+6932	other	http://www.endo-lighting.co.jp/
+6938	other	http://www.soshin.co.jp/
+6941	other	http://www.yamaichi.co.jp
+6942	other	http://www.sophia.com/
+6943	industrial manufacturing	https://www.nkkswitches.co.jp/
+6946	other	http://www.avio.co.jp/
+6951	scientific instrument	http://www.jeol.com/
+6952	electronics industry	http://world.casio.com/
+6954	industrial manufacturing	https://www.fanuc.co.jp/index.html
+6955	other	http://www.fdk.co.jp
+6962	other	http://www.kds.info/
+6963	electronics	https://www.rohm.co.jp/
+6964	other	http://www.sko.co.jp/
+6969	other	https://www.ncc-matsuo.co.jp/
+6971	electronics	https://www.kyocera.co.jp/
+6973	other	http://www.kyoei.co.jp/
+6976	electronics	http://www.ty-top.com
+6977	other	http://www.jrm.co.jp/
+6981	other	https://www.murata.com/ja-jp
+6989	other	http://www.hdk.co.jp/
+6994	other	https://www.shizuki.co.jp/
+6996	electronics	http://www.nichicon.co.jp/
+6997	electronics	https://www.chemi-con.co.jp/
+6998	other	https://www.nittan.co.jp/
+7004	weapons industry	http://www.kanadevia.com
+7011	heavy industry	https://www.mhi.com
+7012	weapons industry	https://www.khi.co.jp/
+7013	shipbuilding	http://www.ihi.co.jp/
+7014	other	http://www.namura.co.jp/
+7018	shipbuilding	https://www.naikaizosen.co.jp/
+7022	shipbuilding	http://www.sanoyas.co.jp/
+7030	other	http://www.sprix.jp/
+7037	other	http://www.teno.co.jp/
+7039	other	http://www.bridge-g.com/
+7058	other	https://www.kyoei-ss.co.jp/
+7060	other	https://geechs.com/
+7063	tertiary sector of the economy	https://birdman.tokyo/
+7065	other	http://www.upr-net.co.jp/
+7072	other	https://corp.intimatemerger.com/
+7075	other	https://qlshd.co.jp/
+7077	other	https://www.alink.ne.jp/
+7081	other	https://www.koyou.co.jp/
+7087	other	https://www.willtec.jp/
+7102	rail vehicle manufacturer	https://www.n-sharyo.co.jp/
+7104	industrial manufacturing	http://www.fujicar.com/
+7105	other	http://www.logisnext.com/
+7112	clothing industry	https://www.cube-co.com/ja/index.html
+7122	industrial manufacturing	http://www.kinkisharyo.co.jp/
+7128	other	https://www.unisol-gr.com/
+7134	other	http://www.upgarage.com/
+7150	economics of banking	https://www.shimagin.co.jp/
+7161	other	http://www.jimoto-hd.co.jp/
+7162	other	http://www.astmax.com/
+7163	economics of banking	https://www.netbk.co.jp/
+7167	other	http://www.mebuki-fg.co.jp/
+7175	other	http://www.imamura.co.jp/
+7182	economics of banking	https://www.jp-bank.japanpost.jp
+7186	economics of banking	https://www.boy.co.jp/
+7201	automotive industry	https://www.nissan-global.com/
+7202	automotive industry	https://www.isuzu.co.jp/world/
+7203	automotive industry	https://global.toyota
+7205	automotive industry	https://www.hino.co.jp
+7211	automotive industry	https://www.mitsubishi-motors.com/en/
+7212	other	http://www.ftech.co.jp/
+7214	other	http://www.gmb.jp/
+7217	automotive industry	http://www.tein.co.jp/
+7218	other	http://www.tanasei.co.jp/
+7219	other	https://www.hks-global.com/
+7222	automotive industry	http://www.nissan-shatai.co.jp/
+7228	other	http://www.daytona.co.jp/
+7229	automotive industry	https://www.yutakagiken.co.jp/
+7233	other	http://www.jbk.co.jp/
+7235	other	https://www.tokyo-radiator.co.jp/
+7243	other	http://www.shiroki.co.jp/
+7247	automotive industry	http://www.mikuni.co.jp/e/index.html
+7248	automotive supplier	http://www.calsonickansei.co.jp/
+7254	other	http://www.uvc.co.jp/
+7256	other	http://www.kasai.co.jp/
+7259	automotive industry	https://www.aisin.com/jp/
+7261	automotive industry	https://www.mazda.com/ja/
+7262	automotive industry	https://www.daihatsu.com/
+7264	other	https://www.muro.co.jp/
+7265	other	https://www.eiken-kk.co.jp/
+7266	other	http://www.imasen.co.jp/
+7267	industrial manufacturing	https://global.honda
+7269	automotive industry	https://www.globalsuzuki.com/
+7270	automotive industry	https://www.subaru.co.jp
+7271	automotive industry	https://www.fine-yasunaga.co.jp/
+7272	mechanical engineering	https://global.yamaha-motor.com/
+7273	other	https://www.ikuyo194.co.jp/
+7277	other	http://www.tbk-jp.com/
+7279	other	http://www.hi-lex.co.jp/e/index.html
+7282	other	http://www.toyoda-gosei.co.jp/
+7284	other	http://www.meiwasangyo.co.jp/
+7287	other	http://www.nippon-seiki.co.jp
+7291	other	http://www.n-plast.co.jp/
+7292	other	http://www.murakami-kaimeido.co.jp/
+7297	other	http://www.carmate.co.jp/
+7298	other	http://www.yachiyo-ind.co.jp/
+7299	other	http://www.oozx.co.jp/
+7305	other	http://www.araya-kk.co.jp/
+7309	sports industry	https://www.shimano.com/en/
+7314	other	https://www.odawarakiki.com/
+7315	other	http://www.ijtt-hd.co.jp/
+7320	other	https://solvvy.co.jp/
+7338	other	https://www.inv.inc/
+7352	other	https://twostone-s.com/
+7356	tertiary sector of the economy	https://corp.retty.me/
+7357	other	http://www.geo-code.co.jp/
+7359	other	https://tokyo-tsushin.com/
+7360	tertiary sector of the economy	https://www.ondeck.jp/
+7367	business and other management consultancy activities	https://www.celm.co.jp/
+7368	other	http://www.hyojito.co.jp/
+7377	other	https://www.dcne.co.jp/
+7412	other	http://www.atom-corp.co.jp/
+7413	other	http://www.sokensha.co.jp/index.html
+7417	other	http://www.nanyo.co.jp/
+7425	other	http://www.hatsuho.co.jp/
+7426	other	http://www.yamadai.com/
+7427	other	http://www.echotd.co.jp/
+7434	other	https://www.kk-otake.co.jp/
+7435	other	http://www.nadex.co.jp/
+7442	other	http://www.nakayamafuku.co.jp/
+7443	other	http://www.yokohamagyorui.co.jp/
+7444	other	http://www.harimakb.co.jp/
+7445	other	http://www.right-on.co.jp/
+7446	other	http://www.t-kagaku.co.jp/
+7450	other	https://www.sunday.co.jp/
+7451	other	http://www.mitsubishi-shokuhin.com/
+7453	retail	https://ryohin-keikaku.jp
+7455	other	https://www.paris-miki.co.jp/
+7460	other	http://www.yaginet.co.jp/
+7461	other	https://www.kimuranet.jp/
+7462	other	http://www.daiya-tsusho.co.jp/
+7472	other	http://www.toba.co.jp/
+7480	other	https://www.suzuden.co.jp/
+7481	other	http://www.oie.co.jp/
+7483	industrial manufacturing	http://www.doshisha.co.jp/
+7486	other	http://www.sanrinkk.co.jp/
+7487	other	http://www.ozu.co.jp/
+7494	other	http://www.konaka.co.jp/
+7501	other	https://www.tiemco.co.jp/
+7502	other	https://www.plazacreate.co.jp
+7505	other	http://www.fusodentsu.co.jp/
+7506	other	https://www.houseofrose.co.jp/
+7512	other	https://www.aeon-hokkaido.jp/
+7513	other	https://www.kojima.net/
+7514	other	https://www.himaraya.co.jp/
+7515	other	http://ww2.maruyoshi-center.co.jp/
+7518	other	http://www.netone.co.jp/
+7523	other	http://www.artvivant.net/
+7524	other	https://www.marche.co.jp/
+7527	other	http://www.systemsoft.co.jp/
+7532	other	https://ppih.co.jp/
+7544	other	https://www.three-f.co.jp/
+7550	retail chain	https://www.zensho.co.jp/
+7551	other	http://www.weds.co.jp/
+7552	video game industry	https://www.happinet.co.jp
+7559	other	https://www.gfc-c.co.jp/
+7561	other	http://www.hurxley.co.jp/
+7562	food service	http://www.anrakutei.co.jp/
+7564	other	https://www.workman.co.jp/
+7565	other	http://www.mansei.co.jp/
+7571	other	http://www.yamano-hd.com/
+7575	other	https://www.jll.co.jp/
+7578	other	http://www.nichiryoku.co.jp/
+7581	food service	https://www.saizeriya.co.jp
+7590	gardening	http://takasho.co.jp/
+7601	convenience store	https://www.poplar-cvs.co.jp/
+7602	other	https://www.ledax.co.jp/
+7603	other	https://gyet.co.jp/
+7604	other	http://www.umenohana.co.jp/
+7608	other	http://www.sk-japan.co.jp/
+7610	other	http://www.tay2.co.jp/
+7614	other	http://www.om2.co.jp/
+7615	other	https://www.kyotokimonoyuzen.co.jp/
+7619	other	http://www.tanakashoji.co.jp/
+7621	food service	https://www.ukai.co.jp/
+7624	other	http://www.naito.net/
+7625	food service	http://www.global-dining.com/
+7630	food service	https://www.ichibanya.co.jp
+7634	other	http://www.hosi.co.jp/
+7636	other	https://www.handsman.co.jp/
+7638	other	http://www.parler.co.jp/
+7640	other	http://www.topculture.co.jp/
+7643	other	https://www.daiichi-d.co.jp/
+7646	mass-market retailing	https://www.plant-co.jp/
+7647	other	http://www.ontsu.co.jp/index.html
+7652	automotive industry	https://www.volvogroup.com/en/
+7659	automotive industry	https://www.volkswagenag.com/
+7661	weapons industry	https://boeing.com/
+7663	automotive industry	https://group.mercedes-benz.com/
+7674	other	https://nattyswanky.com/
+7677	other	https://www.yashima-co.co.jp/
+7678	other	https://www.asakuma.co.jp/
+7682	other	http://www.hamayuu.co.jp
+7686	other	https://www.kakuyasu.co.jp/
+7689	other	https://www.copa.co.jp/
+7698	other	http://www.iceco.co.jp/
+7701	other	http://www.shimadzu.co.jp/
+7702	other	http://www.jms.cc/
+7705	other	http://www.gls.co.jp/
+7716	other	http://www.nsk-nakanishi.co.jp/
+7719	other	http://www.tksnet.co.jp/
+7726	other	http://www.kuroda-precision.co.jp/
+7727	other	http://www.oval.co.jp/
+7731	camera	https://www.nikon.com/
+7733	electronics	http://www.olympus-global.com/
+7735	other	http://www.screen.co.jp/eng/
+7745	other	http://www.aandd.co.jp/
+7746	other	https://ogc-jp.com/
+7749	other	http://www.medikit.co.jp/
+7750	photo industry	https://www.ricoh-imaging.co.jp/
+7751	electronics	https://global.canon/
+7752	electronics industry	http://www.ricoh.com/
+7760	other	http://www.imv.co.jp/
+7762	horology	http://www.citizen.co.jp
+7771	other	http://www.nihon-s.co.jp/
+7775	other	https://www.daiken-iki.co.jp/
+7777	other	https://www.3d-matrix.co.jp/
+7782	other	https://www.sincere-vision.com/
+7791	other	https://www.dreambed.co.jp/
+7795	other	https://www.kyoritsu-printing.co.jp/
+7800	other	https://www.amifa.co.jp/
+7803	video game industry	https://bushiroad.co.jp/
+7804	other	https://www.bandp.co.jp/
+7805	other	https://printnet.jp/
+7807	other	http://www.tacaof.co.jp/
+7809	other	https://www.kotobukiya.co.jp/
+7811	other	https://www.npacks.co.jp/
+7819	cosmetics industry	https://www.shobido-corp.co.jp/
+7822	other	http://www.eidai.com/
+7823	other	http://www.artnature.co.jp/
+7827	other	https://orvis.co.jp/
+7831	other	http://www.wellco-corp.com/
+7832	video game industry	https://www.bandainamco.co.jp/
+78390	other	https://www.shoei.com/
+7841	other	http://endo-mfg.co.jp/
+7842	game industry	https://www.segafave.co.jp
+7844	video game industry	https://www.marv.jp/
+7846	office supply	https://www.pilotpen.com
+7849	other	http://starts-pub.jp/
+7851	other	http://www.kc-s.co.jp/
+7857	other	https://www.seki.co.jp/
+7859	other	http://www.almedio.co.jp/
+7860	music industry	http://www.avex.co.jp/
+7865	other	https://www.people-kk.co.jp/
+7867	video game industry	https://www.takaratomy.co.jp/english/
+7871	other	https://www.fukuvi.co.jp
+7874	other	https://www.lecinc.co.jp/
+7875	other	https://www.takedaip-hd.co.jp/
+7878	other	http://www.kosaikogei.co.jp/
+7879	other	http://www.noda-co.jp/
+7883	other	http://www.sunmesse.co.jp/
+7885	other	https://www.takano-net.co.jp
+7887	other	https://www.nankaiplywood.co.jp/
+7896	other	http://www.seven-gr.co.jp/
+7897	other	http://www.hokushinmdf.co.jp/
+7898	other	http://www.woodone.co.jp/
+7899	other	https://www.n-advf.com/
+7901	other	http://www.matsumoto-inc.co.jp
+7906	other	https://www.yonex.com/
+7908	other	https://www.kimoto.co.jp/
+7911	printing industry	https://www.holdings.toppan.com/en/
+7912	other	https://www.dnp.co.jp/
+7913	other	https://www.toppan-colorer.co.jp/
+7914	printing industry	http://www.kyodoprinting.co.jp/
+7916	other	https://www.mitsumura.co.jp/
+7917	other	https://www.zacros.co.jp/
+7918	other	http://www.via-hd.co.jp/
+7919	other	http://www.nozakiinsatu.co.jp/
+7927	other	http://www.muto.co.jp/
+7928	other	http://www.asahikagakukogyo.co.jp/
+7932	other	http://www.nippi-inc.co.jp/index.html
+7936	textile industry	https://www.asics.com/
+7937	other	http://www.tsutsumi.co.jp/
+7938	other	http://www.regal.co.jp/
+7939	other	http://www.kensoh.co.jp/
+7942	other	https://www.co-jsp.co.jp
+7951	automotive industry	https://jp.yamaha.com/
+7952	musical instrument	https://www.kawai-global.com/
+7953	other	http://www.kikusui-chem.co.jp/
+7955	other	https://cleanup.jp/
+7956	other	http://www.pigeon.co.jp/
+7957	other	http://www.fujicopian.com/
+7962	other	http://www.kingjim.co.jp/
+7963	other	https://www.koken-ltd.co.jp/
+7965	other	https://www.zojirushi.co.jp/
+7970	other	http://www.shinpoly.co.jp/
+7971	other	http://www.toli.co.jp/
+7972	other	https://www.itoki.jp/
+7974	video game industry	https://www.nintendo.com/jp/index.html
+7975	other	http://www.lihit-lab.com/
+7976	industrial manufacturing	https://www.uniball.com
+7980	other	http://www.sts-japan.com/
+7981	other	http://www.takara-standard.co.jp/
+7983	weapons industry	http://www.miroku-jp.com/
+7984	other	https://www.kokuyo.com
+7985	other	https://www.nepon.co.jp
+7987	other	http://www.nakabayashi.co.jp/
+7991	other	http://www.mamiya-op.co.jp/
+7992	stationery	https://sailor.co.jp/
+7994	other	https://www.okamura.co.jp/
+7995	other	http://www.valqua.co.jp/
+7997	other	http://www.kurogane-kks.co.jp/
+7999	other	https://www.mutoh-hd.co.jp/
+8001	trade	https://www.itochu.co.jp
+8002	sōgō shōsha	https://www.marubeni.com/
+8006	other	http://www.yuasa-funashoku.com/
+8015	wholesale	http://www.toyota-tsusho.com/
+8018	other	http://www.sankyoseiko.co.jp
+8023	other	https://www.daiko-xtech.co.jp/
+8028	convenience store	https://www.family.co.jp/company.html
+8030	other	http://www.marunaka-net.co.jp/
+8031	logistics	https://www.mitsui.com/jp/ja
+8035	electronics	https://www.tel.co.jp/
+8038	other	http://www.tohsui.co.jp
+8039	other	http://www.tsukiji-uoichiba.co.jp/
+8040	other	http://www.soir.co.jp/
+8041	wholesale	http://www.oug.co.jp/
+8045	other	http://www.yokohama-maruuo.co.jp/
+8050	manufacture of watches and clocks	https://www.seiko.co.jp/
+8051	other	https://www.yamazen.co.jp/
+8053	sōgō shōsha	https://www.sumitomocorp.co.jp/
+8058	wholesale	http://www.mitsubishicorp.com/
+8060	other	https://corporate.jp.canon/
+8066	other	https://www.mitani-corp.co.jp/
+8070	other	https://www.tscom.co.jp/
+8072	other	http://www.jptco.co.jp/en.html
+8074	other	http://www.yuasa.co.jp/
+8076	other	http://www.canox.co.jp/
+8077	other	http://www.kobayashi-metals.co.jp/
+8085	other	https://www.narasaki.co.jp/
+8086	medical device	http://www.nipro.co.jp/
+8088	other	http://www.iwatani.co.jp/
+8089	other	http://www.suteki-nice.jp/
+8105	other	http://www.pearly-marusho.co.jp/
+8107	other	http://www.kimuratan.co.jp/
+8114	textile industry	https://www.descente.co.jp/
+8115	other	http://www.moonbat.co.jp/
+8117	other	https://www.central-auto.co.jp/
+8123	other	http://www.kawabe.co.jp/
+8127	clothing industry	http://www.yamatointr.co.jp/
+8130	other	http://www.sangetsu.co.jp/
+8131	other	http://www.mitsuuroko.com/
+8133	wholesale	http://www.itcenex.com/
+8135	other	https://zett.jp/
+8136	wholesale	https://www.sanrio.com/
+8141	other	https://www.shinko-sj.co.jp/
+8143	other	http://www.lapine.co.jp/
+8153	other	https://www.mos.co.jp/company/
+8154	video game industry	http://www.taxan.co.jp/
+8163	other	https://srs-holdings.co.jp/
+8165	other	http://www.bellemaison.jp
+8166	other	http://www.taka-q.com/
+8173	other	https://www.joshin.co.jp/joshintop/
+8179	other	https://www.royal-holdings.co.jp/
+8181	other	https://www.totenko.co.jp/
+8182	other	http://www.inageya.co.jp/
+8194	other	http://www.lifecorp.jp/
+8198	retail	http://www.mv-tokai.co.jp
+8200	restaurant	https://www.ringerhut.jp/
+8202	retail	http://www.laox.co.jp/
+8207	other	https://www.teng.co.jp/
+8208	other	http://www.encho.co.jp/
+8209	other	http://www.friendly-co.com/
+8215	other	https://www.ginyama.co.jp/
+8225	other	http://www.kk-takachiho.jp/
+8226	other	https://www.rikei.co.jp/
+8227	other	https://www.shimamura.gr.jp/
+8230	other	http://www.hasegawa.jp/
+8233	retail	https://www.takashimaya.co.jp/
+8242	retail	http://www.h2o-retailing.co.jp/
+8244	retail	https://www.d-kintetsu.co.jp/
+8247	other	https://www.daiwa-dp.co.jp/
+8251	retail	https://www.parco.jp/
+8256	other	https://routestyle.co.jp/
+8260	other	https://www.izutsuya.co.jp/
+8267	retail	https://www.aeon.info/
+8275	other	http://www.forval.co.jp/
+8278	other	https://www.the-fuji.com/
+8279	retail	https://www.yaoko-net.com/
+8285	other	http://www.mitani.co.jp/
+8289	other	https://www.olympic-corp.co.jp/
+8291	other	http://www.nissan-tokyo-hd.co.jp/index.html
+8301	other	https://www.boj.or.jp/
+8303	economics of banking	http://www.shinseibank.com
+8306T	financial services	http://www.mufg.jp/
+8308	bank	http://www.resona-gr.co.jp/
+8309	financial services	https://www.smth.jp/
+8316	financial sector	http://www.smfg.co.jp/
+8349	bank	http://www.tohoku-bank.co.jp/
+8355	financial sector	https://www.shizuokabank.co.jp
+8361	financial sector	https://www.okb.co.jp/
+8365	economics of banking	http://www.toyamabank.co.jp/
+8377	other	https://www.hokuhoku-fg.co.jp/
+8383	economics of banking	http://www.tottoribank.co.jp/
+8399	bank	https://www.ryugin.co.jp/
+8410	financial services	https://www.sevenbank.co.jp/
+8411	financial services	http://www.mizuho-fg.co.jp/
+8416	economics of banking	http://www.kochi-bank.co.jp/
+8473	financial services	http://www.sbigroup.co.jp/
+8508	other	https://www.jt-corp.co.jp/
+8518	other	http://www.jaic-vc.co.jp/
+8524	economics of banking	https://www.hokuyobank.co.jp/
+8537	other	http://www.taikobank.jp/
+8542	economics of banking	https://www.tomatobank.co.jp/
+8543	economics of banking	http://www.minatobk.co.jp/
+8545	other	http://www.kansaiurban.co.jp/
+8562	economics of banking	http://www.fukushimabank.co.jp/
+8563	economics of banking	https://www.daitobank.co.jp/
+8571	other	http://www.nisgroup.jp/
+8572	other	https://www.acom.co.jp/
+8591	financial services	http://www.orix.co.jp/
+8596	other	http://www.k-lease.co.jp/
+8601	investment bank	https://www.daiwa-grp.jp/
+8604	financial services	https://www.nomura.com/
+8609	other	http://www.okasan.jp/
+8613	other	http://www.marusan-sec.co.jp/
+8614	financial instruments business	https://www.toyo-sec.co.jp/
+8617	other	http://www.kosei.co.jp/
+8628	other	http://www.matsui.co.jp/
+8630	other	https://www.sompo-hd.com/
+8634	economics of banking	https://www.jpmorganchase.com/
+8637	financial services	https://www.nab.com.au/
+8640	financial services	http://www.td.com/
+8641	financial services	https://www.westpac.com.au/
+8642	economics of banking	https://home.barclays/
+8648	financial services	https://www.bankofamerica.com/
+8651	financial services	https://www.db.com
+8653	financial services	https://www.credit-suisse.com/
+8654	financial services	https://www.santander.com/en/home
+8657	economics of banking	https://www.ubs.com/
+8665	other monetary intermediations	https://group.bnpparibas
+8666	other monetary intermediations	https://www.societegenerale.com/
+8685	financial services	https://www.aig.com
+8686	other	https://www.aflac.com
+8689	insurance	https://www.aegon.com
+8697	financial services	https://www.jpx.co.jp/
+8698	financial services	http://www.monexgroup.jp/
+8699	other	http://www.sawada-holdings.co.jp/
+8700	other	http://www.maruhachi-sec.co.jp/
+8704	other	http://www.tradershd.com
+8710	bank	https://citibnqa.com/
+8714	other	http://www.senshuikeda-hd.co.jp/
+8725	insurance	http://www.ms-ins.com/
+8729	financial services	https://www.sonyfg.co.jp/
+8732	financial instruments business	http://www.moneypartners-group.co.jp/
+8737	other	http://www.akatsuki-fg.com/
+8740	financial instruments business	http://www.fujitomi.co.jp/
+8742	other	https://www.kobayashiyoko.com/
+8746	other	https://unbanked.jp/
+8747	other	http://www.yutaka-shoji.co.jp/
+8766	insurance industry	https://www.tokiomarinehd.com
+8769	other	http://www.armg.jp/
+8772	other	http://www.asax.co.jp/
+8801	other	https://www.mitsuifudosan.co.jp/
+8802	other	https://www.mec.co.jp/
+8804	real estate agent	http://www.tatemono.com/
+8806	other	http://www.daibiru.co.jp/
+8830	real estate development	http://www.sumitomo-rd.co.jp/
+8835	other	http://www.taiheiyo.net/
+8841	other	http://www.toc.co.jp/toc/
+8844	other	http://www.cigr.co.jp/
+8854	other	http://2110.jp/
+8864	other	https://www.afc.jp/
+8869	other	http://www.meiwajisyo.co.jp/
+8871	other	https://www.goldcrest.co.jp/
+8886	other	https://www.woodfriends.co.jp/
+8887	real property	https://www.cumica.co.jp/
+8888	other	http://www.creed.co.jp/
+8889	other	https://apamanshop-hd.co.jp/
+8890	other	http://www.raysum.co.jp/
+8891	other	https://www.amg-hd.co.jp/
+8893	other	http://www.kksnt.co.jp/
+8894	other	https://revolution.co.jp/
+8898	other	https://www.century21japan.co.jp
+8903	other	http://www.sunwood.co.jp/
+8904	other	https://avantia-g.co.jp/
+8905	other	https://www.aeonmall.com/
+8908	other	http://www.maicom.co.jp/
+8914	other	http://www.arealink.co.jp/
+8917	other	http://www.f-juken.co.jp/
+8918	other	http://www.land.jp/
+8920	other	http://www.to-sho.net/
+8925	other	http://www.ardepro.co.jp/
+8927	other	http://www.meiho-est.com/
+8928	other	http://www.anabuki.ne.jp/
+8931	other	http://www.wadakohsan.co.jp/
+8940	other	https://www.intellex.co.jp/
+8946	other	http://www.asian.co.jp/
+8951	other	http://www.nbf-m.com/nbf/
+8963	other	http://www.invincible-inv.co.jp/
+8990	real estate industry	http://www.hld.com
+8995	other	http://www.makoto-gr.com/
+9001	public transport	https://www.tobu.co.jp/
+9003	other	http://www.sotetsu.co.jp/group/company/sotetsuholdings.html
+9005	public transport	https://www.tokyu.co.jp/
+9006	public transport	https://www.keikyu.co.jp/
+9007	public transport	https://www.odakyu.jp/
+9008	public transport	https://www.keio.co.jp
+9009	public transport	https://www.keisei.co.jp/
+9010	public transport	https://www.fujikyu.co.jp
+9012	rail transport	https://www.chichibu-railway.co.jp/
+9017	public transport	https://www.niigata-kotsu.co.jp/
+9020	rail transport	https://www.jreast.co.jp/
+9021	rail transport	https://www.westjr.co.jp/
+9022	rail transport	https://jr-central.co.jp/
+9023	public transport	https://www.tokyometro.jp/
+9024	other	https://www.seibuholdings.co.jp/
+9028	other	https://www.zero-group.co.jp/
+9029	other	https://www.e-higashi.co.jp/
+9031	public transport	http://www.nishitetsu.co.jp
+9033	transit bus	https://www.hiroden.co.jp/
+9034	other	http://www.nanso.co.jp/
+9036	other	https://www.tohbu.co.jp/
+9041	other	http://www.kintetsu-g-hd.co.jp/
+9042	land transport	https://www.hankyu-hanshin.co.jp
+9044	public transport	https://www.nankai.co.jp/
+9045	other	https://www.keihan-holdings.co.jp/
+9046	railway	https://www.shintetsu.co.jp/
+9048	public transport	https://top.meitetsu.co.jp/
+9049	public transport	https://www.keifuku.co.jp/
+9051	other	http://senkon.co.jp/
+9052	rail transport	http://www.sanyo-railway.co.jp/
+9057	other	http://www.enshu-truck.co.jp/
+9059	transportation	http://www.kanda-web.co.jp/
+9060	other	https://www.logitem.co.jp/
+9062	logistics	https://www.nittsu.co.jp/
+9063	other	http://www.okaken.co.jp/
+9064	other	https://www.yamato-hd.co.jp/
+9065	other	http://www.sankyu.co.jp/
+9067	other	http://www.maruwn.co.jp/
+9073	other	http://www.kyogoku.co.jp/
+9074	transport	http://www.jot.co.jp/
+9075	freight transport	http://www.fukutsu.co.jp/
+9076	other	https://www.seino.co.jp/seino/shd/
+9078	other	http://www.sline.co.jp/S_LINE/
+9081	TRANSPORT	https://www.kanachu.co.jp/
+9082	other	http://www.daiwaj.com/
+9083	public transport	https://www.shinkibus.co.jp/
+9101	water transport	https://www.nyk.com/
+9104	water transport	https://www.mol.co.jp/
+9107	water transport	https://www.kline.co.jp/
+9115	other	https://www.meiji-group.com/
+9130	shipping line	https://www.kyoeitanker.co.jp/
+9142	rail transport	https://www.jrkyushu.co.jp/
+9143	other	https://www.sg-hldgs.co.jp/
+9145	other	https://being-group.jp/
+9147	other	https://www.nipponexpress-holdings.com/
+9160	other	https://www.novarese.co.jp/
+9165	other	https://www.qualtec.co.jp
+9166	other	https://genda.jp/
+9171	other	https://www.kuribayashishosen.com/
+9173	other	https://www.tokaikisen.co.jp/
+9179	other	https://www.kawakin.co.jp/
+9193	other	http://www.tokyokisen.co.jp/
+9201	aviation	https://www.jal.co.jp/jp/
+9202	aviation	https://www.ana.co.jp
+9206	other	http://www.starflyer.jp/
+9220	other	https://www.fb-kaigo.co.jp/
+9229	other	https://sunwels.jp/
+9232	other	https://www.pasco.co.jp
+9233	other	http://www.ajiko.co.jp/
+9248	other	https://www.pdt-g.co.jp/
+9249	other	http://jp-eco.co.jp/
+9267	other	https://genky.co.jp/
+9275	textile industry	http://www.narumiya-net.co.jp/
+9279	other	https://www.gift-group.co.jp/
+9281	other	https://tif9281.co.jp/
+9306	other	https://www.toyo-logistics.co.jp/
+9307	other	http://www.sugimura-wh.co.jp/
+9308	other	http://www.inui.co.jp/
+9311	other	https://www.asagami.co.jp/
+9312	other	http://www.keihin.co.jp/
+9322	other	https://www.kawanishi.co.jp
+9325	other	https://www.phyz.co.jp/
+9326	other	https://www.kantsu.com/
+9334	other	https://ibisholdings.co.jp/
+9336	other	https://www.dinsgr.co.jp/
+9339	business and other management consultancy activities	https://www.coacha.com/
+9341	other	https://genova.co.jp/
+9348	space industry	https://ispace-inc.com/
+9351	other	http://www.toyofuto.co.jp
+9355	other	http://www.rinko.co.jp/
+9360	other	http://www.shinwart.co.jp/
+9361	other	https://www.fkk-toyama.co.jp/
+9365	other	http://www.tradia.co.jp/
+9366	other	https://www.srt.co.jp/
+9368	other	http://www.kimura-unity.co.jp/
+9369	other	http://www.krs.co.jp/
+9375	logistics	http://www.kwe.co.jp
+9376	other	http://www.eurasia.co.jp/
+9377	other	https://www.agpgroup.co.jp/
+9380	other	http://www.azumaship.co.jp/
+9401	telecommunications industry	https://www.tbsholdings.co.jp/
+9404	other	https://www.ntvhd.co.jp/
+9405	mass media	https://corp.asahi.co.jp/
+9409	other	https://www.tv-asahihd.co.jp/
+9412	other	https://www.skyperfectjsat.space/
+9413	other	https://www.txhd.co.jp/
+9414	other	https://www.bs11.jp/
+9419	other	http://www.wirelessgate.co.jp/
+9421	other	https://www.njhd.jp/
+9423	other	http://www.realstraight.co.jp/
+9428	other	http://www.crops.ne.jp/
+9432	telecommunications industry	https://group.ntt/jp/
+9433	telecommunications industry	https://www.kddi.com/
+9434	telecommunications industry	https://www.softbank.jp/
+9436	other	https://www.au.com/okinawa_cellular/
+9437	telecommunications industry	https://www.docomo.ne.jp/
+9439	other	http://mhgroup.co.jp/
+9444	other	http://www.toshin-group.com/
+9445	other	http://www.forvaltel.co.jp/
+9449	other	https://group.gmo/
+9468	other	https://group.kadokawa.co.jp/
+9468T	video game industry	http://shoten.kadokawa.co.jp/
+9470	publishing industry	https://www.gakken.co.jp/
+9474	cartography	https://www.zenrin.co.jp
+9475	other	https://www.mapple.co.jp/
+9476	other	http://www.chuokeizai.co.jp/
+9478	other	https://www.sehi.co.jp/
+9479	other	https://www.impressholdings.com/
+9481	telecommunications	https://www.telefonica.com/
+9496	telecommunications industry	https://www.telekom.com/
+9501	electric power industry	https://www.tepco.co.jp/
+9502	energy supply	https://www.chuden.co.jp/
+9503	electricity supply company	https://www.kepco.co.jp/
+9508	electric power industry	https://www.kyuden.co.jp/
+9509	electricity generation	https://www.hepco.co.jp/
+9513	electric power industry	https://www.jpower.co.jp/
+9514	other	http://www.fesco.co.jp/
+9517	other	http://erex.co.jp/
+9531	natural gas field	https://www.tokyo-gas.co.jp/
+9532	other	https://www.osakagas.co.jp/
+9533	other	https://www.tohogas.co.jp/
+9534	petroleum industry	http://www.hokkaido-gas.co.jp/
+9536	other	https://www.saibugas.co.jp/
+9537	petroleum industry	http://www.hokurikugas.co.jp/
+9539	petroleum industry	http://www.keiyogas.co.jp/
+9560	tertiary sector of the economy	https://www.progrit.co.jp/
+9601	other	https://www.shochiku.co.jp/
+9602	film industry	https://www.toho.co.jp/
+9605	film industry	https://www.toei.co.jp/
+9610	other	https://www.wilsonlearning.com/
+9613	information technology consulting	https://www.nttdata.com
+9616	other	https://www.kyoritsugroup.co.jp/
+9624	other	http://www.chodai.co.jp/
+9625	other	http://www.cerespo.co.jp/
+9627	other	https://www.ainj.co.jp/corporate/
+9632	other	http://www.subaru-kougyou.jp/
+9633	other	http://www.theatres.co.jp/
+9635	other	http://www.musashino-k.co.jp/
+9636	other	http://www.kin-ei.co.jp/
+9637	other	http://www.osgroup.co.jp/
+9639	other	https://www.sankyofrontier.com/
+9640	other	https://www.saison-technology.com/
+9646	video game industry	https://www.taito.co.jp
+9647	other	http://www.kyowa-c.co.jp/
+9651	other	http://www.jpd.co.jp/
+9656	other	http://www.greenland.co.jp/
+9661	other	https://www.kabuki-za.co.jp/
+9672	other	http://www.tokyotokeiba.co.jp/
+9675	other	http://www.joban-kosan.com/
+9679	other	http://www.horai-kk.co.jp/
+9684	other	https://www.hd.square-enix.com/eng/
+9685	other	https://www.kyd.co.jp/
+9686	other	http://www.toyo-tec.co.jp/
+9691	other	http://www.ryomo.co.jp/
+9697	video game industry	https://www.capcom.co.jp/
+9698	other	http://www.creo.co.jp/
+9699	other	https://nishio-grp.co.jp/
+9701	other	http://www.kaikan.co.jp/
+9704	lodging industry	https://www.agora.jp/
+9706	other	https://www.tokyo-airport-bldg.co.jp
+9708	hotel industry	https://www.imperialhotel.co.jp/
+9709	other	http://ncsa.jp/
+9713	other	https://www.rihga.co.jp/osaka
+9719	other	https://www.scsk.jp/
+9720	other	https://www.hotel-newgrand.co.jp/
+9722	other	http://www.fujita-kanko.co.jp/
+9723	other	http://www.kyotohotel.co.jp/
+9726	other	http://www.kntcthd.co.jp/
+9731	other	http://www.hakuyosha.co.jp
+9733	other	http://www.toshin.com/nagase/
+9737	software industry	http://www.csk.com/
+9744	other	https://www.meitec.co.jp/
+9749	software development	https://www.fsi.co.jp/
+9753	other	http://www.ikic.co.jp/
+9755	other	https://www.oyo.co.jp/
+9757	other	http://hd.funaisoken.co.jp/
+9760	other	https://www.shingakukai.co.jp/
+9763	other	https://www.maruken-lease.co.jp/
+9766	video game industry	https://www.konami.com/en/
+9768	other	https://www.ideacon.co.jp/
+9776	other	http://www.saturin.co.jp/
+9778	other	https://www.subaru-net.com/
+9782	advertising mail	http://www.dmsjp.co.jp/
+9783	other	https://www.benesse-hd.co.jp/ja/
+9812	other	https://tohd.co.jp/
+9816	other	http://www.striders.co.jp/
+9823	other	https://mami-mart-holdings.com/
+9827	other	http://www.lilycolor.co.jp/
+9828	food service	https://www.genki-gdc.co.jp/
+9830	other	http://www.trusco.co.jp/
+9831	retail	https://www.yamada-holdings.jp/
+9835	other	https://www.juntendo.co.jp/
+9843	other	https://www.nitorihd.co.jp/
+9846	other	http://www.tenmaya-store.co.jp/
+9849	other	https://www.kyodopaper.com/ja/index.html
+98500	other	https://www.gourmet-kineya-hd.co.jp/
+9853	food service	https://www.ginza-renoir.co.jp/
+9856	other	http://www.ku-hd.com/
+9872	other	http://www.kitakei.jp/
+9873	fast food	http://japan.kfc.co.jp/
+9876	other	http://www.cox-online.co.jp/
+9878	other	http://www.sekido.com/
+9885	other	https://www.charle.co.jp/
+9887	other	https://www.matsuyafoods-holdings.co.jp/
+9890	other	http://www.makiya-group.co.jp/
+9895	wholesale	http://www.consec.co.jp/
+9903	other	https://www.kanseki.co.jp/
+9906	other	https://www.fujii.co.jp/
+9914	other	https://uematsushokai.jp/
+9919	retail	https://www.kansaisuper.co.jp
+9927	other	http://www.wattmann.co.jp/
+9930	other	http://www.kitazawasangyo.co.jp/
+9946	convenience store	https://www.ministop.co.jp/
+9948	other	https://www.arcs-g.co.jp/
+9950	other	https://www.hachiban.co.jp/
+9955	other	http://www.yonkyu.co.jp/
+9959	other	http://www.aseed-hd.co.jp/
+9962	Industrial	http://www.misumi.co.jp/
+9969	other	https://www.shokubun.co.jp/
+9972	other	http://www.altech.co.jp/
+9973	other	http://www.kozosushi.co.jp/
+9976	other	http://www.sekichu.co.jp/
+9977	other	https://www.aokisuper.co.jp/
+9979	other	http://www.daisyo.co.jp/
+9980	other	http://www.maruko.com/
+9982	other	https://www.takihyo.co.jp/
+9983	retail	https://www.fastretailing.com/
+9984	telecommunications	https://group.softbank/
+9986	other	https://www.zaohnet.co.jp/
+9993	retail	https://yamazawa.co.jp/
+9994	retail	https://www.yamaya.jp
+9996	other	https://www.satoh-web.co.jp/
+9997	other	https://www.belluna.co.jp/
+Q1027454	food industry	https://www.calpis.co.jp/
+Q11294875	automotive industry	http://www.kyb.co.jp/english
+Q11307354	other	https://sinanengroup.co.jp
+Q11508607	other	https://www.nitten.co.jp/
+Q125074	brewing industry	https://www.anheuser-busch.com/
+Q125659965	other	https://materialgroup.jp/
+Q125660088	other	https://www.manabi-aid.jp/
+Q12605948	transportation	http://www.alps-logistics.jp/
+Q137321907	other	https://www.npr-riken.co.jp/
+Q1485061	aerospace industry	https://www.geaerospace.com/
+Q1509282	pulp and paper industry	https://www.gp.com/
+Q159433	occupational safety	https://www.3m.com/
+Q1630559	hotel industry	http://www.hosthotels.com
+Q1753080	retail	https://www.kmart.com/
+Q193412	electronics	http://ti.com
+Q2013357	petroleum industry	https://www.oxy.com/
+Q2022261	aluminium industry	https://www.riotinto.com/
+Q2552219	waste management industry	https://www.wm.com/
+Q35476	telecommunications industry	https://www.att.com
+Q38076	food service	https://www.mcdonalds.com
+Q4650685	other	https://www.aciworldwide.com/
+Q4781944	petroleum industry	http://www.exxon.com/
+Q507338	other	http://indexes.nikkei.co.jp/
+Q541477	automotive industry	http://www.daimler.de
+Q5468204	investment management	http://www.fandc.com
+Q548278	financial services	https://www.sc.com
+Q632694	food processing	https://adm.com/
+Q6499202	retail	http://www.sears.com
+Q730179	film industry	https://toei-anim.co.jp/
+Q735261	financial services	https://rbc.com
+Q7414	animation	https://www.disney.com/
+Q815668	telecommunications industry	http://www.bellsouth.com/
+Q953319	personal care product	https://www.scottbrand.com

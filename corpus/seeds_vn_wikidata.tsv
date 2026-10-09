@@ -1,0 +1,370 @@
+# VN companies from Wikidata (https://query.wikidata.org/sparql): id <TAB> industry <TAB> official website.
+# Regenerate: python scripts/collect_corpus.py seeds-wikidata VN <this file>
+Q101575325	other	https://www.scb.com.vn/
+Q104479974	other	https://www.anovacorp.vn/
+Q105356479	video game industry	https://saigondragonstudios.com/
+Q105741036	pharmaceutical industry	https://saothaiduong.com.vn/
+Q106103966	shipbuilding	https://honghashipbuilding.com
+Q106196496	other	https://morinhotel.com.vn/
+Q106508691	real estate industry	https://keenland.com.vn/
+Q10749367	other	https://coopmart.vn
+Q10752014	other	https://www.spt.vn/
+Q10752034	electronics	http://www.nguyenkim.com
+Q10762720	other	https://www.hotelgrandsaigon.com/
+Q10771879	other	https://hcma.vn/
+Q10771896	other	http://hocvienquany.vn/
+Q10779550	other	https://www.daewoohotel.com/
+Q10800262	other	https://vbsp.org.vn/
+Q10800288	other	https://abbank.vn/
+Q10801003	other	https://ktcgkpv.org
+Q10805714	other	http://www.kontum.udn.vn/
+Q108096250	other	https://thethao247.vn/
+Q10812081	other	http://fafim.vn/
+Q10812086	other	http://megastar.vn/vn/vct/#?jumptocontent
+Q10825953	other	https://vietnammedia.vnanet.vn/
+Q10828459	other	https://www.sctv.com.vn/
+Q10828460	other	https://www.vtvcab.vn/
+Q10829049	other	http://www.hanu.vn/
+Q10829126	other	http://ued.udn.vn
+Q10831591	mechanical engineering	https://rubbergroup.vn
+Q109295941	other	https://www.btaskee.com
+Q109438508	other	https://fptshop.com.vn/
+Q1109534	telecommunications industry	https://viettel.vn/
+Q111402978	hospitality industry	https://www.hilton.com/en/hotels/hanopgi-hilton-garden-inn-hanoi/
+Q111402980	other	https://mgallery.accor.com/en/hotels/7832.html
+Q112004563	other	https://capellahotels.com/en/capella-hanoi
+Q11247682	convenience store	https://www.family.co.jp/
+Q113236478	other	https://winmart.vn/
+Q11326612	other	http://jshanoi.com
+Q113377179	other	http://vccavietnam.com/
+Q11338362	other	http://jschoolhcmc.com
+Q113858405	telemedicine	https://hellobacsi.com/
+Q114562417	video game industry	https://skrice.com/
+Q115193408	other	https://sunair.vn/
+Q115206870	graphic design	https://namhaiart.com/
+Q115324413	retail	https://www.pharmacity.vn
+Q115327101	retail	https://www.bachhoaxanh.com
+Q1156874	other	https://www.pacificairlines.com/
+Q116026924	other	https://poongsankorea.vn/
+Q116696997	Internet dating industry	https://minu.ai/
+Q1171693	other	http://www.crazyhouse.vn/
+Q117210355	other	https://phimgiaiphong.com.vn
+Q117325508	other	https://www.pandanusresort.com/
+Q117325880	other	https://www.bayhotelhcm.com/
+Q117326003	other	https://www.themystdongkhoihotel.com/
+Q117326022	other	https://sanctuary.com.vn/
+Q117326045	other	https://www.aristohotel.com.vn/
+Q117326049	other	https://carmelinaresort.com/
+Q118710708	tourism	https://go365.vn
+Q12060754	other	http://www.ihg.com/intercontinental/hotels/gb/en/hanoi/hanha/hoteldetail/
+Q121756130	other	https://chongluadao.vn/
+Q122258583	floristry	https://hoatuoi4t.com/
+Q122457706	shipbuilding	https://songthu.com.vn
+Q122922491	opinion poll	https://indochina-research.com/
+Q123376181	other	https://vinwonders.com/en/grand-world-phu-quoc/
+Q123493815	other	https://viettelstore.vn/
+Q123556144	other	https://tropicalspaceil.com/
+Q123908821	other	https://www.mageplaza.com/
+Q124334320	other	https://chickenplus.com.vn/
+Q124421292	other	https://www.vard.com/location/vietnam/vard-vung-tau
+Q124713825	other	https://huetv.com.vn/
+Q125400389	other	https://san-art.org/
+Q125507631	other	http://www.idee.vn/
+Q126391552	other	https://happy1512.com/
+Q126619563	other	https://dongphuchongha-com
+Q126911219	other	https://f88.vn
+Q126921808	construction	https://tubepminhlong.vn/
+Q127043182	food industry	https://www.kidofoods.vn/
+Q127324864	other	https://abc-flowershop.com/
+Q127327604	other	https://viettelpost.com.vn/
+Q127375336	other	https://bitis.com.vn/
+Q127377457	other	https://www.viettien.com.vn
+Q127378382	other	https://www.dongabank.com.vn/
+Q127433280	other	https://eropi.com/
+Q127514667	dairy industry	https://www.thmilk.vn
+Q127604126	other	https://hoatuoiphuongthao.com/
+Q127691027	other	https://www.nhathuocankhang.com
+Q127691725	other	https://banhngot.vn
+Q127811060	other	https://hutbephotivenco.vn/
+Q127862183	other	https://tocotocotea.com/
+Q128031910	information technology	https://cypeace.net/
+Q128095886	other	https://nhathuoclongchau.com.vn/
+Q128303498	other	https://petimex.com.vn/
+Q128305502	other	https://napoli.vn/
+Q129077172	other	https://thalexim.vn/
+Q129329268	other	https://cellphones.com.vn/
+Q129482626	other	https://elise.vn/
+Q129910342	other	http://saigonpetro.com.vn/
+Q129968725	other	https://concung.com/
+Q129970514	other	https://everon.com.vn/
+Q130261779	other	https://nhanhauclinic.com.vn/
+Q130315258	other	https://cpc.vn/
+Q130355959	other	https://vanphongphambanhat.com.vn
+Q131369222	other	https://phimtruyen1.com
+Q131926395	other	https://zalo.me/
+Q132152202	pharmaceutical industry	https://ecopharma.com.vn/
+Q132153839	other	https://jtexpress.vn/
+Q134463853	auction	https://www.millon.com
+Q134538934	other	https://davinhquang.vn
+Q134698584	other	https://vsd.vn/
+Q134769018	tourism	https://parfumdautomne.fr
+Q135431758	film industry	http://galaxycine.vn
+Q135449446	radar station	https://radarthoitiet.com/
+Q135495330	auction	https://millon-vietnam.com
+Q135670257	other	https://opcpharma.com/
+Q135728516	industrial manufacturing	https://www.giangiaoviet.com
+Q135914103	shop	https://www.dienmayxanh.com/
+Q135914247	retail	https://www.avakids.com
+Q136092176	other	https://masanconsumer.com/
+Q136100498	retail	https://www.topzone.vn/
+Q136276788	other	https://febet.com
+Q136503479	other	https://daehan.vn/
+Q136504738	supermarket	https://dacsanngon.com.vn
+Q136544476	online publisher	https://muaban.net/
+Q136648647	other	https://www.sunphuquocairways.com/
+Q136700856	job training	https://cyberjutsu.io/
+Q136802638	other	https://www.thanhcong.com.vn/
+Q1370655	other	http://vasco.com.vn
+Q137171501	mechanical engineering	https://thacoindustries.com/en/
+Q137459167	food industry	https://www.ricepaperthuanphong.com/
+Q137609225	other	https://maytredan.vn/
+Q1377237	other	http://www.hcmcons.vn/
+Q137735270	other	https://titanhanoi.vn
+Q137776677	other	https://www.rmhlebelhamy.com/
+Q138314068	renewable energy	https://www.hirdaramani.com
+Q138479463	retail	https://phongvu.vn/
+Q138504612	other	https://amanaki.vn/amanaki-boutique-saigon
+Q138570271	travel agency	https://hoadalattravel.vn/
+Q138571833	casino	https://casinocorona.vn
+Q138657794	metal engineering industry	https://giacongsatinox.com
+Q138661417	other	http://www.thuvientinhgialai.vn/
+Q138665435	other	http://www.thuvienbinhdinh.com/
+Q138681071	other	https://khachsanhoabao.com/thong-nhat
+Q138682840	mechanical engineering	https://weldcom.vn/
+Q138744716	architecture	https://xconsgroup.com.vn/
+Q138809124	photography	https://em-production.com
+Q138818950	e-commerce	https://lucifertech.store
+Q138841382	beverage industry	https://nawon.com.vn/
+Q138969961	marketing	https://sota.media/
+Q139060408	retail	https://onggiau.com.vn
+Q139595624	film industry	https://promedia.vn
+Q139647355	beverage industry	https://www.nuockhoangoris.vn/
+Q139671297	other	https://camco.vn
+Q139688913	artificial intelligence	https://adamosoft.com/
+Q139701562	other	https://allgifted.com/
+Q139793171	tourism	https://vietnamdecouverte.com/
+Q139802243	other	https://www.gyu-kaku.com/
+Q139829940	information technology	https://luvina.jp
+Q139862781	Solar Energy	https://vrenergy.vn
+Q139886770	other	https://gaonauchupanh.vn
+Q139905527	other	https://pthaicapital.io.vn
+Q139972655	other	https://luatmaison.vn/
+Q139973377	other	https://zeninailspa.com
+Q140030460	textile industry	https://bk-bags.com
+Q140030497	business process outsourcing	https://incorp.com.vn/
+Q140030997	other	https://chacakinhky.com
+Q140042128	other	https://sidiningdanang.com/
+Q140044630	other	https://moonmenofficial.com/
+Q140044631	other	https://mienmancafe.vn/
+Q140044632	other	https://madamtuhong.vn/
+Q140045390	other	https://vietstar-research.com
+Q140047174	other	https://meddies.ai
+Q140050977	freight transport	https://daisypettransport.com
+Q140068421	metrology	https://techmaster.com.vn
+Q140088705	other	https://giatoi.vn
+Q140173406	other	https://capannam.com
+Q140184446	other	https://www.grandmercuredalat.com
+Q140216612	other	https://kinhtrangtrithanhphat.com
+Q140310724	other	https://www.mercurenhatrangbeach.com/leisure/horizon-spa/
+Q140329146	pharmacy	https://abcpharmacy.com.vn
+Q140342216	retail	https://tinhocanhphat.vn
+Q140353384	other	https://tonybed.vn/
+Q140356069	furniture	https://7modu.vn
+Q140376805	print on demand	https://legitfulfill.com
+Q140379413	software industry	https://topon.tech/
+Q140380327	business process outsourcing	https://digi-texx.com
+Q140380369	other	https://nexastar.net
+Q140384985	other	https://tuibluetuyhoa.com
+Q140391057	other	https://e28-bet.us/
+Q140391196	other	https://ug88.uk.com
+Q140391278	other	https://ga888vnd.com
+Q140419032	online gambling	https://ga888-vnd.com/
+Q140423775	investment	https://vng.com.vn/
+Q140447579	online gambling	https://gemma-international.co.uk/
+Q140447626	online gambling	https://e2bet-vietnam.us/
+Q140454686	legal services	https://ivlf-lawyer.com/
+Q140462199	other	https://www.guwinebistro.com/
+Q140502473	graphic designer	https://sinhvu.com
+Q140508171	other	https://meilile.vn
+Q140529423	other	https://silverlandhotels.com
+Q140546690	real estate industry	https://smartland.vn
+Q140546691	real estate industry	https://smartrealtors.vn
+Q140546692	real estate industry	https://smartproperty.vn
+Q140562263	other	https://thietbi114.vn
+Q140588986	other	https://bongdata.org/
+Q140626567	Real Estate Company	https://maisonoffice.vn/
+Q140626638	interior design	https://maisoninterior.vn/
+Q140626662	retail	https://winevn.com/
+Q140667725	other	https://vn.jfe-shoji-ele.co.jp/
+Q140693040	other	https://www.beuptodate.vn/
+Q140721854	real estate industry	https://vietgoldenland.vn/
+Q140770623	information technology	https://kaopiz.com/en/
+Q140796495	other	https://ambassadorcruise.com/
+Q140796558	handicraft	https://www.hmdhycraft.com
+Q140844920	other	https://dienthoaiviet.vn
+Q140869675	other	https://genesolutions.vn
+Q140929635	self storage	https://vboxselfstorage.com
+Q140930761	information technology	https://dmcaai.com
+Q140982696	other	https://azuki.com.vn
+Q141000255	renewable energy industry	https://vietnamsolar.vn/
+Q141005244	other	https://nguyenbau.studio/
+Q141100266	service	https://vongquaymayman.icu/
+Q141118455	technical support	https://www.tronghanhmedia.com/
+Q141126111	chemical industry	https://hoachatlocthien.com
+Q141133742	golf	https://baygolf.vn/
+Q141174502	Watford	https://vsim.vn
+Q141179008	software industry	https://huvi.ai
+Q141180730	advertising	https://focusmedia.vn
+Q141189453	automotive industry	https://auto365.vn
+Q141194516	other	https://ute.udn.vn
+Q141194550	other	https://vnuk.udn.vn
+Q141195013	other	https://vinatabard.vn
+Q141195348	other	http://ufl.udn.vn
+Q141201162	other	https://enosta.com/
+Q141206024	other	http://www.lvmcholdings.net/
+Q141214610	other	https://hogathongminh.vn
+Q141219935	other	https://wedoskinclinic.com/
+Q141246701	other	https://ug888.org.uk/
+Q141266465	other	https://kompa.ai/
+Q141273711	temporary work agency	https://nhankiet.vn/
+Q141329654	other	https://binhminhkindergarten.site
+Q141342690	Real Estate Company	https://x2office.vn/
+Q141370330	information technology	https://thenexova.com
+Q141401149	medical technology industry	https://viethuy.vn/
+Q141403701	online gambling	https://ug88.ae.org/
+Q141403815	other	https://ug888.autos/
+Q141449836	industrial equipment	https://www.thiennamvn.com/
+Q141458571	product packaging	https://directecogreen.fr/
+Q141470448	biotechnology industry	https://mbsbio.com.vn/
+Q141495125	other	https://vanlucland.com/
+Q141531750	information technology	https://mona.media
+Q141563379	other	https://cypheon.vn/
+Q141596468	software industry	https://weebpal.com
+Q141612084	other	https://school.inti.foundation/
+Q141622151	other	https://havivietnam.com/
+Q141644194	wholesale	https://tictacco.net
+Q141669271	other	https://cfvg.org
+Q1435010	software development	https://www.luxoft.com/
+Q1437016	automotive industry	https://www.ford.com.vn/
+Q1486081	automotive industry	http://gmvietnam.com.vn
+Q15850523	other	https://www.fourseasons.com/hoian/
+Q16471828	computer security	https://www.group-ib.com/
+Q16479983	other	https://www.thegioididong.com/
+Q16480474	other	https://vku.udn.vn
+Q16481324	other	https://nxbhoinhavan.vn
+Q16481466	other	http://vfc.vtv.vn/
+Q1674963	other	http://isuzu-vietnam.com/
+Q16826319	other	http://www.aisvietnam.com
+Q17068326	other	http://danang.intercontinental.com/
+Q17299927	other	http://www.hisvietnam.com/
+Q18206616	other	http://www.europeaninternationalschoolhcmc.com/
+Q1924723	commerce	https://www.agribank.com.vn/
+Q19572735	other	http://lfiduras.com/
+Q20026054	other	https://nxbgd.vn
+Q20026193	shipbuilding	https://www.dongtau189.com
+Q2089536	petroleum industry	http://www.pvn.vn
+Q20984297	e-commerce	http://www.sendo.vn
+Q21000469	other	http://kshcm.net
+Q21060695	other	http://www.hanoischool.net
+Q21096017	other	https://www.shopback.sg/
+Q2227403	other	https://www.hnx.vn
+Q23461491	other	http://dimtutac.com
+Q24958893	other	https://www.lazada.vn/
+Q24959053	other	http://hfic.vn
+Q2496369	other	http://www.ifi.auf.org
+Q24995282	other	http://www.bvishanoi.com/
+Q25067746	other	http://chuyen-qb.com/
+Q2595987	telecommunications industry	http://www.gmobile.vn/
+Q27346350	shipbuilding	https://www.hd-hvs.com/
+Q28398873	other	http://saigonrailway.com.vn/
+Q28449546	entertainment	https://appota.com/
+Q28752772	other	https://www.aman.com/resorts/amanoi
+Q28972626	other	http://diemmach.com
+Q2930683	other	http://www.suoitien.com
+Q30263797	other	http://www.hiep-phuoc.com/
+Q30325374	other	http://www.igs-hcmc.org/
+Q3063149	other	https://www.majesticsaigon.com.vn/
+Q30920022	television	https://www.cattiensa.com
+Q30920888	other	http://www.pnf.com.vn/
+Q3558046	other	https://www.evn.com.vn
+Q3578023	other	http://www.ishcmc.com/
+Q36176188	other	http://www.megastarmedia.net/
+Q3875777	other	http://www.nxbkimdong.com.vn
+Q39048823	investment management	http://www.veil-dragoncapital.com/
+Q407572	other	http://www.airmekong.com.vn
+Q4130080	other	http://www.vrbank.com.vn/GioithieuVrb.aspx?lang=rus//
+Q4130084	petroleum industry	https://www.vietsov.com.vn/
+Q420569	industrial manufacturing	http://www.casumina.com.vn/
+Q4251332	industrial manufacturing	http://www.src.com.vn/
+Q4292690	other	http://www.nestle.ua/brands/culinary/mivina
+Q4392092	shipbuilding	http://sbic.com.vn
+Q4650171	other	http://www.theabcis.com
+Q4904537	financial services	http://www.cbv.vn/en/
+Q49055901	real estate investing	https://vtpgroup.com.vn/
+Q49081030	other	http://wepro.com.vn
+Q4914338	other	http://www.binhminhplastic.com/
+Q4970147	other	http://www.bisvietnam.com
+Q50037259	other	http://www.vabiotech.com.vn/?lang=en
+Q501329	rail transport	http://www.vr.com.vn/
+Q50309882	other	https://www.okura-nikko.com/vietnam/ho-chi-minh/the-okura-prestige-saigon/
+Q50480350	telecommunications industry	https://cmctelecom.vn/
+Q51779763	other	https://www.bambooairways.com/en/
+Q5210229	other	http://www.dalatpalacehotel.com
+Q5214926	industrial manufacturing	http://www.drc.com.vn/
+Q5324611	telecommunications industry	http://www.evntelecom.com.vn/
+Q55341311	other	http://phenikaa.com/
+Q55637134	financial services	https://vinacapital.com/
+Q56043232	movie theater	http://galaxy.com.vn/
+Q56043454	film production	http://hkfilm.com.vn
+Q56273928	video game industry	https://dotgears.com
+Q56660561	automotive industry	https://vinfastauto.com/
+Q5759361	other	https://www.highlandscoffee.com.vn/
+Q5911405	other	https://continentalsaigon.com/
+Q5983839	other	http://www.iagcargo.com
+Q610241	information technology	http://www.fpt.com.vn/en/
+Q61127290	other	https://www.kplus.vn/
+Q61132693	other	https://vsmart.net/eu-en
+Q63371124	retail	http://www.guardian.com.vn
+Q63863118	other	https://www.pho24.com.vn/
+Q63864181	other	https://congcaphe.ca
+Q6413825	food industry	https://www.mondelezinternational.com/Our-Brands/Kinh-Do
+Q6480687	other	http://thptchuyenlamson.vn
+Q65171514	other	https://wefit.vn/
+Q65171780	other	https://www.pvcombank.com.vn/
+Q65608704	other	https://momo.vn/
+Q656313	other	http://mariecurie.biz/
+Q66817608	other	https://www.vinpearl.com/condotel-empire-nha-trang/
+Q6707495	other	http://www.lfay.com.vn/
+Q6886703	mobile phone industry	https://www.mobifone.vn/
+Q7065086	other	https://all.accor.com/hotel/6033/index.en.shtml
+Q7118890	iron and steel industry	http://www.pebsteel.com/
+Q7119462	insurance industry	https://www.pjico.com.vn
+Q7188370	other	http://hangphim.phuocsang.com
+Q72177165	retail	https://pnjwatch.com.vn
+Q7319215	other	https://www.rexhotelsaigon.com/
+Q7387062	mobile phone industry	http://www.sfone.com.vn/
+Q7403164	other	https://nhatngusakura.com/
+Q744171	live streaming	https://www.onlive.vn
+Q7553773	other	http://www.sofitel-legend-metropole-hanoi.com
+Q77957779	other	https://www.icisequynhon.com/
+Q7928543	telecommunications	https://vnpt.com.vn/
+Q7928684	mobile phone industry	http://vietnamobile.com.vn/
+Q7931361	mobile phone industry	http://www.vinaphone.com.vn/
+Q7931367	textile industry	http://www.vinatex.com/
+Q8034031	financial services	http://wooricbv.com
+Q853878	other	http://www.vietjetair.com/
+Q86012653	shipbuilding	https://basonshipyard.vn
+Q945839	other	http://www.udn.vn/
+Q96053262	other	https://nhaxuatbantudo.com/
+Q96395562	other	https://kv2.petrolimex.com.vn/
+Q97335680	other	https://1reels.us/

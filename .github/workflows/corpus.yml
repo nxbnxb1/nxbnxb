@@ -1,32 +1,78 @@
 name: Collect enterprise documents
 
 # Builds the enterprise document corpus (scripts/collect_corpus.py): documents Vietnamese and
-# Japanese listed companies publish themselves — financial statements, annual reports, AGM
-# resolutions and minutes, disclosures, … in Vietnamese, English and Japanese. Commits the
-# manifest (URL, checksum, company, type, language, digital/scan, split) to corpus/; the files
-# stay in the Actions cache. Split by company: 70% train, 10% dev, 20% test.
+# Japanese companies publish on their own websites — financial statements, annual reports, AGM
+# notices, resolutions and minutes, disclosures, … in Vietnamese, English and Japanese. robots.txt
+# is honoured for every host. Eight runners crawl the websites (corpus/seeds_*.tsv) in parallel,
+# then one job downloads, adds the documents to the manifest committed in corpus/ (URL, checksum,
+# company, type, language, digital/scan, split) and keeps the files in the Actions cache. Split by
+# company: 70% train, 10% dev, 20% test. Runs every week too, so the corpus grows with new
+# publications.
 
 on:
   workflow_dispatch:
     inputs:
-      tdnet_days:
-        description: Days of TDnet disclosures to list (TDnet keeps about one month)
-        default: "30"
       per_company:
         description: Documents per company (spread over document types)
-        default: "6"
+        default: "10"
+      max_gb:
+        description: Size of all stored files in GB (Actions cache)
+        default: "5"
+  schedule:
+    - cron: "17 3 * * 1"  # Mondays
 
 permissions:
   contents: write
+  actions: write  # delete the corpus caches of earlier runs
 
 concurrency:
   group: corpus
   cancel-in-progress: false
 
 jobs:
-  collect:
+  crawl:
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install (with Chromium for websites built by JavaScript)
+        run: |
+          pip install -e . httpx playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Vietnamese companies
+        run: |
+          python scripts/collect_corpus.py crawl VN corpus/seeds_vn.tsv corpus/seeds_vn_wikidata.tsv \
+            --out candidates/vn-${{ matrix.shard }}.jsonl --shard ${{ matrix.shard }}/8 --render
+
+      - name: Japanese companies
+        if: ${{ !cancelled() }}
+        run: |
+          python scripts/collect_corpus.py crawl JP corpus/seeds_jp_wikidata.tsv \
+            --out candidates/jp-${{ matrix.shard }}.jsonl --shard ${{ matrix.shard }}/8 --render --max-pages 40
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: corpus-candidates-${{ github.run_number }}-${{ matrix.shard }}
+          path: candidates/
+          retention-days: 7
+
+  collect:
+    needs: crawl
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
 
@@ -37,6 +83,12 @@ jobs:
 
       - run: pip install -e . httpx
 
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: corpus-candidates-${{ github.run_number }}-*
+          path: candidates
+          merge-multiple: true
+
       - name: Corpus files from earlier runs
         uses: actions/cache/restore@v4
         with:
@@ -44,22 +96,20 @@ jobs:
           key: corpus-files-v1-${{ github.run_id }}
           restore-keys: corpus-files-v1-
 
-      - name: Vietnamese companies (investor relations pages)
-        run: python scripts/collect_corpus.py crawl-vn corpus/seeds_vn.tsv candidates/vn.jsonl
-
-      - name: Japanese companies (TDnet)
-        run: python scripts/collect_corpus.py tdnet candidates/jp.jsonl --days "${{ inputs.tdnet_days }}"
+      - name: Files of earlier runs missing from the cache
+        run: python scripts/collect_corpus.py fetch corpus/manifest.jsonl --dir corpus_files || true
 
       - name: Select, download and inspect
         run: |
-          python scripts/collect_corpus.py download candidates/vn.jsonl candidates/jp.jsonl \
-            --dir corpus_files --manifest corpus/manifest.jsonl --per-company "${{ inputs.per_company }}" --max-mb 20
+          python scripts/collect_corpus.py download candidates/*.jsonl --dir corpus_files --manifest corpus/manifest.jsonl \
+            --per-company "${{ inputs.per_company || '10' }}" --max-gb "${{ inputs.max_gb || '5' }}"
           {
             echo "# Enterprise document corpus"
             echo
-            echo "Built by run ${{ github.run_id }} on $(date -u +%Y-%m-%d). Files are not stored in the repository:"
+            echo "Updated by run ${{ github.run_id }} on $(date -u +%Y-%m-%d). Files are not stored in the repository:"
             echo "\`python scripts/collect_corpus.py fetch corpus/manifest.jsonl --dir corpus_files\` downloads them"
-            echo "from the companies' own publications (checksums verified)."
+            echo "from the companies' own websites (checksums verified, robots.txt honoured). Long documents are"
+            echo "stored as at most 20 of their pages (scans: 5), the same pages on every fetch."
             echo
             python scripts/collect_corpus.py stats corpus/manifest.jsonl
           } > corpus/STATS.md
@@ -70,10 +120,21 @@ jobs:
           path: corpus_files
           key: corpus-files-v1-${{ github.run_id }}
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: corpus-candidates-${{ github.run_number }}
-          path: candidates/
+      - name: Delete the corpus caches of earlier runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh cache list --key corpus-files-v1- --limit 100 --json id,key \
+            --jq '.[] | select(.key != "corpus-files-v1-${{ github.run_id }}") | .id' |
+            while read -r id; do gh cache delete "$id"; done
+
+      - name: Delete the candidate lists of earlier runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --paginate "repos/${{ github.repository }}/actions/artifacts?per_page=100" \
+            --jq '.artifacts[] | select(.name | startswith("corpus-candidates-")) | select(.workflow_run.id != ${{ github.run_id }}) | .id' |
+            while read -r id; do gh api -X DELETE "repos/${{ github.repository }}/actions/artifacts/$id"; done
 
       - name: Commit the manifest
         run: |
