@@ -36,7 +36,7 @@ runs:
         sudo apt-get install -y -qq $packages >/dev/null
         mkdir -p ~/.fonts
         # every installed font file (some packages only depend on others that hold the files)
-        find /usr/share/fonts -type f \( -name '*.ttf' -o -name '*.otf' -o -name '*.ttc' \) -exec cp -L -t ~/.fonts {} +
+        find -L /usr/share/fonts -type f \( -name '*.ttf' -o -name '*.otf' -o -name '*.ttc' \) -exec cp -L -t ~/.fonts {} +
         ls ~/.fonts | wc -l
 
     - name: PaddleOCR training code
