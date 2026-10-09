@@ -1,0 +1,89 @@
+# Vietnamese listed companies: ticker <TAB> sector <TAB> website (starting point of the crawler).
+# Only documents the companies publish themselves (investor relations / disclosures) are collected.
+ACB	bank	https://acb.com.vn
+BID	bank	https://bidv.com.vn
+CTG	bank	https://www.vietinbank.vn
+EIB	bank	https://eximbank.com.vn
+HDB	bank	https://hdbank.com.vn
+LPB	bank	https://lpbank.com.vn
+MBB	bank	https://www.mbbank.com.vn
+MSB	bank	https://www.msb.com.vn
+OCB	bank	https://www.ocb.com.vn
+SHB	bank	https://www.shb.com.vn
+SSB	bank	https://www.seabank.com.vn
+STB	bank	https://www.sacombank.com.vn
+TCB	bank	https://techcombank.com
+TPB	bank	https://tpb.vn
+VCB	bank	https://www.vietcombank.com.vn
+VIB	bank	https://www.vib.com.vn
+VPB	bank	https://www.vpbank.com.vn
+VAB	bank	https://www.vietabank.com.vn
+ABB	bank	https://www.abbank.com.vn
+NAB	bank	https://www.namabank.com.vn
+KLB	bank	https://kienlongbank.com
+SGB	bank	https://www.saigonbank.com.vn
+SSI	securities	https://www.ssi.com.vn
+VND	securities	https://www.vndirect.com.vn
+HCM	securities	https://www.hsc.com.vn
+FTS	securities	https://www.fpts.com.vn
+SHS	securities	https://www.shs.com.vn
+BSI	securities	https://www.bsc.com.vn
+MBS	securities	https://www.mbs.com.vn
+AGR	securities	https://www.agriseco.com.vn
+BVH	insurance	https://www.baoviet.com.vn
+PVI	insurance	https://www.pvi.com.vn
+BMI	insurance	https://www.baominh.com.vn
+FPT	technology	https://fpt.com
+CMG	technology	https://www.cmc.com.vn
+HPG	steel	https://www.hoaphat.com.vn
+HSG	steel	https://www.hoasengroup.vn
+NKG	steel	https://www.namkimgroup.vn
+MSN	consumer	https://www.masangroup.com
+SAB	consumer	https://www.sabeco.com.vn
+VNM	consumer	https://www.vinamilk.com.vn
+KDC	consumer	https://www.kdc.vn
+MWG	retail	https://mwg.vn
+PNJ	retail	https://www.pnj.com.vn
+FRT	retail	https://frt.vn
+DGW	retail	https://digiworld.com.vn
+VIC	real estate	https://vingroup.net
+VHM	real estate	https://vinhomes.vn
+NLG	real estate	https://www.namlongvn.com
+KDH	real estate	https://www.khangdien.com.vn
+DXG	real estate	https://www.datxanh.vn
+PDR	real estate	https://www.phatdat.com.vn
+NVL	real estate	https://www.novaland.com.vn
+CTD	construction	https://www.coteccons.vn
+VCG	construction	https://vinaconex.com.vn
+HHV	construction	https://hhv.com.vn
+CTR	construction	https://viettelconstruction.com.vn
+PC1	energy	https://www.pc1group.vn
+GAS	energy	https://www.pvgas.com.vn
+PLX	energy	https://www.petrolimex.com.vn
+POW	energy	https://pvpower.vn
+REE	energy	https://www.reecorp.com
+NT2	energy	https://nt2.com.vn
+DPM	chemicals	https://dpm.vn
+DCM	chemicals	https://www.pvcfc.com.vn
+DGC	chemicals	https://ducgiangchem.vn
+BMP	plastics	https://www.binhminhplastic.com.vn
+NTP	plastics	https://www.nhuatienphong.vn
+DHG	pharma	https://www.dhgpharma.com.vn
+TRA	pharma	https://www.traphaco.com.vn
+IMP	pharma	https://www.imexpharm.com
+DBD	pharma	https://www.bidiphar.com
+VHC	seafood	https://www.vinhhoan.com
+ANV	seafood	https://www.navicorp.com.vn
+FMC	seafood	https://www.sjfoods.com.vn
+GMD	logistics	https://www.gemadept.com.vn
+VSC	logistics	https://www.viconship.com
+HAH	logistics	https://www.haiancorp.com
+VJC	aviation	https://ir.vietjetair.com
+HVN	aviation	https://www.vietnamairlines.com
+ACV	aviation	https://vietnamairport.vn
+TNG	textile	https://www.tng.vn
+VGT	textile	https://www.vinatex.com.vn
+MSH	textile	https://www.songhong.vn
+GEX	industrial	https://www.gelex.vn
+VCS	materials	https://www.vicostone.com
+LIX	consumer	https://www.lixco.com
