@@ -26,4 +26,5 @@ mkdir -p models
 gh release download "$tag" -p "$asset" -D models --clobber
 tar -xzf "models/$asset" -C models
 echo "DOCEXTRACT_OCR_REC_MODEL_DIR=$PWD/models/${product}_PP-OCRv5_mobile_rec" >> "$GITHUB_ENV"
+echo "OCR_MODEL_TAG=$tag" >> "$GITHUB_ENV"
 echo "OCR model of $product: release $tag" | tee -a "$GITHUB_STEP_SUMMARY"

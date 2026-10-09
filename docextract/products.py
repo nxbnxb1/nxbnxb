@@ -15,6 +15,7 @@ class Product:
     model: str  # fine-tuned recognition model (GitHub Release asset <model>.tar.gz)
     baseline_model: str  # stock PaddleOCR recognition model = baseline of this product
     paddle_lang: str  # PaddleOCR language code used with the baseline
+    tesseract_langs: str  # Tesseract languages of the product (benchmark baseline)
 
 
 PRODUCTS: dict[str, Product] = {
@@ -25,6 +26,7 @@ PRODUCTS: dict[str, Product] = {
         model="vi_en_PP-OCRv5_mobile_rec",
         baseline_model="latin_PP-OCRv5_mobile_rec",
         paddle_lang="vi",
+        tesseract_langs="vie+eng",
     ),
     "vi_en_ja": Product(
         key="vi_en_ja",
@@ -33,6 +35,7 @@ PRODUCTS: dict[str, Product] = {
         model="vi_en_ja_PP-OCRv5_mobile_rec",
         baseline_model="PP-OCRv5_mobile_rec",
         paddle_lang="japan",
+        tesseract_langs="vie+eng+jpn",
     ),
 }
 

@@ -1,13 +1,21 @@
 name: _benchmark (reusable)
 
-# Phase 2 for one product: CER/WER, word F1, table TEDS, heading F1, time/page, VLM calls and
-# cost/page per category, for the product's baseline (stock PaddleOCR model it is fine-tuned from)
-# and for the product's fine-tuned model.
-#   dataset=eval   held-out set: newest "eval-set-*" Release (Wikipedia articles of the product's
-#                  languages as digital PDF / DOCX / scan) + OmniDocBench real pages (9 kinds),
-#                  split dev/test (split input; report test)
-#   dataset=demo   the product's generated demo documents (scripts/make_samples.py --product)
-#   anything else  a folder in the repository with documents and <name>.gt.md files
+# Phase 2 for one product: the product (docextract with its fine-tuned recognition model) and
+# several reasonable baselines on the same data, each on its own runner, one table at the end.
+#
+# Documents (CER, word F1, table TEDS, heading F1, ms/page, needs review; per category):
+#   fine-tuned    docextract + the product's fine-tuned model (newest Release, or model_tag)
+#   stock         docextract + the stock PaddleOCR model the product is fine-tuned from
+#   ppocrv6       docextract + PP-OCRv6_medium_rec (newest PaddleOCR generation)
+#   ppstructure   PP-StructureV3, PaddleOCR's own document parser
+#   tesseract     Tesseract 5 (tessdata_best) on every page, product languages
+#   text_layer    text already in the file, no OCR (scans give nothing)
+# Text lines (CER, line accuracy, Vietnamese letters, ms/line; synthetic lines per language):
+#   fine-tuned, stock, PP-OCRv5_server_rec, PP-OCRv6_medium_rec, Tesseract 5, EasyOCR, VietOCR
+#
+# dataset: eval (held-out set: newest "eval-set-*" Release, Wikipedia articles of the product's
+#          languages as digital PDF / DOCX / scan + OmniDocBench real pages of 9 kinds; split
+#          dev/test), demo (generated demo documents), or a folder with <name>.gt.md files.
 
 on:
   workflow_call:
@@ -30,17 +38,24 @@ on:
       vlm:
         type: string
         default: none
+      lines:
+        type: boolean
+        default: true
 
 permissions:
   contents: read
 
+env:
+  PRODUCT: ${{ inputs.product }}
+  DOCEXTRACT_PRODUCT: ${{ inputs.product }}
+  PADDLEOCR_REF: dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf
+  WORK: ${{ github.workspace }}/vi_ocr_work
+  PADDLEOCR_DIR: ${{ github.workspace }}/PaddleOCR
+
 jobs:
-  bench:
+  dataset:
     runs-on: ubuntu-latest
-    timeout-minutes: 350
-    env:
-      PRODUCT: ${{ inputs.product }}
-      DOCEXTRACT_PRODUCT: ${{ inputs.product }}
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -49,95 +64,286 @@ jobs:
           python-version: "3.12"
           cache: pip
 
-      - name: Install docextract with PaddleOCR
-        run: pip install -e ".[paddle]"
+      - run: pip install -e . lxml
+
+      - name: Documents with ground truth
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          case "${{ inputs.dataset }}" in
+            ""|demo)
+              python scripts/make_samples.py bench_data --product "$PRODUCT" ;;
+            eval)
+              tag=$(gh release list --limit 100 --json tagName --jq '[.[] | select(.tagName | startswith("eval-set-"))][0].tagName')
+              if [ -n "$tag" ]; then
+                gh release download "$tag" -p eval_wikipedia.tar.gz && tar -xzf eval_wikipedia.tar.gz
+                mv eval bench_data
+                echo "Wikipedia part: $tag" | tee -a "$GITHUB_STEP_SUMMARY"
+              else
+                echo "::warning::no eval-set release yet: run 'Build evaluation set' first (OmniDocBench only)"
+              fi
+              python scripts/build_eval_set.py omnidocbench bench_data --per-kind "${{ inputs.omnidocbench_per_kind }}"
+              langs=$(python -c "from docextract.products import PRODUCTS; print(' '.join(PRODUCTS['$PRODUCT'].languages))")
+              for dir in bench_data/*/wiki_*; do
+                [ -d "$dir" ] || continue
+                lang=${dir##*/wiki_}
+                [[ " $langs " == *" $lang "* ]] || rm -rf "$dir"  # only the product's languages
+              done ;;
+            *)
+              cp -r "${{ inputs.dataset }}" bench_data ;;
+          esac
+          find bench_data -name '*.gt.md' | sed 's#/[^/]*$##' | sort | uniq -c | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bench-data-${{ inputs.product }}
+          path: bench_data/
+          retention-days: 7
+
+  documents:
+    needs: dataset
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      matrix:
+        system: [fine-tuned, stock, ppocrv6, ppstructure, tesseract, text_layer]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: |
+          case "${{ matrix.system }}" in
+            text_layer) pip install -e . ;;
+            *) pip install -e ".[paddle]" ;;
+          esac
+          case "${{ matrix.system }}" in  # the OCR tools read DOCX converted to PDF by LibreOffice
+            tesseract|ppstructure)
+              sudo apt-get update -qq
+              sudo apt-get install -y -qq libreoffice-writer-nogui >/dev/null ;;
+          esac
+
+      - name: Tesseract 5 (tessdata_best)
+        if: matrix.system == 'tesseract'
+        run: scripts/fetch_tessdata.sh "$(python -c "from docextract.products import PRODUCTS; print(PRODUCTS['$PRODUCT'].tesseract_langs)")"
 
       - name: Cache PaddleOCR models
+        if: matrix.system != 'tesseract' && matrix.system != 'text_layer'
         uses: actions/cache@v4
         with:
           path: ~/.paddlex/official_models
           key: paddlex-models-${{ runner.os }}-v1
 
+      - name: Fine-tuned model of the product from Releases
+        if: matrix.system == 'fine-tuned'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/fetch_ocr_model.sh "$PRODUCT" "${{ inputs.model_tag }}"
+
       - name: Cache local VLM
-        if: inputs.vlm == 'local'
+        if: inputs.vlm == 'local' && (matrix.system == 'fine-tuned' || matrix.system == 'stock' || matrix.system == 'ppocrv6')
         uses: actions/cache@v4
         with:
           path: ~/.ollama/models
           key: ollama-${{ vars.DOCEXTRACT_LOCAL_VLM || 'qwen2.5vl:3b' }}-v1
 
       - name: Free local VLM (Ollama)
-        if: inputs.vlm == 'local'
+        if: inputs.vlm == 'local' && (matrix.system == 'fine-tuned' || matrix.system == 'stock' || matrix.system == 'ppocrv6')
         continue-on-error: true
         run: scripts/start_local_vlm.sh "${{ vars.DOCEXTRACT_LOCAL_VLM || 'qwen2.5vl:3b' }}"
 
-      - name: Dataset
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          case "${{ inputs.dataset }}" in
-            ""|demo)
-              python scripts/make_samples.py samples --product "$PRODUCT"
-              echo "DATASET=samples" >> "$GITHUB_ENV" ;;
-            eval)
-              tag=$(gh release list --limit 100 --json tagName --jq '[.[] | select(.tagName | startswith("eval-set-"))][0].tagName')
-              if [ -n "$tag" ]; then
-                gh release download "$tag" -p eval_wikipedia.tar.gz && tar -xzf eval_wikipedia.tar.gz
-                echo "Wikipedia part: $tag"
-              else
-                echo "::warning::no eval-set release yet: run 'Build evaluation set' first (OmniDocBench only)"
-              fi
-              pip install lxml
-              python scripts/build_eval_set.py omnidocbench eval --per-kind "${{ inputs.omnidocbench_per_kind }}"
-              langs=$(python -c "from docextract.products import PRODUCTS; print(' '.join(PRODUCTS['$PRODUCT'].languages))")
-              for dir in eval/*/wiki_*; do
-                [ -d "$dir" ] || continue
-                lang=${dir##*/wiki_}
-                [[ " $langs " == *" $lang "* ]] || rm -rf "$dir"  # only the product's languages
-              done
-              find eval -name '*.gt.md' | sed 's#/[^/]*$##' | sort | uniq -c
-              echo "DATASET=eval" >> "$GITHUB_ENV" ;;
-            *)
-              echo "DATASET=${{ inputs.dataset }}" >> "$GITHUB_ENV" ;;
-          esac
-          if [ "${{ inputs.split }}" = dev ] || [ "${{ inputs.split }}" = test ]; then
-            echo "SPLIT_ARGS=--split ${{ inputs.split }}" >> "$GITHUB_ENV"
-          fi
+      - uses: actions/download-artifact@v4
+        with:
+          name: bench-data-${{ inputs.product }}
+          path: bench_data
 
-      - name: Baseline (stock PaddleOCR model of the product)
+      - name: Benchmark ${{ matrix.system }}
         env:
           DOCEXTRACT_VLM_BASE_URL: ${{ inputs.vlm == 'api' && secrets.DOCEXTRACT_VLM_BASE_URL || env.DOCEXTRACT_VLM_BASE_URL }}
           DOCEXTRACT_VLM_API_KEY: ${{ inputs.vlm == 'api' && secrets.DOCEXTRACT_VLM_API_KEY || '' }}
           DOCEXTRACT_VLM_MODEL: ${{ inputs.vlm == 'api' && (vars.DOCEXTRACT_VLM_MODEL || 'Qwen/Qwen2.5-VL-7B-Instruct') || env.DOCEXTRACT_VLM_MODEL }}
         run: |
-          baseline=$(python -c "from docextract.products import PRODUCTS; print(PRODUCTS['$PRODUCT'].baseline_model)")
-          python -m docextract bench "$DATASET" $SPLIT_ARGS -o bench/baseline
-          { echo "## $PRODUCT — baseline ($baseline)"; cat bench/baseline/benchmark.md; } >> "$GITHUB_STEP_SUMMARY"
+          eval "$(python - <<'EOF'
+          from docextract.products import PRODUCTS
+          import os
+          p = PRODUCTS[os.environ["PRODUCT"]]
+          print(f"BASE='{p.baseline_model}' PADDLE_LANG='{p.paddle_lang}' TESS='{p.tesseract_langs}'")
+          EOF
+          )"
+          split=()
+          case "${{ inputs.split }}" in dev|test) split=(--split "${{ inputs.split }}") ;; esac
+          case "${{ matrix.system }}" in
+            fine-tuned)
+              if [ -z "${DOCEXTRACT_OCR_REC_MODEL_DIR:-}" ]; then echo "no fine-tuned model yet"; exit 0; fi
+              args=(--system docextract --name "docextract + fine-tuned model ($OCR_MODEL_TAG)") ;;
+            stock) args=(--system docextract --name "docextract + $BASE (stock, fine-tuning source)") ;;
+            ppocrv6)
+              export DOCEXTRACT_OCR_REC_MODEL=PP-OCRv6_medium_rec
+              args=(--system docextract --name "docextract + PP-OCRv6_medium_rec (stock)") ;;
+            ppstructure) args=(--system ppstructure --name "PP-StructureV3 (PaddleOCR, lang=$PADDLE_LANG)") ;;
+            tesseract) args=(--system tesseract --name "Tesseract 5 ($TESS, tessdata_best)") ;;
+            text_layer) args=(--system text_layer --name "text layer only, no OCR") ;;
+          esac
+          [ "${{ inputs.vlm }}" = none ] && args+=(--no-vlm)
+          python -m docextract bench bench_data "${split[@]}" "${args[@]}" -o "bench/${{ matrix.system }}"
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: bench-docs-${{ inputs.product }}-${{ matrix.system }}
+          path: bench/
+          if-no-files-found: ignore
+
+  lines-data:
+    if: inputs.lines
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/ocr-train-setup
+        with:
+          paddleocr-ref: ${{ env.PADDLEOCR_REF }}
+          paddleocr-dir: ${{ env.PADDLEOCR_DIR }}
+
+      - name: Evaluation lines (same seeds as the evaluation after training)
+        env:
+          LANGS: ${{ inputs.product == 'vi_en_ja' && 'vi,en,ja' || 'vi,en' }}
+          EVAL_COUNT: "1000"
+          VAL_COUNT: "1"
+        run: training/vi_ocr/run_training.sh prepare
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bench-lines-data-${{ inputs.product }}
+          path: |
+            ${{ env.WORK }}/data/eval_*/
+          retention-days: 7
+
+  lines:
+    needs: lines-data
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        system: [fine-tuned, stock, server, ppocrv6, tesseract, easyocr, vietocr]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: |
+          pip install -e . rapidfuzz
+          case "${{ matrix.system }}" in
+            easyocr|vietocr)
+              pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+              pip install "${{ matrix.system }}" ;;
+            tesseract) ;;
+            *) pip install -e ".[paddle]" ;;
+          esac
+
+      - name: Tesseract 5 (tessdata_best)
+        if: matrix.system == 'tesseract'
+        run: scripts/fetch_tessdata.sh "$(python -c "from docextract.products import PRODUCTS; print(PRODUCTS['$PRODUCT'].tesseract_langs)")"
 
       - name: Fine-tuned model of the product from Releases
+        if: matrix.system == 'fine-tuned'
         env:
           GH_TOKEN: ${{ github.token }}
         run: scripts/fetch_ocr_model.sh "$PRODUCT" "${{ inputs.model_tag }}"
 
-      - name: Fine-tuned model
-        if: env.DOCEXTRACT_OCR_REC_MODEL_DIR != ''
-        env:
-          DOCEXTRACT_VLM_BASE_URL: ${{ inputs.vlm == 'api' && secrets.DOCEXTRACT_VLM_BASE_URL || env.DOCEXTRACT_VLM_BASE_URL }}
-          DOCEXTRACT_VLM_API_KEY: ${{ inputs.vlm == 'api' && secrets.DOCEXTRACT_VLM_API_KEY || '' }}
-          DOCEXTRACT_VLM_MODEL: ${{ inputs.vlm == 'api' && (vars.DOCEXTRACT_VLM_MODEL || 'Qwen/Qwen2.5-VL-7B-Instruct') || env.DOCEXTRACT_VLM_MODEL }}
-        run: |
-          python -m docextract bench "$DATASET" $SPLIT_ARGS -o bench/finetuned
-          { echo "## $PRODUCT — fine-tuned model"; cat bench/finetuned/benchmark.md; } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/download-artifact@v4
+        with:
+          name: bench-lines-data-${{ inputs.product }}
+          path: lines_data
 
-      - name: Baseline vs fine-tuned (accuracy and speed)
-        if: env.DOCEXTRACT_OCR_REC_MODEL_DIR != ''
+      - name: Evaluate ${{ matrix.system }}
         run: |
-          baseline=$(python -c "from docextract.products import PRODUCTS; print(PRODUCTS['$PRODUCT'].baseline_model)")
-          python -m docextract compare bench/baseline/benchmark.json bench/finetuned/benchmark.json \
-            --baseline-name "baseline ($baseline)" --candidate-name "fine-tuned" -o bench/comparison.md
-          { echo "## $PRODUCT — baseline vs fine-tuned, same runner, same documents"; cat bench/comparison.md; } >> "$GITHUB_STEP_SUMMARY"
+          eval "$(python - <<'EOF'
+          from docextract.products import PRODUCTS
+          import os
+          p = PRODUCTS[os.environ["PRODUCT"]]
+          print(f"BASE='{p.baseline_model}' TESS='{p.tesseract_langs}' EASY='{'auto' if 'ja' in p.languages else 'vi,en'}'")
+          EOF
+          )"
+          case "${{ matrix.system }}" in
+            fine-tuned)
+              if [ -z "${DOCEXTRACT_OCR_REC_MODEL_DIR:-}" ]; then echo "no fine-tuned model yet"; exit 0; fi
+              system="fine-tuned ($OCR_MODEL_TAG)=paddle:$BASE@$DOCEXTRACT_OCR_REC_MODEL_DIR" ;;
+            stock) system="$BASE (stock, fine-tuning source)=paddle:$BASE" ;;
+            server) system="PP-OCRv5_server_rec (stock)=paddle:PP-OCRv5_server_rec" ;;
+            ppocrv6) system="PP-OCRv6_medium_rec (stock)=paddle:PP-OCRv6_medium_rec" ;;
+            tesseract) system="Tesseract 5 ($TESS, tessdata_best)=tesseract:$TESS" ;;
+            easyocr) system="EasyOCR ($EASY)=easyocr:$EASY" ;;
+            vietocr) system="VietOCR (vgg_transformer)=vietocr:vgg_transformer" ;;
+          esac
+          mkdir -p lines
+          (cd training/vi_ocr && python evaluate.py --eval "$GITHUB_WORKSPACE"/lines_data/eval_* --system "$system" \
+            --json "$GITHUB_WORKSPACE/lines/${{ matrix.system }}.json" --report "$GITHUB_WORKSPACE/lines/${{ matrix.system }}.md")
 
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: ${{ !cancelled() }}
+        with:
+          name: bench-lines-${{ inputs.product }}-${{ matrix.system }}
+          path: lines/
+          if-no-files-found: ignore
+
+  report:
+    needs: [documents, lines]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -e . rapidfuzz
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: bench-*-${{ inputs.product }}-*
+          path: results
+
+      - name: One table for all systems
+        run: |
+          mkdir -p report
+          reports=()
+          for system in fine-tuned stock ppocrv6 ppstructure tesseract text_layer; do
+            f="results/bench-docs-$PRODUCT-$system/$system/benchmark.json"
+            [ -f "$f" ] && reports+=("$f")
+          done
+          {
+            echo "# $PRODUCT: product vs baselines (same documents, split ${{ inputs.split }}, VLM ${{ inputs.vlm }})"
+            echo
+            echo "## Documents"
+            echo
+            if [ ${#reports[@]} -gt 0 ]; then python -m docextract compare "${reports[@]}"; else echo "(no document results)"; fi
+          } > report/documents.md
+          lines=$(ls results/bench-lines-$PRODUCT-*/*.json 2>/dev/null || true)
+          if [ -n "$lines" ]; then
+            (cd training/vi_ocr && python evaluate.py merge $(for f in $lines; do echo "$GITHUB_WORKSPACE/$f"; done) \
+              --report "$GITHUB_WORKSPACE/report/lines.md" >/dev/null)
+          fi
+          cat report/documents.md >> "$GITHUB_STEP_SUMMARY"
+          [ -f report/lines.md ] && { echo; cat report/lines.md; } >> "$GITHUB_STEP_SUMMARY"
+          true
+
+      - uses: actions/upload-artifact@v4
         with:
           name: benchmark-${{ inputs.product }}-${{ github.run_number }}
-          path: bench/
+          path: |
+            report/
+            results/

@@ -90,9 +90,8 @@ def cmd_serve(args: argparse.Namespace) -> int:
 def cmd_compare(args: argparse.Namespace) -> int:
     from .benchmark import compare_reports
 
-    baseline = json.loads(Path(args.baseline).read_text(encoding="utf-8"))
-    candidate = json.loads(Path(args.candidate).read_text(encoding="utf-8"))
-    table = compare_reports(baseline, candidate, (args.baseline_name, args.candidate_name))
+    reports = [json.loads(Path(path).read_text(encoding="utf-8")) for path in args.reports]
+    table = compare_reports(reports, args.name or None)
     if args.output:
         Path(args.output).write_text(table, encoding="utf-8")
     print(table)
@@ -102,13 +101,12 @@ def cmd_compare(args: argparse.Namespace) -> int:
 def cmd_bench(args: argparse.Namespace) -> int:
     from .benchmark import run_benchmark
 
-    pipeline = None
-    if args.product:
-        from .config import Settings
-        from .pipeline import DocumentPipeline
+    from .baselines import make_system
+    from .config import Settings
 
-        pipeline = DocumentPipeline(Settings.from_env(product=args.product))
-    report = run_benchmark(Path(args.dataset), use_vlm=not args.no_vlm, pipeline=pipeline, split=args.split)
+    settings = Settings.from_env(product=args.product) if args.product else Settings.from_env()
+    system = make_system(args.system, settings, use_vlm=not args.no_vlm)
+    report = run_benchmark(Path(args.dataset), split=args.split, system=system, system_name=args.name or args.system)
     out = Path(args.output)
     out.mkdir(parents=True, exist_ok=True)
     (out / "benchmark.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -144,13 +142,14 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--no-vlm", action="store_true")
     p.add_argument("--product", choices=["vi_en", "vi_en_ja"])
     p.add_argument("--split", choices=["dev", "test"], help="only documents under dev/ or test/")
+    p.add_argument("--system", default="docextract", choices=["docextract", "ppstructure", "tesseract", "text_layer"],
+                   help="conversion system to score (baselines: see docextract/baselines.py)")
+    p.add_argument("--name", help="display name of the system in reports")
     p.set_defaults(func=cmd_bench)
 
-    p = sub.add_parser("compare", help="side-by-side table of two benchmark.json files")
-    p.add_argument("baseline")
-    p.add_argument("candidate")
-    p.add_argument("--baseline-name", default="baseline")
-    p.add_argument("--candidate-name", default="fine-tuned")
+    p = sub.add_parser("compare", help="one table of several benchmark.json files (same documents)")
+    p.add_argument("reports", nargs="+")
+    p.add_argument("--name", action="append", help="display name of each report, in order (default: its system)")
     p.add_argument("-o", "--output")
     p.set_defaults(func=cmd_compare)
 

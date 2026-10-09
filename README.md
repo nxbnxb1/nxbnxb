@@ -32,7 +32,7 @@ sản phẩm chạy bằng baseline. Benchmark và đánh giá khi huấn luyệ
 |---|---|
 | Trích xuất tài liệu | Đẩy file vào `inputs/vi_en/` hoặc `inputs/vi_en_ja/` → workflow *Extract documents* của sản phẩm đó tự chạy, sinh `outputs/<sản phẩm>/<tên>.md`, `<tên>.json`, `<tên>_assets/*.png` (hình giữ lại), commit vào nhánh và đính kèm artifact. Hoặc *Actions → … · Extract documents → Run workflow* (chọn file/thư mục, trang, hoặc `demo`). |
 | Huấn luyện model OCR | *Actions → … · Train OCR model → Run workflow*: 8 runner GitHub cùng huấn luyện theo vòng, lấy trung bình trọng số sau mỗi vòng ([chi tiết](training/vi_ocr/README.md)). Model được đánh giá so với baseline của sản phẩm (độ chính xác và tốc độ, cùng runner) rồi xuất bản thành Release; workflow Extract/Benchmark của sản phẩm tự tải bản mới nhất. |
-| Đo chất lượng | *Actions → … · Benchmark*: baseline và model fine-tune của sản phẩm chạy lần lượt trên cùng runner, cùng tài liệu (mặc định: tập `test` của bộ đánh giá giữ riêng); bảng so sánh theo từng loại tài liệu: CER, F1 từ, TEDS, F1 tiêu đề, ms/trang, tỷ lệ cần kiểm tra. |
+| Đo chất lượng | *Actions → … · Benchmark*: sản phẩm và các baseline chạy song song, mỗi hệ thống một runner, trên cùng dữ liệu (mặc định: tập `test` của bộ đánh giá giữ riêng); một bảng chung theo từng loại tài liệu (xem *Baseline* dưới đây). |
 | Kiểm thử mã nguồn | Workflow **CI** chạy `pytest` ở mỗi lần push / pull request. |
 
 Cấu hình tùy chọn (*Settings → Secrets and variables → Actions*):
@@ -145,6 +145,18 @@ Mọi tham số trong [`docextract/config.py`](docextract/config.py) đặt đư
 | `DOCEXTRACT_CACHE_DIR` | — | Cache kết quả theo nội dung vùng cắt (SQLite) |
 | `DOCEXTRACT_ROUTE_LOG_PATH` | — | Log quyết định của Router (JSONL) |
 | `DOCEXTRACT_OUTPUT_LOCALE` | `vi` | Nhãn trong Markdown và ngôn ngữ mô tả hình không có chữ (một ngôn ngữ của sản phẩm) |
+
+## Baseline
+
+Mỗi sản phẩm được so với cùng một bộ baseline, trên cùng dữ liệu và cùng loại runner (model được nạp trước khi bấm giờ):
+
+| Mức | Hệ thống so sánh |
+|---|---|
+| Tài liệu (CER, F1 từ, TEDS bảng, F1 tiêu đề, ms/trang) | docextract + model fine-tune (sản phẩm) · docextract + model PaddleOCR gốc · docextract + PP-OCRv6_medium_rec · PP-StructureV3 (bộ phân tích tài liệu của PaddleOCR) · Tesseract 5 (tessdata_best) · chỉ lấy text có sẵn trong file, không OCR |
+| Dòng chữ (CER, độ chính xác dòng, giữ chữ có dấu, ms/dòng) | model fine-tune · model gốc · PP-OCRv5_server_rec · PP-OCRv6_medium_rec · Tesseract 5 · EasyOCR · VietOCR |
+
+Ngôn ngữ của baseline theo sản phẩm: Tesseract `vie+eng` / `vie+eng+jpn`; EasyOCR `vi,en` / theo ngôn ngữ từng tập
+(EasyOCR không ghép được tiếng Việt với tiếng Nhật); PP-StructureV3 `lang=vi` / `lang=japan`.
 
 ## Thành phần khác
 

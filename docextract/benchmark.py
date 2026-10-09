@@ -83,23 +83,29 @@ def run_benchmark(
     pipeline: DocumentPipeline | None = None,
     split: str | None = None,
     warmup: bool = True,
+    system=None,
+    system_name: str | None = None,
 ) -> dict:
-    pipeline = pipeline or DocumentPipeline(Settings.from_env())
+    """Score one conversion system (default: this pipeline) on every document with a ground truth."""
+    from .baselines import DocextractSystem
+
+    if system is None:
+        system = DocextractSystem(Settings.from_env(), pipeline, use_vlm)
     docs = list(documents(dataset, split))
     if warmup:  # ms/page measures processing, not model loading
-        pipeline.warm_up()
+        system.warm_up()
     rows = []
     for doc, gt_path, category, doc_split in docs:
         gt = gt_path.read_text(encoding="utf-8")
-        result = pipeline.process_file(doc, ExtractOptions(use_vlm=use_vlm))
-        pred = document_text(result.markdown or "")
+        converted = system.convert(doc)
+        pred = document_text(converted.markdown or "")
         gt_tables, pred_tables = markdown_tables(gt), markdown_tables(pred)
         table_scores = best_match_teds(gt_tables, pred_tables)
         structure_scores = [
             max((teds(ref, p, structure_only=True) for p in pred_tables), default=0.0) for ref in gt_tables
         ]
         gt_headings = markdown_headings(gt)
-        s = result.stats
+        s = converted.stats
         rows.append(
             {
                 "document": doc.relative_to(dataset).as_posix(),
@@ -116,13 +122,15 @@ def run_benchmark(
                 "ms_per_page": s.ms_per_page,
                 "vlm_calls_per_page": round(s.vlm_calls / max(1, s.pages_processed), 3),
                 "cost_per_page": s.cost_per_page,
-                "needs_review_ratio": round(s.regions_by_status.get("needs_review", 0) / max(1, s.regions), 4),
+                # only systems that flag uncertain regions report it
+                "needs_review_ratio": round(s.regions_by_status.get("needs_review", 0) / s.regions, 4) if s.regions else None,
                 "methods": s.regions_by_method,
             }
         )
     summary = _summary(rows)
     categories = {c: _summary([r for r in rows if r["category"] == c]) for c in sorted({r["category"] for r in rows})}
     return {
+        "system": system_name or getattr(system, "name", "system"),
         "documents": rows,
         "summary": summary,
         "categories": categories,
@@ -169,29 +177,30 @@ COMPARED = [
 ]
 
 
-def _change(old, new, higher_better: bool) -> str:
-    if old is None or new is None:
-        return f"{_cell(old)} → {_cell(new)}"
-    delta = new - old
-    if abs(delta) < 1e-9:
-        mark = "="
-    else:
-        mark = "better" if (delta > 0) == higher_better else "worse"
-    return f"{old} → {new} ({mark})"
-
-
-def compare_reports(baseline: dict, candidate: dict, names: tuple[str, str] = ("baseline", "fine-tuned")) -> str:
-    """Side-by-side table of two benchmark reports on the same documents, per category and overall."""
+def compare_reports(reports: list[dict], names: list[str] | None = None) -> str:
+    """One table per category: every system's metrics on the same documents, best value in bold."""
+    names = names or [r.get("system", f"system {i + 1}") for i, r in enumerate(reports)]
+    header = "| system | " + " | ".join(label for _, label, _ in COMPARED) + " |"
+    rule = "|" + "---|" * (len(COMPARED) + 1)
     lines = [
-        f"Each cell: {names[0]} → {names[1]}. Lower is better for CER, ms/page and needs review; higher for the rest.",
+        "Lower is better for CER, ms/page and needs review; higher for the rest. Best value of each column in bold.",
         "",
-        "| category | documents | " + " | ".join(label for _, label, _ in COMPARED) + " |",
-        "|" + "---|" * (len(COMPARED) + 2),
     ]
-    cats = dict(candidate.get("categories") or {})
-    rows = [(name, (baseline.get("categories") or {}).get(name, {}), values) for name, values in cats.items()]
-    rows.append(("**all**", baseline["summary"], candidate["summary"]))
-    for name, old, new in rows:
-        cells = [_change(old.get(key), new.get(key), better) for key, _, better in COMPARED]
-        lines.append(f"| {name} | {new.get('documents', '-')} | " + " | ".join(cells) + " |")
-    return "\n".join(lines) + "\n"
+    categories = sorted({c for r in reports for c in (r.get("categories") or {})})
+    sections = [(c, [(r.get("categories") or {}).get(c, {}) for r in reports]) for c in categories]
+    sections.append(("all documents", [r["summary"] for r in reports]))
+    for title, values in sections:
+        docs = max((v.get("documents") or 0) for v in values)
+        lines += [f"**{title}** ({docs} documents)", "", header, rule]
+        best = {}
+        for key, _, higher in COMPARED:
+            present = [v.get(key) for v in values if v.get(key) is not None]
+            best[key] = (max if higher else min)(present) if present else None
+        for name, v in zip(names, values):
+            cells = []
+            for key, _, _ in COMPARED:
+                value = v.get(key)
+                cells.append(f"**{value}**" if value is not None and value == best[key] and len(values) > 1 else _cell(value))
+            lines.append(f"| {name} | " + " | ".join(cells) + " |")
+        lines.append("")
+    return "\n".join(lines)

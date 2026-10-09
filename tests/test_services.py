@@ -118,11 +118,19 @@ def test_benchmark_and_cli(tmp_path, settings, monkeypatch):
     assert [r["document"] for r in report["documents"]] == ["test/reports/report.pdf"]
     assert report["documents"][0]["category"] == "reports" and list(report["categories"]) == ["reports"]
 
-    # baseline vs candidate: per category and overall, with the direction of each change
+    # several systems on the same documents: one table per category and overall, best in bold
     worse = json.loads(json.dumps(report))
     worse["summary"]["cer"] = report["summary"]["cer"] + 0.1
-    table = compare_reports(report, worse)
-    assert "| reports | 1 |" in table and "| **all** |" in table and "(worse)" in table
+    worse["system"] = "other"
+    table = compare_reports([report, worse])
+    assert "**reports** (1 documents)" in table and "**all documents**" in table
+    assert f"| docextract | **{report['summary']['cer']}** |" in table
+
+    # a baseline without OCR: the text layer of the PDF
+    from docextract.baselines import TextLayerSystem
+
+    plain = run_benchmark(tmp_path, system=TextLayerSystem(), system_name="text layer")
+    assert plain["system"] == "text layer" and plain["summary"]["word_f1"] > 0.9
 
     monkeypatch.setenv("DOCEXTRACT_LAYOUT_BACKEND", "heuristic")
     monkeypatch.setenv("DOCEXTRACT_OCR_BACKEND", "none")
