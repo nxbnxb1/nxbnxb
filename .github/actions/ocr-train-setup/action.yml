@@ -24,7 +24,7 @@ runs:
       uses: actions/cache@v4
       with:
         path: ~/.fonts
-        key: ocr-train-fonts-v1-${{ runner.os }}
+        key: ocr-train-fonts-v2-${{ runner.os }}
 
     - name: Fonts with Vietnamese and Japanese coverage
       if: steps.fonts.outputs.cache-hit != 'true'
@@ -35,7 +35,8 @@ runs:
         sudo apt-get update -qq
         sudo apt-get install -y -qq $packages >/dev/null
         mkdir -p ~/.fonts
-        for p in $packages; do dpkg -L "$p" | grep -E '\.(ttf|otf|ttc)$' | xargs -r cp -t ~/.fonts; done
+        # every installed font file (some packages only depend on others that hold the files)
+        find /usr/share/fonts -type f \( -name '*.ttf' -o -name '*.otf' -o -name '*.ttc' \) -exec cp -L -t ~/.fonts {} +
         ls ~/.fonts | wc -l
 
     - name: PaddleOCR training code
