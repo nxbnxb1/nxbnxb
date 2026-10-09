@@ -1,12 +1,27 @@
-# docextract — Trích xuất tài liệu bằng OCR + VLM (Việt + Anh · Việt + Anh + Nhật)
+# docextract — Trích xuất tài liệu doanh nghiệp bằng OCR + VLM (Việt + Anh · Việt + Anh + Nhật)
 
-Chuyển **PDF, Word (.docx/.doc) và ảnh scan** thành **Markdown + JSON** có cấu trúc, giữ nguyên nội dung,
-số liệu, bảng biểu và thứ tự đọc, kèm metadata để truy vết về tài liệu gốc. Phục vụ AI / RAG / LLM.
+## Mục đích
 
-Nguyên tắc: **không mất thông tin**. Văn bản chỉ lấy từ text layer PDF hoặc OCR (không bao giờ từ VLM);
-hình ảnh chỉ được thay bằng chữ khi chữ mang được toàn bộ nội dung, nếu không thì giữ lại file hình.
+Chuyển **tài liệu của doanh nghiệp** — báo cáo tài chính, báo cáo thường niên, nghị quyết, biên bản, công văn,
+hợp đồng, hóa đơn, chứng từ… bằng tiếng Việt, tiếng Anh (và tiếng Nhật) — ở mọi dạng thường gặp (PDF số, bản scan,
+ảnh chụp, Word, Excel/PowerPoint) thành **Markdown + JSON đúng và đủ nội dung**, để đưa vào hệ thống của doanh nghiệp:
+tìm kiếm, hỏi đáp bằng AI (RAG / LLM), trích xuất số liệu, lưu trữ số.
 
-Mọi thứ chạy trên **GitHub Actions**, không cần cài đặt gì trên máy cá nhân.
+Công cụ được đánh giá theo đúng mục đích đó:
+
+| Yêu cầu | Nghĩa là |
+|---|---|
+| Đúng từng chữ, từng con số | Chữ tiếng Việt có dấu, số tiền, ngày tháng, số hiệu văn bản không được sai hay mất; văn bản chỉ lấy từ text có sẵn trong file hoặc OCR, **không bao giờ do VLM viết ra** |
+| Giữ cấu trúc | Tiêu đề, đoạn, danh sách, bảng (cả ô gộp, bảng nối qua trang), công thức, thứ tự đọc |
+| Không mất thông tin | Hình, biểu đồ, con dấu không mô tả hết bằng chữ thì giữ nguyên ảnh |
+| Truy vết được | Mỗi phần có trang, vị trí, phương pháp trích xuất, trạng thái kiểm tra |
+| Biết chỗ không chắc | Vùng nghi ngờ được đánh dấu để người duyệt, kèm ảnh gốc |
+| Chi phí 0 | Chạy hoàn toàn trên GitHub Actions, không GPU, không dịch vụ trả phí |
+
+Không thuộc mục đích: dịch, tóm tắt hay sửa nội dung tài liệu; thay người duyệt ở những chỗ đã được đánh dấu.
+
+Chất lượng được đo trên tài liệu doanh nghiệp giữ riêng (không dùng để huấn luyện) và so với nhiều baseline
+(xem [Baseline](#baseline)).
 
 ## Hai sản phẩm
 
