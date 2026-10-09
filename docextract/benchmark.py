@@ -20,6 +20,7 @@ from pathlib import Path
 
 from .config import Settings
 from .metrics import best_match_teds, cer, heading_f1, teds, wer, word_f1
+from .models import DocumentStats
 from .pipeline import DocumentPipeline, ExtractOptions
 from .tables import Table, parse_html_tables, parse_markdown_table
 
@@ -87,7 +88,7 @@ def run_benchmark(
     system_name: str | None = None,
 ) -> dict:
     """Score one conversion system (default: this pipeline) on every document with a ground truth."""
-    from .baselines import DocextractSystem
+    from .baselines import Converted, DocextractSystem
 
     if system is None:
         system = DocextractSystem(Settings.from_env(), pipeline, use_vlm)
@@ -97,7 +98,11 @@ def run_benchmark(
     rows = []
     for doc, gt_path, category, doc_split in docs:
         gt = gt_path.read_text(encoding="utf-8")
-        converted = system.convert(doc)
+        try:
+            converted, error = system.convert(doc), None
+        except Exception as exc:  # out of memory, a crash: this document scores as empty output
+            error = f"{type(exc).__name__}: {exc}"[:300]
+            converted = Converted("", DocumentStats(pages_processed=_page_count(doc)))
         pred = document_text(converted.markdown or "")
         gt_tables, pred_tables = markdown_tables(gt), markdown_tables(pred)
         table_scores = best_match_teds(gt_tables, pred_tables)
@@ -119,12 +124,13 @@ def run_benchmark(
                 "teds_structure": _mean(structure_scores),
                 # only where the ground truth marks headings: some sources do not annotate them
                 "heading_f1": round(heading_f1(gt_headings, markdown_headings(pred)), 4) if gt_headings else None,
-                "ms_per_page": s.ms_per_page,
+                "ms_per_page": None if error else s.ms_per_page,
                 "vlm_calls_per_page": round(s.vlm_calls / max(1, s.pages_processed), 3),
                 "cost_per_page": s.cost_per_page,
                 # only systems that flag uncertain regions report it
                 "needs_review_ratio": round(s.regions_by_status.get("needs_review", 0) / s.regions, 4) if s.regions else None,
                 "methods": s.regions_by_method,
+                "error": error,
             }
         )
     summary = _summary(rows)
@@ -138,8 +144,21 @@ def run_benchmark(
     }
 
 
+def _page_count(path: Path) -> int:
+    if path.suffix.lower() != ".pdf":
+        return 1
+    import pymupdf
+
+    try:
+        with pymupdf.open(path) as doc:
+            return doc.page_count
+    except Exception:
+        return 1
+
+
 def _summary(rows: list[dict]) -> dict:
-    out: dict = {"documents": len(rows), "pages": sum(r["pages"] or 0 for r in rows)}
+    out: dict = {"documents": len(rows), "pages": sum(r["pages"] or 0 for r in rows),
+                 "failed": sum(1 for r in rows if r.get("error"))}
     out.update({key: _mean([r[key] for r in rows if r[key] is not None]) for key in METRICS})
     return out
 
@@ -149,7 +168,7 @@ def _cell(value) -> str:
 
 
 def _report(rows: list[dict], summary: dict, categories: dict[str, dict]) -> str:
-    cols = ["documents", "pages", "cer", "word_f1", "teds", "heading_f1", "ms_per_page", "vlm_calls_per_page",
+    cols = ["documents", "pages", "failed", "cer", "word_f1", "teds", "heading_f1", "ms_per_page", "vlm_calls_per_page",
             "needs_review_ratio"]
     lines = ["| category | " + " | ".join(cols) + " |", "|" + "---|" * (len(cols) + 1)]
     for name, values in categories.items():
@@ -161,6 +180,9 @@ def _report(rows: list[dict], summary: dict, categories: dict[str, dict]) -> str
     for row in rows:
         lines.append("| " + " | ".join(_cell(row[c]) for c in cols) + " |")
     lines += ["", "</details>"]
+    failed = [r for r in rows if r.get("error")]
+    if failed:
+        lines += ["", "Failed (scored as empty output):", ""] + [f"- {r['document']}: {r['error']}" for r in failed]
     return "\n".join(lines) + "\n"
 
 
@@ -174,6 +196,7 @@ COMPARED = [
     ("heading_f1", "heading F1", True),
     ("ms_per_page", "ms/page", False),
     ("needs_review_ratio", "needs review", False),
+    ("failed", "failed documents", False),
 ]
 
 
@@ -183,7 +206,8 @@ def compare_reports(reports: list[dict], names: list[str] | None = None) -> str:
     header = "| system | " + " | ".join(label for _, label, _ in COMPARED) + " |"
     rule = "|" + "---|" * (len(COMPARED) + 1)
     lines = [
-        "Lower is better for CER, ms/page and needs review; higher for the rest. Best value of each column in bold.",
+        "Lower is better for CER, ms/page, needs review and failed documents; higher for the rest. "
+        "Best value of each column in bold.",
         "",
     ]
     categories = sorted({c for r in reports for c in (r.get("categories") or {})})

@@ -243,8 +243,8 @@ def main() -> None:
             Path(args.json).write_text(json.dumps(data, indent=1, ensure_ascii=False), encoding="utf-8")
     text = report(data)
     Path(args.report).write_text(text, encoding="utf-8")
-    Path(args.report).with_suffix(".json").write_text(json.dumps(data["results"], indent=2, ensure_ascii=False),
-                                                      encoding="utf-8")
+    # same format as --json (which may be this very file), so merge reads either
+    Path(args.report).with_suffix(".json").write_text(json.dumps(data, indent=1, ensure_ascii=False), encoding="utf-8")
     print(text)
 
 

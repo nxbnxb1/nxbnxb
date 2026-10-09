@@ -132,6 +132,15 @@ def test_benchmark_and_cli(tmp_path, settings, monkeypatch):
     plain = run_benchmark(tmp_path, system=TextLayerSystem(), system_name="text layer")
     assert plain["system"] == "text layer" and plain["summary"]["word_f1"] > 0.9
 
+    # a document a system cannot convert scores as empty output instead of stopping the run
+    class Crashing(TextLayerSystem):
+        def convert(self, path):
+            raise MemoryError("out of memory")
+
+    crashed = run_benchmark(tmp_path / "eval", split="test", system=Crashing(), system_name="crashing")
+    assert crashed["summary"]["failed"] == 1 and crashed["summary"]["cer"] == 1.0
+    assert crashed["documents"][0]["ms_per_page"] is None and "MemoryError" in crashed["markdown"]
+
     monkeypatch.setenv("DOCEXTRACT_LAYOUT_BACKEND", "heuristic")
     monkeypatch.setenv("DOCEXTRACT_OCR_BACKEND", "none")
     monkeypatch.setenv("DOCEXTRACT_TABLE_BACKEND", "none")
