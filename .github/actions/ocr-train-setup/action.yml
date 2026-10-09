@@ -17,13 +17,26 @@ runs:
         python-version: "3.12"
         cache: pip
 
+    # fonts are cached: installing them with apt sometimes takes 15 minutes, and every round of
+    # training waits for its slowest runner
+    - name: Cached fonts
+      id: fonts
+      uses: actions/cache@v4
+      with:
+        path: ~/.fonts
+        key: ocr-train-fonts-v1-${{ runner.os }}
+
     - name: Fonts with Vietnamese and Japanese coverage
+      if: steps.fonts.outputs.cache-hit != 'true'
       shell: bash
       run: |
+        packages="fonts-dejavu-core fonts-liberation2 fonts-freefont-ttf fonts-noto-core fonts-crosextra-carlito
+          fonts-crosextra-caladea fonts-roboto fonts-open-sans fonts-noto-cjk fonts-ipaexfont-gothic fonts-ipaexfont-mincho"
         sudo apt-get update -qq
-        sudo apt-get install -y -qq fonts-dejavu-core fonts-liberation2 fonts-freefont-ttf fonts-noto-core \
-          fonts-crosextra-carlito fonts-crosextra-caladea fonts-roboto fonts-open-sans \
-          fonts-noto-cjk fonts-ipaexfont-gothic fonts-ipaexfont-mincho >/dev/null
+        sudo apt-get install -y -qq $packages >/dev/null
+        mkdir -p ~/.fonts
+        for p in $packages; do dpkg -L "$p" | grep -E '\.(ttf|otf|ttc)$' | xargs -r cp -t ~/.fonts; done
+        ls ~/.fonts | wc -l
 
     - name: PaddleOCR training code
       shell: bash

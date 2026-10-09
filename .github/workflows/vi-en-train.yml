@@ -9,20 +9,20 @@ on:
     inputs:
       runners:
         description: Runners training at the same time (each on its own synthetic lines)
-        type: number
-        default: 8
+        type: string
+        default: "8"
       rounds:
         description: Rounds (1-6); the runners' weights are averaged after each round
-        type: number
-        default: 4
+        type: string
+        default: "4"
       round_minutes:
         description: Training minutes per round (at most 100)
-        type: number
-        default: 50
+        type: string
+        default: "50"
       lines:
         description: New synthetic lines per runner and round
-        type: number
-        default: 24000
+        type: string
+        default: "24000"
       resume_tag:
         description: Continue from the weights of this release; empty = start from the baseline model
         default: ""
@@ -34,15 +34,17 @@ on:
 permissions:
   contents: write
 
+# Numbers are typed as strings in the form and converted with fromJSON: a number input passed
+# straight to the reusable workflow left the run queued without any job.
 jobs:
   train:
     uses: ./.github/workflows/_train.yml
     with:
       product: vi_en
-      runners: ${{ inputs.runners }}
-      rounds: ${{ inputs.rounds }}
-      round_minutes: ${{ inputs.round_minutes }}
-      lines: ${{ inputs.lines }}
+      runners: ${{ fromJSON(inputs.runners) }}
+      rounds: ${{ fromJSON(inputs.rounds) }}
+      round_minutes: ${{ fromJSON(inputs.round_minutes) }}
+      lines: ${{ fromJSON(inputs.lines) }}
       resume_tag: ${{ inputs.resume_tag }}
       publish: ${{ inputs.publish }}
 
