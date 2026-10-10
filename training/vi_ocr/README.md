@@ -29,7 +29,10 @@ thể sinh ra các chữ đó nên **bỏ mất cả chữ** mà độ tin cậy
 Một runner GitHub có 4 nhân CPU, không GPU. Mỗi **vòng**: N runner bắt đầu từ cùng trọng số, mỗi runner huấn luyện trên
 dòng tổng hợp riêng trong `round_minutes` phút, rồi trọng số được **lấy trung bình**; vòng sau bắt đầu từ trung bình đó.
 Sau mỗi vòng có kiểm tra trên dòng validation (trong *Summary* của workflow). Vòng cuối được export, đánh giá với baseline
-và xuất bản Release. Mặc định: 8 runner × 4 vòng × 50 phút. Learning rate không đổi trong vòng, giảm theo cosine qua các
+trên mọi bộ đánh giá (tổng hợp theo ngôn ngữ, dòng dài 30–60 ký tự, dòng cắt từ tài liệu thật của các công ty dùng để test
+theo từng ngôn ngữ) và chỉ xuất bản Release khi qua chốt chất lượng `gate.py`: trên mọi bộ dòng của tài liệu thật, CER không
+cao hơn baseline quá 0,5 điểm % (dòng tổng hợp không quyết định: `vi_en_ja-ocr-2` tốt hơn baseline trên dòng tổng hợp nhưng
+kém hơn trên tài liệu thật). Không qua thì model chỉ được giữ làm artifact. Mặc định: 8 runner × 4 vòng × 50 phút. Learning rate không đổi trong vòng, giảm theo cosine qua các
 vòng. Runner nào lỗi chỉ làm bớt một phần của trung bình.
 
 Tham số workflow: `runners`, `rounds` (1–6), `round_minutes`, `lines` (dòng mới mỗi runner mỗi vòng), `resume_tag`

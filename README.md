@@ -46,7 +46,7 @@ sản phẩm chạy bằng baseline. Benchmark và đánh giá khi huấn luyệ
 | Việc cần làm | Cách làm |
 |---|---|
 | Trích xuất tài liệu | Đẩy file vào `inputs/vi_en/` hoặc `inputs/vi_en_ja/` → workflow *Extract documents* của sản phẩm đó tự chạy, sinh `outputs/<sản phẩm>/<tên>.md`, `<tên>.json`, `<tên>_assets/*.png` (hình giữ lại), commit vào nhánh và đính kèm artifact. Hoặc *Actions → … · Extract documents → Run workflow* (chọn file/thư mục, trang, hoặc `demo`). |
-| Huấn luyện model OCR | *Actions → … · Train OCR model → Run workflow*: 8 runner GitHub cùng huấn luyện theo vòng, lấy trung bình trọng số sau mỗi vòng ([chi tiết](training/vi_ocr/README.md)). Model được đánh giá so với baseline của sản phẩm (độ chính xác và tốc độ, cùng runner) rồi xuất bản thành Release; workflow Extract/Benchmark của sản phẩm tự tải bản mới nhất. |
+| Huấn luyện model OCR | *Actions → … · Train OCR model → Run workflow*: 8 runner GitHub cùng huấn luyện theo vòng, lấy trung bình trọng số sau mỗi vòng ([chi tiết](training/vi_ocr/README.md)). Model được đánh giá so với baseline của sản phẩm (độ chính xác và tốc độ, cùng runner) và chỉ được xuất bản thành Release nếu trên dòng chữ cắt từ tài liệu thật của các công ty dùng để test, ở từng ngôn ngữ, nó không kém baseline ([`gate.py`](training/vi_ocr/gate.py)); workflow Extract/Benchmark của sản phẩm tự tải bản mới nhất. |
 | Đo chất lượng | *Actions → … · Benchmark*: sản phẩm và các baseline chạy song song, mỗi hệ thống một runner, trên cùng dữ liệu (mặc định: tập `test` của bộ đánh giá giữ riêng); một bảng chung theo từng loại tài liệu (xem *Baseline* dưới đây). |
 | Kiểm thử mã nguồn | Workflow **CI** chạy `pytest` ở mỗi lần push / pull request. |
 
