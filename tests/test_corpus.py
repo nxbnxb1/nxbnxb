@@ -64,3 +64,11 @@ def test_split_is_by_company():
     assert cc.split_of("vn:ACB") == cc.split_of("vn:ACB")
     shares = [cc.split_of(f"jp:{i}") for i in range(2000)]
     assert 0.6 < shares.count("train") / 2000 < 0.8
+
+
+def test_seeds_with_ticker_check(tmp_path):
+    seeds = tmp_path / "seeds.tsv"
+    seeds.write_text("# comment\nVNM\tconsumer\thttps://www.vinamilk.com.vn\nHPG\tsteel\thttps://hoaphat.com.vn\tticker\n"
+                     "XYZ\tother\thttps://vinamilk.com.vn/\n", encoding="utf-8")
+    read = cc.read_seeds([str(seeds)], "VN")
+    assert [(s["id"], s["check"]) for s in read] == [("VNM", ""), ("HPG", "ticker")]  # same website once

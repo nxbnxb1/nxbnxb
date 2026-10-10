@@ -400,6 +400,12 @@ def crawl_site(seed: dict, fetch, robots: RobotsCache, args: argparse.Namespace)
     seen, pages = {root}, 0
     bases = {domain(root)}
     deadline = time.monotonic() + args.site_seconds
+    # a seed marked "ticker" counts only if the website shows its ticker (in a page, or in the name
+    # of a document): a wrong or re-registered domain then yields nothing, not another company's files
+    ticker = None
+    if seed.get("check") == "ticker":
+        ticker = re.compile(rf"(?<![A-Za-z0-9]){seed['id']}(?![A-Za-z0-9])", re.IGNORECASE)
+    confirmed = ticker is None
     while queue_ and pages < args.max_pages and len(found) < args.max_pdfs and time.monotonic() < deadline:
         queue_.sort()
         _, depth, url = queue_.pop(0)
@@ -415,6 +421,7 @@ def crawl_site(seed: dict, fetch, robots: RobotsCache, args: argparse.Namespace)
         if pages == 1 and got[1]:
             bases.add(domain(got[1][0][0]))  # the website moved to another domain
         for page_url, page in got[1]:
+            confirmed = confirmed or bool(re.search(rf"\b{seed['id']}\b", page))  # upper case in pages
             for link, text in page_links(page_url, page):
                 if time.monotonic() > deadline:  # robots.txt of many other hosts can take long
                     break
@@ -440,6 +447,10 @@ def crawl_site(seed: dict, fetch, robots: RobotsCache, args: argparse.Namespace)
                 time.sleep(0.5)
         finally:
             probe.close()
+    if not confirmed and not any(ticker.search(unquote(i["url"]) + " " + i["title"]) for i in found.values()):
+        if found:
+            print(f"{seed['id']} {root}: ticker not seen on the website, {len(found)} links dropped", flush=True)
+        return {}
     company = f"{country.lower()}:{seed['id']}"
     return {
         url: {**item, "source": country.lower(), "company": company, "ticker": seed["id"], "sector": seed["sector"],
@@ -454,11 +465,12 @@ def read_seeds(paths: list[str], country: str) -> list[dict]:
         for line in Path(path).read_text(encoding="utf-8").splitlines():
             if not line.strip() or line.startswith("#"):
                 continue
-            cid, sector, website = (part.strip() for part in line.split("\t")[:3])
+            cid, sector, website, *rest = (part.strip() for part in line.split("\t"))
             if domain(website) in domains:  # the same website under two ids
                 continue
             domains.add(domain(website))
-            seeds.append({"id": cid, "sector": sector, "website": website, "country": country})
+            seeds.append({"id": cid, "sector": sector, "website": website, "country": country,
+                          "check": rest[0] if rest else ""})
     return seeds
 
 

@@ -87,3 +87,97 @@ MSH	textile	https://www.songhong.vn
 GEX	industrial	https://www.gelex.vn
 VCS	materials	https://www.vicostone.com
 LIX	consumer	https://www.lixco.com
+# More listed companies (4th column "ticker": a website counts only if it shows the company's ticker)
+VCI	securities	https://www.vietcap.com.vn	ticker
+CTS	securities	https://www.vietinbanksc.com.vn	ticker
+VIX	securities	https://www.vixs.vn	ticker
+ORS	securities	https://www.tpbs.com.vn	ticker
+BVS	securities	https://www.bvsc.com.vn	ticker
+VDS	securities	https://www.vdsc.com.vn	ticker
+TVS	securities	https://www.tvs.vn	ticker
+PSI	securities	https://www.psi.vn	ticker
+DSC	securities	https://www.dsc.com.vn	ticker
+BAB	bank	https://www.baca-bank.vn	ticker
+BVB	bank	https://www.vietcapitalbank.com.vn	ticker
+PGB	bank	https://www.pgbank.com.vn	ticker
+VBB	bank	https://www.vietbank.com.vn	ticker
+NVB	bank	https://www.ncb-bank.vn	ticker
+BIC	insurance	https://www.bic.vn	ticker
+MIG	insurance	https://www.mic.vn	ticker
+PTI	insurance	https://www.pti.com.vn	ticker
+ABI	insurance	https://www.abic.com.vn	ticker
+VNR	insurance	https://www.vinare.com.vn	ticker
+DIG	real estate	https://www.dic.vn	ticker
+CEO	real estate	https://www.ceogroup.com.vn	ticker
+HDG	real estate	https://www.hado.com.vn	ticker
+KBC	real estate	https://www.kinhbaccity.com.vn	ticker
+IDC	real estate	https://www.idico.com.vn	ticker
+SZC	real estate	https://www.sonadezichauduc.com.vn	ticker
+VGC	building materials	https://www.viglacera.com.vn	ticker
+DXS	real estate	https://www.datxanhservices.vn	ticker
+SCR	real estate	https://www.sacomreal.com.vn	ticker
+NTL	real estate	https://www.lideco.vn	ticker
+AGG	real estate	https://www.angiahouse.vn	ticker
+NBB	real estate	https://www.nbb.com.vn	ticker
+VRE	real estate	https://www.vincom.com.vn	ticker
+BCM	real estate	https://www.becamex.com.vn	ticker
+TDC	real estate	https://www.becamextdc.com.vn	ticker
+LHG	real estate	https://www.lhg.vn	ticker
+D2D	real estate	https://www.d2d.com.vn	ticker
+HBC	construction	https://www.hbcg.vn	ticker
+FCN	construction	https://www.fecon.com.vn	ticker
+CII	infrastructure	https://www.cii.com.vn	ticker
+LCG	construction	https://www.lizen.vn	ticker
+HT1	building materials	https://www.ximanghatien1.com.vn	ticker
+BCC	building materials	https://www.ximangbimson.com.vn	ticker
+DPR	rubber	https://www.doruco.com.vn	ticker
+CSM	tyres	https://www.casumina.com	ticker
+PAC	batteries	https://www.pinaco.com	ticker
+TLG	consumer	https://www.thienlonggroup.com	ticker
+RAL	consumer	https://www.rangdong.com.vn	ticker
+TLH	steel	https://www.tienlensteel.com.vn	ticker
+SMC	steel	https://www.smc.vn	ticker
+PVD	energy	https://www.pvdrilling.com.vn	ticker
+PVS	energy	https://www.ptsc.com.vn	ticker
+BSR	energy	https://www.bsr.com.vn	ticker
+PVT	shipping	https://www.pvtrans.com	ticker
+OIL	energy	https://www.pvoil.com.vn	ticker
+GEG	energy	https://www.geccom.vn	ticker
+PPC	energy	https://www.ppc.evn.vn	ticker
+PGV	energy	https://www.genco3.com	ticker
+BWE	utilities	https://www.biwase.com.vn	ticker
+BFC	fertilizer	https://www.binhdien.com	ticker
+AAA	plastics	https://www.anphatplastic.com	ticker
+APH	plastics	https://www.anphatholdings.com	ticker
+QNS	consumer	https://www.qns.com.vn	ticker
+SBT	consumer	https://www.ttcagris.com.vn	ticker
+VCF	consumer	https://www.vinacafebienhoa.com	ticker
+BHN	consumer	https://www.habeco.com.vn	ticker
+MML	consumer	https://www.masanmeatlife.com.vn	ticker
+DBC	agriculture	https://www.dabaco.com	ticker
+HAG	agriculture	https://www.hagl.com.vn	ticker
+PAN	agriculture	https://www.thepangroup.vn	ticker
+NAF	agriculture	https://www.nafoods.com	ticker
+ASM	seafood	https://www.saomaigroup.com	ticker
+IDI	seafood	https://www.idiseafood.com	ticker
+MPC	seafood	https://www.minhphu.com	ticker
+PET	retail	https://www.petrosetco.vn	ticker
+HAX	retail	https://www.haxaco.com.vn	ticker
+SVC	retail	https://www.savico.com.vn	ticker
+DMC	pharma	https://www.domesco.com	ticker
+DVN	pharma	https://www.vinapharm.com.vn	ticker
+PME	pharma	https://www.pymepharco.com	ticker
+ELC	technology	https://www.elcom.com.vn	ticker
+SGT	technology	https://www.saigontel.vn	ticker
+VGI	telecom	https://www.viettelglobal.vn	ticker
+VOS	shipping	https://www.vosco.vn	ticker
+SCS	logistics	https://www.scsc.vn	ticker
+PHP	logistics	https://www.haiphongport.com.vn	ticker
+SGN	aviation	https://www.sags.vn	ticker
+DVP	logistics	https://www.dinhvuport.com.vn	ticker
+MVN	shipping	https://www.vimc.co	ticker
+CDN	logistics	https://www.danangport.com	ticker
+STK	textile	https://www.theky.vn	ticker
+SAS	aviation	https://www.sasco.com.vn	ticker
+NCT	aviation	https://www.ncts.vn	ticker
+TMT	automotive	https://www.tmt-vietnam.com	ticker
