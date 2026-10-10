@@ -25,6 +25,7 @@
 #            training lines are then REAL_SHARE (default 0.5) real lines cut from documents of
 #            the training companies (doc_lines.py, documents of shard SHARD=k/n) and the rest
 #            synthetic; validation and evaluation also get real lines of the dev / test companies
+#            (evaluation: eval_real_<lang> per language, eval_real_long)
 #   loader:  LOADER_WORKERS (data loader processes, default 2)
 #   CPU:     THREADS (default: all cores), FUSE / FREEZE / GTC (see train_cpu.py)
 set -euo pipefail
@@ -57,9 +58,9 @@ mkdir -p "$WORK/pretrained" "$WORK/output" "$WORK/data"
 
 synth() { (cd "$HERE" && python synth.py "$@" --dict "$DICT" --workers "$WORKERS"); }
 corpus() { [ -n "${CORPUS_MANIFEST:-}" ] && [ -s "$CORPUS_MANIFEST" ] && [ -d "${CORPUS_FILES:-}" ]; }
-real_lines() {  # out split count seed [shard [doc_lines.py options]]
+real_lines() {  # out split count seed [shard [languages [doc_lines.py options]]]
   python "$HERE/doc_lines.py" "$1" --manifest "$CORPUS_MANIFEST" --files "$CORPUS_FILES" --dict "$DICT" \
-    --langs "$LANGS" --split "$2" --count "$3" --seed "$4" --shard "${5:-1/1}" --workers "$WORKERS" "${@:6}"
+    --split "$2" --count "$3" --seed "$4" --shard "${5:-1/1}" --langs "${6:-$LANGS}" --workers "$WORKERS" "${@:7}"
 }
 
 prepare() {
@@ -100,9 +101,13 @@ prepare() {
   done
   [ -s "$WORK/data/eval_clean/labels.txt" ] || synth "$WORK/data/eval_clean" --count "$((eval_count * 6 / 10))" --seed 3 --langs "$LANGS" --no-augment
   if corpus; then  # lines of real documents of companies never trained on
-    [ -s "$WORK/data/eval_real/labels.txt" ] || real_lines "$WORK/data/eval_real" test "$eval_count" 7 || true
-    [ -s "$WORK/data/eval_real_long/labels.txt" ] || real_lines "$WORK/data/eval_real_long" test "$((eval_count / 2))" 8 \
-      1/1 --min-len 30 --max-len 80 || true
+    seed=7
+    for lang in "${LANG_LIST[@]}"; do  # per language: the corpus has far more Japanese than Vietnamese
+      [ -s "$WORK/data/eval_real_$lang/labels.txt" ] || real_lines "$WORK/data/eval_real_$lang" test "$eval_count" "$seed" 1/1 "$lang" || true
+      seed=$((seed + 1))
+    done
+    [ -s "$WORK/data/eval_real_long/labels.txt" ] || real_lines "$WORK/data/eval_real_long" test "$((eval_count / 2))" 20 \
+      1/1 "$LANGS" --min-len 30 --max-len 80 || true
     [ -s "$WORK/data/val_real/labels.txt" ] || real_lines "$WORK/data/val_real" dev "$val" 77 || true
   fi
   mkdir -p "$WORK/data/val"

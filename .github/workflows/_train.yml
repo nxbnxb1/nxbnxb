@@ -772,6 +772,21 @@ jobs:
             --report "$WORK/report.md"
           cat "$WORK/report.md" >> "$GITHUB_STEP_SUMMARY"
 
+      # Published only if not worse than the baseline on lines of real documents of the test
+      # companies (training/vi_ocr/gate.py); otherwise the model is kept as an artifact only.
+      - name: Quality gate
+        id: gate
+        working-directory: training/vi_ocr
+        run: |
+          source "$WORK/model.env"
+          if python gate.py "$WORK/report.json" --model "$NAME (fine-tuned)" --baseline "$BASE_MODEL" > "$WORK/gate.md"; then
+            echo "pass=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "pass=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::not published: worse than the baseline on real document lines, or not evaluated (see the summary)"
+          fi
+          cat "$WORK/gate.md" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Package
         run: |
           source "$WORK/model.env"
@@ -789,9 +804,10 @@ jobs:
           path: |
             ${{ env.WORK }}/dist/*.tar.gz
             ${{ env.WORK }}/report.*
+            ${{ env.WORK }}/gate.md
 
       - name: Publish release
-        if: inputs.publish
+        if: inputs.publish && steps.gate.outputs.pass == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -803,6 +819,8 @@ jobs:
             echo "fused=$FUSE frozen='${FREEZE}' gtc=$GTC; continued from '${{ inputs.resume_tag }}'."
             echo
             cat "$WORK/report.md" 2>/dev/null || echo "(evaluation report missing: see the workflow logs)"
+            echo
+            cat "$WORK/gate.md"
           } > "$WORK/notes.md"
           assets=("$WORK/dist/$NAME.tar.gz" "$WORK/dist/checkpoint.tar.gz")
           for f in "$WORK/report.md" "$WORK/report.json"; do [ -f "$f" ] && assets+=("$f"); done
