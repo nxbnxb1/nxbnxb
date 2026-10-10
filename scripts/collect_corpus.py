@@ -32,7 +32,6 @@ import hashlib
 import html
 import json
 import os
-import queue
 import re
 import sys
 import threading
@@ -159,6 +158,18 @@ def client() -> httpx.Client:
     return httpx.Client(headers={"User-Agent": UA}, timeout=30, follow_redirects=True, verify=True)
 
 
+def read_body(response: httpx.Response, max_bytes: int, seconds: float) -> bytes | None:
+    """The body of a streamed response, or None when it is larger than max_bytes or takes longer
+    than seconds (a server trickling bytes would otherwise hold a worker for hours)."""
+    deadline = time.monotonic() + seconds
+    data = bytearray()
+    for chunk in response.iter_bytes():
+        data += chunk
+        if len(data) > max_bytes or time.monotonic() > deadline:
+            return None
+    return bytes(data)
+
+
 # --- robots.txt ---------------------------------------------------------------------------
 
 
@@ -230,13 +241,14 @@ class RobotsCache:
         text = None  # 5xx or no answer: nothing allowed (RFC 9309 2.3.1)
         for attempt in range(3):
             try:
-                with client() as c:
-                    response = c.get(origin + "/robots.txt")
+                with client() as c, c.stream("GET", origin + "/robots.txt") as response:
+                    status = response.status_code
+                    body = read_body(response, 512 * 1024, 30) if status == 200 else b""
             except httpx.HTTPError:
                 time.sleep(2 + 4 * attempt)
                 continue
-            if response.status_code < 500:  # 4xx: no robots.txt, everything allowed
-                text = "" if response.status_code >= 400 else response.text
+            if status < 500:  # 4xx: no robots.txt, everything allowed
+                text = (body or b"").decode("utf-8", "replace") if status == 200 else ""
                 break
             time.sleep(2 + 4 * attempt)
         robots = Robots(text)
@@ -326,11 +338,9 @@ class StaticFetcher:
                     return ("pdf", str(response.url))
                 if "html" not in ctype:
                     return None
-                body = b""
-                for chunk in response.iter_bytes():
-                    body += chunk
-                    if len(body) > 8 * 2**20:
-                        break
+                body = read_body(response, 8 * 2**20, 60)
+                if body is None:
+                    return None
                 return ("html", [(str(response.url), body.decode(response.encoding or "utf-8", "replace"))])
         except Exception:
             return None
@@ -406,6 +416,8 @@ def crawl_site(seed: dict, fetch, robots: RobotsCache, args: argparse.Namespace)
             bases.add(domain(got[1][0][0]))  # the website moved to another domain
         for page_url, page in got[1]:
             for link, text in page_links(page_url, page):
+                if time.monotonic() > deadline:  # robots.txt of many other hosts can take long
+                    break
                 low = fold(unquote(link)) + " " + fold(text)
                 if PDF_URL.search(link):
                     if link not in found and robots.allowed(link):
@@ -450,64 +462,102 @@ def read_seeds(paths: list[str], country: str) -> list[dict]:
     return seeds
 
 
+def _render_child(seed: dict, args: argparse.Namespace, conn) -> None:
+    """One website in a browser, in a process of its own (see crawl)."""
+    os.setpgrp()  # its own process group: killing it also ends the browser
+    fetch = BrowserFetcher()
+    try:
+        conn.send(crawl_site(seed, fetch, RobotsCache(), args))
+    finally:
+        fetch.close()
+
+
+def _render(seed: dict, args: argparse.Namespace) -> dict[str, dict]:
+    """crawl_site in a browser with a hard time limit: a page can hang Chromium for good, so the
+    website gets a process that is killed when its time is up."""
+    import multiprocessing
+    import signal
+
+    ctx = multiprocessing.get_context("spawn")
+    parent, child = ctx.Pipe(duplex=False)
+    proc = ctx.Process(target=_render_child, args=(seed, args, child), daemon=True)
+    proc.start()
+    child.close()
+    items: dict[str, dict] = {}
+    try:
+        if parent.poll(args.site_seconds + 60):
+            items = parent.recv()
+    except (EOFError, OSError):
+        pass
+    finally:
+        # SIGTERM first: the Playwright driver closes the browser on it; then nothing is left alive
+        for sig, wait in ((signal.SIGTERM, 10), (signal.SIGKILL, 10)):
+            if not proc.is_alive():
+                break
+            try:
+                os.killpg(proc.pid, sig)
+            except OSError:
+                proc.kill()
+            proc.join(wait)
+        parent.close()
+    return items
+
+
 def crawl(args: argparse.Namespace) -> None:
+    """PDF links of the websites of a shard, written to --out as each website is done (JSON lines),
+    so a run stopped from outside keeps what it found. No website is started after --budget-minutes."""
     seeds = read_seeds(args.seeds, args.country)
     k, n = (int(x) for x in args.shard.split("/"))
     seeds = [s for s in seeds if int(hashlib.sha1(s["id"].encode()).hexdigest(), 16) % n == k - 1]
     print(f"{len(seeds)} {args.country} websites (shard {args.shard})", flush=True)
+    stop_at = time.monotonic() + args.budget_minutes * 60
     robots = RobotsCache()
     found: dict[str, dict[str, dict]] = {}
+    out = Path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text("", encoding="utf-8")
+    lock = threading.Lock()
 
-    def static(seed: dict) -> dict[str, dict]:
+    def record(seed: dict, items: dict[str, dict], how: str) -> None:
+        with lock:
+            site = found.setdefault(seed["id"], {})
+            new = {url: item for url, item in items.items() if url not in site}
+            site.update(new)
+            with out.open("a", encoding="utf-8") as f:
+                f.writelines(json.dumps(i, ensure_ascii=False) + "\n" for i in new.values())
+            print(f"{seed['id']} {seed['website']}: {len(found[seed['id']])} PDF links ({how})", flush=True)
+
+    def static(seed: dict) -> None:
+        if time.monotonic() > stop_at:
+            return
         fetch = StaticFetcher()
         try:
-            return crawl_site(seed, fetch, robots, args)
+            items = crawl_site(seed, fetch, robots, args)
+        except Exception as exc:
+            print(f"{seed['id']}: {type(exc).__name__}: {exc}", flush=True)
+            items = {}
         finally:
             fetch.close()
+        record(seed, items, "HTML")
 
     with concurrent.futures.ThreadPoolExecutor(args.workers) as pool:
-        futures = {pool.submit(static, s): s for s in seeds}
-        for future in concurrent.futures.as_completed(futures):
-            seed = futures[future]
-            found[seed["id"]] = future.result() if not future.exception() else {}
-            print(f"{seed['id']} {seed['website']}: {len(found[seed['id']])} PDF links", flush=True)
+        list(pool.map(static, seeds))
 
-    sparse = [s for s in seeds if len(found[s["id"]]) < args.render_below and robots.allowed(s["website"])]
+    sparse = [s for s in seeds if s["id"] in found and len(found[s["id"]]) < args.render_below
+              and robots.allowed(s["website"])]
     if args.render and sparse:
         print(f"rendering {len(sparse)} websites with few documents in a browser", flush=True)
-        todo: queue.Queue = queue.Queue()
-        for seed in sparse:
-            todo.put(seed)
-        lock = threading.Lock()
 
-        def worker() -> None:
-            fetch = BrowserFetcher()
-            try:
-                while True:
-                    try:
-                        seed = todo.get_nowait()
-                    except queue.Empty:
-                        return
-                    try:
-                        items = crawl_site(seed, fetch, robots, args)
-                    except Exception:
-                        items = {}
-                    with lock:
-                        before = len(found[seed["id"]])
-                        found[seed["id"]] = {**items, **found[seed["id"]]}
-                        print(f"{seed['id']} {seed['website']}: {before} → {len(found[seed['id']])} PDF links (browser)",
-                              flush=True)
-            finally:
-                fetch.close()
+        def render(seed: dict) -> None:
+            if time.monotonic() <= stop_at:
+                record(seed, _render(seed, args), "browser")
 
-        threads = [threading.Thread(target=worker) for _ in range(args.render_workers)]
-        for t in threads:
-            t.start()
-        for t in threads:
-            t.join()
-    items = [item for site in found.values() for item in site.values()]
-    print(f"{len(items)} PDF links from {sum(1 for v in found.values() if v)} of {len(seeds)} websites", flush=True)
-    _write_jsonl(args.out, items)
+        with concurrent.futures.ThreadPoolExecutor(args.render_workers) as pool:
+            list(pool.map(render, sparse))
+    skipped = len(seeds) - len(found)
+    total = sum(len(v) for v in found.values())
+    print(f"{total} PDF links from {sum(1 for v in found.values() if v)} of {len(seeds)} websites"
+          + (f"; {skipped} not reached within the time budget" if skipped else ""), flush=True)
 
 
 def seeds_wikidata(args: argparse.Namespace) -> None:
@@ -621,12 +671,7 @@ def _get(url: str, max_mb: int) -> bytes | None:
         with client() as c, c.stream("GET", url) as response:
             if response.status_code != 200:
                 return None
-            data = b""
-            for chunk in response.iter_bytes():
-                data += chunk
-                if len(data) > max_mb * 2**20:
-                    return None
-        return data
+            return read_body(response, max_mb * 2**20, 120 + 10 * max_mb)
     except Exception:
         return None
 
@@ -771,6 +816,7 @@ def main() -> None:
     p.add_argument("--render", action="store_true", help="crawl websites with few documents again in a browser")
     p.add_argument("--render-below", type=int, default=10)
     p.add_argument("--render-workers", type=int, default=4)
+    p.add_argument("--budget-minutes", type=float, default=150, help="no website is started after this")
     p.set_defaults(func=crawl)
     p = sub.add_parser("download")
     p.add_argument("candidates", nargs="+")

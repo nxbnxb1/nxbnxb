@@ -50,19 +50,25 @@ jobs:
           pip install -e . httpx playwright
           python -m playwright install --with-deps chromium
 
+      # Each crawl writes its links as websites finish and starts no website after its budget;
+      # the step limits stop anything left, and the links found so far are still uploaded.
       - name: Vietnamese companies
+        timeout-minutes: 110
+        continue-on-error: true
         run: |
           python scripts/collect_corpus.py crawl VN corpus/seeds_vn.tsv corpus/seeds_vn_wikidata.tsv \
-            --out candidates/vn-${{ matrix.shard }}.jsonl --shard ${{ matrix.shard }}/8 --render
+            --out candidates/vn-${{ matrix.shard }}.jsonl --shard ${{ matrix.shard }}/8 --render --budget-minutes 80
 
       - name: Japanese companies
-        if: ${{ !cancelled() }}
+        timeout-minutes: 150
+        continue-on-error: true
         run: |
           python scripts/collect_corpus.py crawl JP corpus/seeds_jp_wikidata.tsv \
-            --out candidates/jp-${{ matrix.shard }}.jsonl --shard ${{ matrix.shard }}/8 --render --max-pages 40
+            --out candidates/jp-${{ matrix.shard }}.jsonl --shard ${{ matrix.shard }}/8 --render --max-pages 40 \
+            --budget-minutes 120
 
       - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
+        if: ${{ always() }}
         with:
           name: corpus-candidates-${{ github.run_number }}-${{ matrix.shard }}
           path: candidates/
