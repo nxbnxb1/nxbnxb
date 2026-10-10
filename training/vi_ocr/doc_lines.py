@@ -28,7 +28,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parents[1]))  # docextract
 sys.path.insert(0, str(HERE))  # synth
 
-MAX_LEN = 23  # same limit as synthetic lines (NRTR drops labels of max_text_length - 1 or more)
+MAX_LEN = 23  # default: same limit as synthetic training lines
 
 
 def _nfc(text: str) -> str:
@@ -48,8 +48,8 @@ def _usable_page(page) -> bool:
     return total > 0 and invisible / total < 0.2
 
 
-def _chunks(chars: list[tuple[str, tuple]]) -> list[tuple[str, tuple]]:
-    """Cut a line into pieces of at most MAX_LEN characters at spaces: (text, bbox)."""
+def _chunks(chars: list[tuple[str, tuple]], max_len: int = MAX_LEN) -> list[tuple[str, tuple]]:
+    """Cut a line into pieces of at most max_len characters at spaces: (text, bbox)."""
     words: list[list[tuple[str, tuple]]] = [[]]
     for ch, box in chars:
         if ch.isspace():
@@ -60,12 +60,12 @@ def _chunks(chars: list[tuple[str, tuple]]) -> list[tuple[str, tuple]]:
     out, current = [], []
     for word in [w for w in words if w]:
         candidate = current + ([(" ", None)] if current else []) + word
-        if len(_nfc("".join(c for c, _ in candidate))) <= MAX_LEN:
+        if len(_nfc("".join(c for c, _ in candidate))) <= max_len:
             current = candidate
             continue
         if current:
             out.append(current)
-        current = word if len(_nfc("".join(c for c, _ in word))) <= MAX_LEN else []
+        current = word if len(_nfc("".join(c for c, _ in word))) <= max_len else []
     if current:
         out.append(current)
     result = []
@@ -76,7 +76,8 @@ def _chunks(chars: list[tuple[str, tuple]]) -> list[tuple[str, tuple]]:
     return result
 
 
-def page_lines(path: str, page_no: int, seed: int, charset: frozenset[str], augment: bool) -> list[tuple[bytes, str]]:
+def page_lines(path: str, page_no: int, seed: int, charset: frozenset[str], augment: bool,
+               max_len: int = MAX_LEN, min_len: int = 2) -> list[tuple[bytes, str]]:
     import pymupdf
     from PIL import Image
 
@@ -106,8 +107,8 @@ def page_lines(path: str, page_no: int, seed: int, charset: frozenset[str], augm
                     continue
                 if garbled_ratio(text) > 0.1 or legacy_encoding_ratio(text) > 0.1:
                     continue
-                for label, (x0, y0, x1, y1) in _chunks(chars):
-                    if len(label) < 2:
+                for label, (x0, y0, x1, y1) in _chunks(chars, max_len):
+                    if len(label) < max(2, min_len):
                         continue
                     h = (y1 - y0) * scale
                     pad_y, pad_x = h * rng.uniform(0.15, 0.35), rng.uniform(2, 8)
@@ -136,6 +137,8 @@ def main() -> None:
     parser.add_argument("--count", type=int, default=12000)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--shard", default="1/1", help="k/n: use only the k-th of n parts of the documents")
+    parser.add_argument("--max-len", type=int, default=MAX_LEN, help="longer lines are cut at word boundaries")
+    parser.add_argument("--min-len", type=int, default=2, help="shorter lines (or pieces) are skipped")
     parser.add_argument("--no-augment", action="store_true")
     parser.add_argument("--workers", type=int, default=4)
     args = parser.parse_args()
@@ -165,7 +168,8 @@ def main() -> None:
     (out / "images").mkdir(parents=True, exist_ok=True)
     labels, written = [], 0
     with concurrent.futures.ProcessPoolExecutor(args.workers) as pool:
-        futures = [pool.submit(page_lines, p, i, s, charset, not args.no_augment) for p, i, s in tasks]
+        futures = [pool.submit(page_lines, p, i, s, charset, not args.no_augment, args.max_len, args.min_len)
+                   for p, i, s in tasks]
         for future in concurrent.futures.as_completed(futures):
             try:
                 lines = future.result()

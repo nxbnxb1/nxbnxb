@@ -57,9 +57,9 @@ mkdir -p "$WORK/pretrained" "$WORK/output" "$WORK/data"
 
 synth() { (cd "$HERE" && python synth.py "$@" --dict "$DICT" --workers "$WORKERS"); }
 corpus() { [ -n "${CORPUS_MANIFEST:-}" ] && [ -s "$CORPUS_MANIFEST" ] && [ -d "${CORPUS_FILES:-}" ]; }
-real_lines() {  # out split count seed [shard]
+real_lines() {  # out split count seed [shard [doc_lines.py options]]
   python "$HERE/doc_lines.py" "$1" --manifest "$CORPUS_MANIFEST" --files "$CORPUS_FILES" --dict "$DICT" \
-    --langs "$LANGS" --split "$2" --count "$3" --seed "$4" --shard "${5:-1/1}" --workers "$WORKERS"
+    --langs "$LANGS" --split "$2" --count "$3" --seed "$4" --shard "${5:-1/1}" --workers "$WORKERS" "${@:6}"
 }
 
 prepare() {
@@ -93,11 +93,16 @@ prepare() {
     # evaluation sets (evaluate.py, after training) and validation sets (during training) differ
     [ -s "$WORK/data/eval_$lang/labels.txt" ] || synth "$WORK/data/eval_$lang" --count "$eval_count" --seed "$seed" --langs "$lang"
     [ -s "$WORK/data/val_$lang/labels.txt" ] || synth "$WORK/data/val_$lang" --count "$val" --seed "$((seed + 50))" --langs "$lang"
+    # lines as long as those of documents (30-60 characters; CJK about 0.6 of that)
+    [ -s "$WORK/data/eval_long_$lang/labels.txt" ] || synth "$WORK/data/eval_long_$lang" --count "$((eval_count / 2))" \
+      --seed "$((seed + 100))" --langs "$lang" --min-len 30 --max-len 60
     seed=$((seed + 1))
   done
   [ -s "$WORK/data/eval_clean/labels.txt" ] || synth "$WORK/data/eval_clean" --count "$((eval_count * 6 / 10))" --seed 3 --langs "$LANGS" --no-augment
   if corpus; then  # lines of real documents of companies never trained on
     [ -s "$WORK/data/eval_real/labels.txt" ] || real_lines "$WORK/data/eval_real" test "$eval_count" 7 || true
+    [ -s "$WORK/data/eval_real_long/labels.txt" ] || real_lines "$WORK/data/eval_real_long" test "$((eval_count / 2))" 8 \
+      1/1 --min-len 30 --max-len 80 || true
     [ -s "$WORK/data/val_real/labels.txt" ] || real_lines "$WORK/data/val_real" dev "$val" 77 || true
   fi
   mkdir -p "$WORK/data/val"

@@ -135,12 +135,15 @@ class TextSource:
             return f"{self.number('en')}{rng.choice(_JA_UNITS)}"
         return f"〒{rng.randint(100, 999)}-{rng.randint(1000, 9999)}"
 
-    def line(self, max_len: int) -> str:
+    def line(self, max_len: int, min_len: int = 0) -> str:
         kind = self.rng.choices(self.kinds, weights=self.weights)[0]
+        cjk = kind in ("ja", "misc_ja")
+        if cjk:  # CJK glyphs are square: about 0.6 as many characters for the same line width
+            max_len, min_len = min(max_len, max(14, round(max_len * 0.6))), round(min_len * 0.6)
         text = self.make(kind)
-        if kind in ("ja", "misc_ja"):
-            max_len = min(max_len, 14)  # CJK glyphs are square: keep the line's aspect ratio sane
-        elif self.rng.random() < 0.12:
+        while len(text) < min_len:  # long lines (like those of documents): several phrases
+            text += ("" if cjk else " ") + self.make(kind)
+        if not cjk and self.rng.random() < 0.12:
             text += self.rng.choice([".", ",", ":", ";", "?", "!", " -", "…"])
         r = self.rng.random()
         if kind not in ("ja", "misc_ja"):
@@ -292,7 +295,7 @@ def _init_worker(font_dirs: list[str], langs: tuple[str, ...], charset: set[str]
 
 
 def _work(args: tuple) -> list[tuple[str, str]]:
-    start, count, seed, out_dir, max_len, augment = args
+    start, count, seed, out_dir, max_len, min_len, augment = args
     rng = random.Random(seed + start)
     source = TextSource(rng, _WORKER["langs"], _WORKER["charset"])
     rows = []
@@ -300,7 +303,7 @@ def _work(args: tuple) -> list[tuple[str, str]]:
     attempts = 0
     while i < start + count and attempts < count * 20:
         attempts += 1
-        text = source.line(max_len)
+        text = source.line(max_len, min_len)
         font = pick_font(text, _WORKER["fonts"], rng) if text else None
         if font is None:
             continue
@@ -324,6 +327,7 @@ def main() -> None:
     parser.add_argument("--langs", default="vi,en", help="languages to generate: any of vi,en,ja")
     parser.add_argument("--dict", help="model dictionary; lines with other characters are skipped")
     parser.add_argument("--max-len", type=int, default=23, help="max characters per line (NRTR drops labels >= max_text_length - 1)")
+    parser.add_argument("--min-len", type=int, default=0, help="min characters per line (long lines join phrases)")
     parser.add_argument("--no-augment", action="store_true", help="clean renderings (for evaluation)")
     parser.add_argument("--font-dir", action="append", default=None, help="font directory (repeatable)")
     parser.add_argument("--workers", type=int, default=os.cpu_count() or 2)
@@ -345,7 +349,7 @@ def main() -> None:
     os.makedirs(os.path.join(args.out, "images"), exist_ok=True)
     chunk = max(1, math.ceil(args.count / (args.workers * 8)))
     jobs = [
-        (s, min(chunk, args.count - s), args.seed * 10_000_000, args.out, args.max_len, not args.no_augment)
+        (s, min(chunk, args.count - s), args.seed * 10_000_000, args.out, args.max_len, args.min_len, not args.no_augment)
         for s in range(0, args.count, chunk)
     ]
     rows: list[tuple[str, str]] = []

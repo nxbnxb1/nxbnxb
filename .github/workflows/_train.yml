@@ -764,10 +764,10 @@ jobs:
         working-directory: training/vi_ocr
         run: |
           source "$WORK/model.env"
+          # every evaluation set: per language, long lines, clean renderings, lines of test companies' documents
           sets=()
-          for lang in ${LANGS//,/ }; do sets+=("$WORK/data/eval_$lang"); done
-          [ -s "$WORK/data/eval_real/labels.txt" ] && sets+=("$WORK/data/eval_real")  # lines of test companies' documents
-          python evaluate.py --eval "${sets[@]}" "$WORK/data/eval_clean" \
+          for d in "$WORK"/data/eval_*; do [ -s "$d/labels.txt" ] && sets+=("$d"); done
+          python evaluate.py --eval "${sets[@]}" \
             --baseline "$BASE_MODEL" --model "$NAME (fine-tuned)=$WORK/export" --model-name "$BASE_MODEL" \
             --report "$WORK/report.md"
           cat "$WORK/report.md" >> "$GITHUB_STEP_SUMMARY"
