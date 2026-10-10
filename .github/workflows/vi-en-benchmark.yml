@@ -19,6 +19,11 @@ on:
         type: choice
         options: [none, local, api]
         default: none
+      parts:
+        description: "documents and text lines, or one of them"
+        type: choice
+        options: [all, documents, lines]
+        default: all
       model_tag:
         description: Release of the fine-tuned model (empty = newest vi_en model)
         default: ""
@@ -35,4 +40,6 @@ jobs:
       split: ${{ inputs.split }}
       model_tag: ${{ inputs.model_tag }}
       vlm: ${{ inputs.vlm }}
+      documents: ${{ inputs.parts != 'lines' }}
+      lines: ${{ inputs.parts != 'documents' }}
     secrets: inherit
