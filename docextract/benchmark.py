@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import re
 import statistics
+import sys
 from pathlib import Path
 
 from .config import Settings
@@ -96,7 +97,7 @@ def run_benchmark(
     if warmup:  # ms/page measures processing, not model loading
         system.warm_up()
     rows = []
-    for doc, gt_path, category, doc_split in docs:
+    for number, (doc, gt_path, category, doc_split) in enumerate(docs, 1):
         gt = gt_path.read_text(encoding="utf-8")
         try:
             converted, error = system.convert(doc), None
@@ -133,6 +134,9 @@ def run_benchmark(
                 "error": error,
             }
         )
+        print(f"[{number}/{len(docs)}] {rows[-1]['document']}: CER {rows[-1]['cer']}, "
+              f"{rows[-1]['ms_per_page'] or '-'} ms/page" + (f", failed: {error}" if error else ""),
+              file=sys.stderr, flush=True)
     summary = _summary(rows)
     categories = {c: _summary([r for r in rows if r["category"] == c]) for c in sorted({r["category"] for r in rows})}
     return {

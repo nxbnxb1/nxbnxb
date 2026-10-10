@@ -43,6 +43,9 @@ on:
       documents:
         type: boolean
         default: true
+      systems:
+        type: string
+        default: all  # or a comma-separated subset, e.g. "ppstructure,tesseract"
       lines:
         type: boolean
         default: true
@@ -58,8 +61,30 @@ env:
   PADDLEOCR_DIR: ${{ github.workspace }}/PaddleOCR
 
 jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      documents: ${{ steps.plan.outputs.documents }}
+      lines: ${{ steps.plan.outputs.lines }}
+    steps:
+      - id: plan
+        env:
+          SYSTEMS: ${{ inputs.systems }}
+        run: |
+          python3 - <<'EOF' >> "$GITHUB_OUTPUT"
+          import json, os
+          documents = ["fine-tuned", "stock", "ppocrv6", "ppstructure", "tesseract", "text_layer"]
+          lines = ["fine-tuned", "stock", "server", "ppocrv6", "tesseract", "easyocr", "vietocr"]
+          wanted = {s.strip() for s in os.environ["SYSTEMS"].split(",") if s.strip()}
+          if not wanted or "all" in wanted:
+              wanted = set(documents) | set(lines)
+          print("documents=" + json.dumps([s for s in documents if s in wanted]))
+          print("lines=" + json.dumps([s for s in lines if s in wanted]))
+          EOF
+
   dataset:
-    if: inputs.documents
+    needs: plan
+    if: inputs.documents && needs.plan.outputs.documents != '[]'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -116,13 +141,13 @@ jobs:
           retention-days: 7
 
   documents:
-    needs: dataset
+    needs: [plan, dataset]
     runs-on: ubuntu-latest
     timeout-minutes: 340
     strategy:
       fail-fast: false
       matrix:
-        system: [fine-tuned, stock, ppocrv6, ppstructure, tesseract, text_layer]
+        system: ${{ fromJSON(needs.plan.outputs.documents) }}
     steps:
       - uses: actions/checkout@v4
 
@@ -215,7 +240,8 @@ jobs:
           if-no-files-found: ignore
 
   lines-data:
-    if: inputs.lines
+    needs: plan
+    if: inputs.lines && needs.plan.outputs.lines != '[]'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -245,13 +271,13 @@ jobs:
           retention-days: 7
 
   lines:
-    needs: lines-data
+    needs: [plan, lines-data]
     runs-on: ubuntu-latest
     timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
-        system: [fine-tuned, stock, server, ppocrv6, tesseract, easyocr, vietocr]
+        system: ${{ fromJSON(needs.plan.outputs.lines) }}
     steps:
       - uses: actions/checkout@v4
 

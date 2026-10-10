@@ -101,12 +101,20 @@ def cmd_compare(args: argparse.Namespace) -> int:
 def cmd_bench(args: argparse.Namespace) -> int:
     from .benchmark import run_benchmark
 
-    from .baselines import make_system
+    from .baselines import IsolatedSystem, make_system
     from .config import Settings
 
-    settings = Settings.from_env(product=args.product) if args.product else Settings.from_env()
-    system = make_system(args.system, settings, use_vlm=not args.no_vlm)
-    report = run_benchmark(Path(args.dataset), split=args.split, system=system, system_name=args.name or args.system)
+    if args.isolate:  # a document that exhausts memory or hangs fails alone, not the whole run
+        system = IsolatedSystem(args.system, args.product, use_vlm=not args.no_vlm, timeout=args.doc_timeout,
+                                max_memory=int(args.max_memory_gb * 2**30) if args.max_memory_gb else None)
+    else:
+        settings = Settings.from_env(product=args.product) if args.product else Settings.from_env()
+        system = make_system(args.system, settings, use_vlm=not args.no_vlm)
+    try:
+        report = run_benchmark(Path(args.dataset), split=args.split, system=system, system_name=args.name or args.system)
+    finally:
+        if args.isolate:
+            system.close()
     out = Path(args.output)
     out.mkdir(parents=True, exist_ok=True)
     (out / "benchmark.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -145,6 +153,10 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--system", default="docextract", choices=["docextract", "ppstructure", "tesseract", "text_layer"],
                    help="conversion system to score (baselines: see docextract/baselines.py)")
     p.add_argument("--name", help="display name of the system in reports")
+    p.add_argument("--no-isolate", dest="isolate", action="store_false",
+                   help="run in this process (default: a supervised worker process)")
+    p.add_argument("--max-memory-gb", type=float, help="worker memory limit (default: 75%% of the machine)")
+    p.add_argument("--doc-timeout", type=float, default=1800, help="seconds per document before it counts as failed")
     p.set_defaults(func=cmd_bench)
 
     p = sub.add_parser("compare", help="one table of several benchmark.json files (same documents)")

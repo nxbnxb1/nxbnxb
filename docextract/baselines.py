@@ -166,6 +166,127 @@ class PPStructureSystem:
 SYSTEMS = ("docextract", "ppstructure", "tesseract", "text_layer")
 
 
+# --- supervised worker ---------------------------------------------------------------------
+
+
+def _memory_total() -> int:
+    try:
+        for line in Path("/proc/meminfo").read_text().splitlines():
+            if line.startswith("MemTotal:"):
+                return int(line.split()[1]) * 1024
+    except OSError:
+        pass
+    return 0
+
+
+def _rss(pid: int) -> int:
+    """Resident memory of a process and all its descendants (Linux /proc; 0 elsewhere)."""
+    total, todo, seen = 0, [pid], set()
+    while todo:
+        p = todo.pop()
+        if p in seen:
+            continue
+        seen.add(p)
+        try:
+            for line in Path(f"/proc/{p}/status").read_text().splitlines():
+                if line.startswith("VmRSS:"):
+                    total += int(line.split()[1]) * 1024
+            for task in Path(f"/proc/{p}/task").iterdir():
+                todo += [int(c) for c in (task / "children").read_text().split()]
+        except (OSError, ValueError):
+            continue
+    return total
+
+
+def _worker(name: str, product: str | None, use_vlm: bool, conn) -> None:
+    from .config import Settings
+
+    settings = Settings.from_env(product=product) if product else Settings.from_env()
+    system = make_system(name, settings, use_vlm=use_vlm)
+    system.warm_up()
+    conn.send(("ready", None))
+    while (path := conn.recv()) is not None:
+        try:
+            converted = system.convert(Path(path))
+            conn.send(("ok", (converted.markdown, converted.stats.model_dump())))
+        except Exception as exc:
+            conn.send(("error", f"{type(exc).__name__}: {exc}"[:300]))
+
+
+class IsolatedSystem:
+    """A system run in a supervised worker process. A document that makes the worker use more
+    than max_memory bytes, or take longer than timeout seconds, stops the worker instead of
+    exhausting the machine (which takes every result of the run with it); the document counts
+    as failed and a new worker takes the next one. Times are measured inside the worker."""
+
+    def __init__(self, name: str, product: str | None = None, use_vlm: bool = True,
+                 max_memory: int | None = None, timeout: float = 1800, startup_timeout: float = 3600) -> None:
+        self.name = name
+        self.product = product
+        self.use_vlm = use_vlm
+        self.max_memory = max_memory or int(_memory_total() * 0.75) or 2**62
+        self.timeout = timeout
+        self.startup_timeout = startup_timeout
+        self._proc = None
+        self._conn = None
+
+    def _start(self) -> None:
+        import multiprocessing
+
+        ctx = multiprocessing.get_context("spawn")
+        self._conn, child = ctx.Pipe()
+        self._proc = ctx.Process(target=_worker, args=(self.name, self.product, self.use_vlm, child), daemon=True)
+        self._proc.start()
+        child.close()
+        self._wait(self.startup_timeout, "starting")
+
+    def _stop(self) -> None:
+        if self._proc is not None and self._proc.is_alive():
+            self._proc.kill()
+            self._proc.join(30)
+        self._proc = None
+
+    def _wait(self, timeout: float, what: str):
+        deadline = time.monotonic() + timeout
+        while True:
+            if self._conn.poll(0.5):
+                kind, payload = self._conn.recv()
+                if kind == "error":
+                    raise RuntimeError(payload)
+                return payload
+            if not self._proc.is_alive():
+                code = self._proc.exitcode
+                self._proc = None
+                raise RuntimeError(f"{self.name} worker ended while {what} (exit code {code})")
+            used = _rss(self._proc.pid)
+            if used > self.max_memory:
+                self._stop()
+                raise MemoryError(f"{self.name} used {used / 2**30:.1f} GB while {what} "
+                                  f"(limit {self.max_memory / 2**30:.1f} GB)")
+            if time.monotonic() > deadline:
+                self._stop()
+                raise TimeoutError(f"{self.name} took more than {timeout:.0f} s while {what}")
+
+    def warm_up(self) -> None:
+        if self._proc is None:
+            self._start()
+
+    def convert(self, path: Path) -> Converted:
+        self.warm_up()
+        self._conn.send(str(path))
+        markdown, stats = self._wait(self.timeout, f"converting {path.name}")
+        return Converted(markdown, DocumentStats(**stats))
+
+    def close(self) -> None:
+        if self._proc is not None and self._proc.is_alive():
+            try:
+                self._conn.send(None)
+                self._proc.join(30)
+            except OSError:
+                pass
+        self._stop()
+
+
 def make_system(name: str, settings: Settings, use_vlm: bool = True, pipeline=None):
     product = settings.product_info
     if name == "docextract":
@@ -179,4 +300,4 @@ def make_system(name: str, settings: Settings, use_vlm: bool = True, pipeline=No
     raise ValueError(f"unknown system {name!r}: one of {', '.join(SYSTEMS)}")
 
 
-__all__ = ["Converted", "SYSTEMS", "make_system"]
+__all__ = ["Converted", "IsolatedSystem", "SYSTEMS", "make_system"]

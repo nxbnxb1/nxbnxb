@@ -24,6 +24,9 @@ on:
         type: choice
         options: [all, documents, lines]
         default: all
+      systems:
+        description: "systems to run: all, or a comma-separated subset (e.g. ppstructure,tesseract)"
+        default: all
       model_tag:
         description: Release of the fine-tuned model (empty = newest vi_en model)
         default: ""
@@ -42,4 +45,5 @@ jobs:
       vlm: ${{ inputs.vlm }}
       documents: ${{ inputs.parts != 'lines' }}
       lines: ${{ inputs.parts != 'documents' }}
+      systems: ${{ inputs.systems }}
     secrets: inherit

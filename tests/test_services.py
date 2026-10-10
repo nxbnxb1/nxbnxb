@@ -2,6 +2,7 @@ import json
 import time
 
 import httpx
+import pytest
 from fastapi.testclient import TestClient
 from PIL import Image, ImageDraw, ImageFont
 
@@ -154,3 +155,20 @@ def test_benchmark_and_cli(tmp_path, settings, monkeypatch):
 def test_settings_from_env():
     s = Settings.from_env({"DOCEXTRACT_DPI": "150", "DOCEXTRACT_VLM_BASE_URL": "none", "DOCEXTRACT_DESKEW": "false"})
     assert s.dpi == 150 and s.vlm_base_url is None and s.deskew is False
+
+
+def test_isolated_system_survives_memory_exhaustion(tmp_path, monkeypatch):
+    from docextract import baselines
+    from docextract.baselines import IsolatedSystem
+
+    pdf = tmp_path / "report.pdf"
+    pdf.write_bytes(make_digital_pdf())
+    system = IsolatedSystem("text_layer", timeout=120)
+    try:
+        assert "ACME Annual Report" in system.convert(pdf).markdown
+    finally:
+        system.close()
+    # a worker above its memory limit is stopped; the caller gets an error it can record
+    monkeypatch.setattr(baselines, "_rss", lambda pid: 10**12)
+    with pytest.raises(MemoryError):
+        IsolatedSystem("text_layer", max_memory=2**30).warm_up()
