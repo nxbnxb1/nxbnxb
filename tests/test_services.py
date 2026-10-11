@@ -144,6 +144,13 @@ def test_benchmark_and_cli(tmp_path, settings, monkeypatch):
     assert [r["document"] for r in merged["documents"]] == [r["document"] for r in whole["documents"]]
     assert merged["summary"]["word_f1"] == whole["summary"]["word_f1"]
 
+    # outputs are kept: scores can be computed again without running the system
+    from docextract.benchmark import rescore
+
+    assert rescore(whole, tmp_path / "eval")["summary"]["word_f1"] == whole["summary"]["word_f1"]
+    # a fixed sample per category (the same documents for every system)
+    assert len(run_benchmark(tmp_path / "eval", system=TextLayerSystem(), per_category=1)["documents"]) == 1
+
     # a document a system cannot convert scores as empty output instead of stopping the run
     class Crashing(TextLayerSystem):
         def convert(self, path):

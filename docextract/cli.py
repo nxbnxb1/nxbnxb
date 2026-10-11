@@ -119,11 +119,24 @@ def cmd_bench(args: argparse.Namespace) -> int:
 
     try:
         report = run_benchmark(Path(args.dataset), split=args.split, system=system, system_name=args.name or args.system,
-                               shard=args.shard, on_document=save)
+                               shard=args.shard, on_document=save, per_category=args.per_category,
+                               categories=[c for c in (args.categories or "").split(",") if c])
     finally:
         if args.isolate:
             system.close()
     save(report)
+    print(report["markdown"])
+    return 0
+
+
+def cmd_rescore(args: argparse.Namespace) -> int:
+    from .benchmark import rescore
+
+    report = rescore(json.loads(Path(args.report).read_text(encoding="utf-8")), Path(args.dataset))
+    out = Path(args.output)
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "benchmark.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    (out / "benchmark.md").write_text(report["markdown"], encoding="utf-8")
     print(report["markdown"])
     return 0
 
@@ -176,7 +189,15 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--max-memory-gb", type=float, help="worker memory limit (default: 75%% of the machine)")
     p.add_argument("--doc-timeout", type=float, default=1800, help="seconds per document before it counts as failed")
     p.add_argument("--shard", help="k/n: only the k-th of n parts of the documents (merge the parts with bench-merge)")
+    p.add_argument("--per-category", type=int, default=0, help="only this many documents per category (fixed sample)")
+    p.add_argument("--categories", help="only categories starting with one of these (comma-separated)")
     p.set_defaults(func=cmd_bench)
+
+    p = sub.add_parser("bench-rescore", help="score the saved outputs of a benchmark.json again")
+    p.add_argument("report")
+    p.add_argument("dataset")
+    p.add_argument("-o", "--output", required=True)
+    p.set_defaults(func=cmd_rescore)
 
     p = sub.add_parser("bench-merge", help="one benchmark.json from those of several shards of one system")
     p.add_argument("reports", nargs="+")

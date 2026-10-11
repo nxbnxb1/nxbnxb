@@ -12,6 +12,9 @@ name: _benchmark (reusable)
 #   text_layer    text already in the file, no OCR (scans give nothing)
 # Text lines (CER, line accuracy, Vietnamese letters, ms/line; synthetic lines per language):
 #   fine-tuned, stock, PP-OCRv5_server_rec, PP-OCRv6_medium_rec, Tesseract 5, EasyOCR, VietOCR
+# Speed: every system in turn on one runner, on a fixed sample (the accuracy jobs run on
+#   different machines, too different in speed to compare their times).
+# "fine-tuned" is the proposed system (PROPOSED in the reports): docextract + the product's model.
 #
 # dataset: eval (held-out set: enterprise documents of companies never trained on, from the
 #          corpus of "Collect enterprise documents", as digital PDF and scan; newest "eval-set-*"
@@ -220,29 +223,10 @@ jobs:
           DOCEXTRACT_VLM_API_KEY: ${{ inputs.vlm == 'api' && secrets.DOCEXTRACT_VLM_API_KEY || '' }}
           DOCEXTRACT_VLM_MODEL: ${{ inputs.vlm == 'api' && (vars.DOCEXTRACT_VLM_MODEL || 'Qwen/Qwen2.5-VL-7B-Instruct') || env.DOCEXTRACT_VLM_MODEL }}
         run: |
-          eval "$(python - <<'EOF'
-          from docextract.products import PRODUCTS
-          import os
-          p = PRODUCTS[os.environ["PRODUCT"]]
-          print(f"BASE='{p.baseline_model}' PADDLE_LANG='{p.paddle_lang}' TESS='{p.tesseract_langs}'")
-          EOF
-          )"
           split=()
           case "${{ inputs.split }}" in dev|test) split=(--split "${{ inputs.split }}") ;; esac
-          case "${{ matrix.system }}" in
-            fine-tuned)
-              if [ -z "${DOCEXTRACT_OCR_REC_MODEL_DIR:-}" ]; then echo "no fine-tuned model yet"; exit 0; fi
-              args=(--system docextract --name "PROPOSED: docextract + fine-tuned model ($OCR_MODEL_TAG)") ;;
-            stock) args=(--system docextract --name "docextract + $BASE (stock, fine-tuning source)") ;;
-            ppocrv6)
-              export DOCEXTRACT_OCR_REC_MODEL=PP-OCRv6_medium_rec
-              args=(--system docextract --name "docextract + PP-OCRv6_medium_rec (stock)") ;;
-            ppstructure) args=(--system ppstructure --name "PP-StructureV3 (PaddleOCR, lang=$PADDLE_LANG)") ;;
-            tesseract) args=(--system tesseract --name "Tesseract 5 ($TESS, tessdata_best)") ;;
-            text_layer) args=(--system text_layer --name "text layer only, no OCR") ;;
-          esac
-          [ "${{ inputs.vlm }}" = none ] && args+=(--no-vlm)
-          python -m docextract bench bench_data "${split[@]}" "${args[@]}" -o "bench/${{ matrix.system }}" \
+          [ "${{ inputs.vlm }}" = none ] && split+=(--no-vlm)
+          scripts/bench_system.sh "${{ matrix.system }}" bench_data "bench/${{ matrix.system }}" "${split[@]}" \
             --shard "${{ matrix.shard }}/${{ needs.plan.outputs.shard_count }}"
 
       - uses: actions/upload-artifact@v4
@@ -327,24 +311,8 @@ jobs:
 
       - name: Evaluate ${{ matrix.system }}
         run: |
-          eval "$(python - <<'EOF'
-          from docextract.products import PRODUCTS
-          import os
-          p = PRODUCTS[os.environ["PRODUCT"]]
-          print(f"BASE='{p.baseline_model}' TESS='{p.tesseract_langs}' EASY='{'auto' if 'ja' in p.languages else 'vi,en'}'")
-          EOF
-          )"
-          case "${{ matrix.system }}" in
-            fine-tuned)
-              if [ -z "${DOCEXTRACT_OCR_REC_MODEL_DIR:-}" ]; then echo "no fine-tuned model yet"; exit 0; fi
-              system="PROPOSED: fine-tuned ($OCR_MODEL_TAG)=paddle:$BASE@$DOCEXTRACT_OCR_REC_MODEL_DIR" ;;
-            stock) system="$BASE (stock, fine-tuning source)=paddle:$BASE" ;;
-            server) system="PP-OCRv5_server_rec (stock)=paddle:PP-OCRv5_server_rec" ;;
-            ppocrv6) system="PP-OCRv6_medium_rec (stock)=paddle:PP-OCRv6_medium_rec" ;;
-            tesseract) system="Tesseract 5 ($TESS, tessdata_best)=tesseract:$TESS" ;;
-            easyocr) system="EasyOCR ($EASY)=easyocr:$EASY" ;;
-            vietocr) system="VietOCR (vgg_transformer)=vietocr:vgg_transformer" ;;
-          esac
+          system="$(scripts/line_system_spec.sh "${{ matrix.system }}")"
+          if [ -z "$system" ]; then echo "no fine-tuned model yet"; exit 0; fi
           mkdir -p lines
           (cd training/vi_ocr && python evaluate.py --eval "$GITHUB_WORKSPACE"/lines_data/eval_* --system "$system" \
             --json "$GITHUB_WORKSPACE/lines/${{ matrix.system }}.json" --report "$GITHUB_WORKSPACE/lines/${{ matrix.system }}.md")
@@ -356,8 +324,89 @@ jobs:
           path: lines/
           if-no-files-found: ignore
 
+  # Accuracy jobs run on different machines, whose speed differs by up to 50%: speed is measured
+  # here, every system in turn on the same runner, on a fixed sample (one enterprise document per
+  # category, 200 lines of each set of real document lines).
+  speed:
+    needs: [plan, dataset, lines-data]
+    if: ${{ !cancelled() && (needs.dataset.result == 'success' || needs.lines-data.result == 'success') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install every system
+        run: |
+          pip install -e ".[paddle]" rapidfuzz
+          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+          pip install easyocr vietocr
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libreoffice-writer-nogui >/dev/null
+          scripts/fetch_tessdata.sh "$(python -c "from docextract.products import PRODUCTS; print(PRODUCTS['$PRODUCT'].tesseract_langs)")"
+
+      - name: Cache PaddleOCR models
+        uses: actions/cache@v4
+        with:
+          path: ~/.paddlex/official_models
+          key: paddlex-models-${{ runner.os }}-v1
+
+      - name: Fine-tuned model of the product from Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/fetch_ocr_model.sh "$PRODUCT" "${{ inputs.model_tag }}"
+
+      - uses: actions/download-artifact@v4
+        if: needs.dataset.result == 'success'
+        with:
+          name: bench-data-${{ inputs.product }}
+          path: bench_data
+
+      - uses: actions/download-artifact@v4
+        if: needs.lines-data.result == 'success'
+        with:
+          name: bench-lines-data-${{ inputs.product }}
+          path: lines_data
+
+      - name: Documents, every system on this runner
+        if: needs.dataset.result == 'success'
+        timeout-minutes: 200
+        continue-on-error: true
+        run: |
+          split=()
+          case "${{ inputs.split }}" in dev|test) split=(--split "${{ inputs.split }}") ;; esac
+          for system in $(python -c "import json; print(' '.join(json.loads('${{ needs.plan.outputs.documents }}')))"); do
+            scripts/bench_system.sh "$system" bench_data "speed/documents/$system" "${split[@]}" --no-vlm \
+              --categories enterprise --per-category 1 || echo "::warning::$system failed"
+          done
+
+      - name: Text lines, every system on this runner
+        if: needs.lines-data.result == 'success'
+        timeout-minutes: 80
+        continue-on-error: true
+        run: |
+          systems=()
+          for system in $(python -c "import json; print(' '.join(json.loads('${{ needs.plan.outputs.lines }}')))"); do
+            spec="$(scripts/line_system_spec.sh "$system")"
+            [ -n "$spec" ] && systems+=(--system "$spec")
+          done
+          mkdir -p speed
+          (cd training/vi_ocr && python evaluate.py --eval "$GITHUB_WORKSPACE"/lines_data/eval_real_* --limit 200 \
+            "${systems[@]}" --json "$GITHUB_WORKSPACE/speed/lines.json" --report "$GITHUB_WORKSPACE/speed/lines.md")
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: bench-speed-${{ inputs.product }}
+          path: speed/
+          if-no-files-found: ignore
+
   report:
-    needs: [documents, lines]
+    needs: [documents, lines, speed]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
@@ -374,6 +423,12 @@ jobs:
         with:
           pattern: bench-*-${{ inputs.product }}-*
           path: results
+
+      - uses: actions/download-artifact@v4
+        continue-on-error: true  # no speed job when it was skipped
+        with:
+          name: bench-speed-${{ inputs.product }}
+          path: results/bench-speed-${{ inputs.product }}
 
       - name: One table for all systems
         run: |
@@ -406,7 +461,39 @@ jobs:
             (cd training/vi_ocr && python evaluate.py merge $(for f in $lines; do echo "$GITHUB_WORKSPACE/$f"; done) \
               --report "$GITHUB_WORKSPACE/report/lines.md" >/dev/null)
           fi
+          python - > report/speed.md <<'EOF'
+          import json, statistics
+          from pathlib import Path
+          print("## Speed, every system on the same runner (fixed sample)")
+          print()
+          docs = sorted(Path("results/bench-speed-${{ inputs.product }}/documents").glob("*/benchmark.json"))
+          if docs:
+              print("| system | documents | pages | s/page |")
+              print("|---|---|---|---|")
+              for f in docs:
+                  r = json.loads(f.read_text())
+                  s = r["summary"]
+                  ms = s.get("ms_per_page")
+                  print(f"| {r['system']} | {s['documents']} | {s['pages']} | {ms / 1000:.1f} |" if ms else f"| {r['system']} | {s['documents']} | {s['pages']} | - |")
+              print()
+          lines = Path("results/bench-speed-${{ inputs.product }}/lines.json")
+          if lines.exists():
+              data = json.loads(lines.read_text())
+              results = data.get("results", data)
+              by_system = {}
+              for dataset, systems in results.items():
+                  for name, m in systems.items():
+                      if "ms_per_line" in m:
+                          by_system.setdefault(name, []).append(m["ms_per_line"])
+              print("| system (text lines) | ms/line (mean of the real-document sets) |")
+              print("|---|---|")
+              for name, values in sorted(by_system.items(), key=lambda kv: statistics.fmean(kv[1])):
+                  print(f"| {name} | {statistics.fmean(values):.1f} |")
+          if not docs and not lines.exists():
+              print("(no speed results)")
+          EOF
           cat report/documents.md >> "$GITHUB_STEP_SUMMARY"
+          { echo; cat report/speed.md; } >> "$GITHUB_STEP_SUMMARY"
           [ -f report/lines.md ] && { echo; cat report/lines.md; } >> "$GITHUB_STEP_SUMMARY"
           true
 

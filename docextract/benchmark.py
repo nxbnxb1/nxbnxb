@@ -18,12 +18,13 @@ import hashlib
 import re
 import statistics
 import sys
+from collections.abc import Sequence
 from pathlib import Path
 
 from .config import Settings
 from .metrics import best_match_teds, cer, cer_any_order, heading_f1, teds, wer, word_f1
 from .models import DocumentStats
-from .pipeline import DocumentPipeline, ExtractOptions
+from .pipeline import DocumentPipeline
 from .tables import Table, parse_html_tables, parse_markdown_table
 
 _DOC_SUFFIXES = {".pdf", ".docx", ".png", ".jpg", ".jpeg", ".tif", ".tiff"}
@@ -95,6 +96,8 @@ def run_benchmark(
     system_name: str | None = None,
     shard: str | None = None,
     on_document=None,
+    per_category: int = 0,
+    categories: Sequence[str] = (),
 ) -> dict:
     """Score one conversion system (default: this pipeline) on every document with a ground truth."""
     from .baselines import Converted, DocextractSystem
@@ -102,6 +105,13 @@ def run_benchmark(
     if system is None:
         system = DocextractSystem(Settings.from_env(), pipeline, use_vlm)
     docs = list(documents(dataset, split, shard))
+    if categories:
+        docs = [d for d in docs if d[2].startswith(tuple(categories))]
+    if per_category:  # a fixed sample: the same documents for every system (speed on one runner)
+        by_category: dict[str, list] = {}
+        for item in sorted(docs, key=lambda d: hashlib.sha1(str(d[0].relative_to(dataset)).encode()).hexdigest()):
+            by_category.setdefault(item[2], []).append(item)
+        docs = sorted((item for items in by_category.values() for item in items[:per_category]), key=lambda d: str(d[0]))
     name = system_name or getattr(system, "name", "system")
     if warmup:  # ms/page measures processing, not model loading
         system.warm_up()
@@ -114,12 +124,6 @@ def run_benchmark(
             error = f"{type(exc).__name__}: {exc}"[:300]
             converted = Converted("", DocumentStats(pages_processed=_page_count(doc)))
         pred = document_text(converted.markdown or "")
-        gt_tables, pred_tables = markdown_tables(gt), markdown_tables(pred)
-        table_scores = best_match_teds(gt_tables, pred_tables)
-        structure_scores = [
-            max((teds(ref, p, structure_only=True) for p in pred_tables), default=0.0) for ref in gt_tables
-        ]
-        gt_headings = markdown_headings(gt)
         s = converted.stats
         rows.append(
             {
@@ -127,14 +131,7 @@ def run_benchmark(
                 "category": category,
                 "split": doc_split,
                 "pages": s.pages_processed,
-                "cer": round(cer(gt, pred), 4),
-                "cer_any_order": round(cer_any_order(gt, pred), 4),
-                "wer": round(wer(gt, pred), 4),
-                "word_f1": round(word_f1(gt, pred), 4),
-                "teds": _mean(table_scores),
-                "teds_structure": _mean(structure_scores),
-                # only where the ground truth marks headings: some sources do not annotate them
-                "heading_f1": round(heading_f1(gt_headings, markdown_headings(pred)), 4) if gt_headings else None,
+                **text_scores(gt, pred),
                 "ms_per_page": None if error else s.ms_per_page,
                 "vlm_calls_per_page": round(s.vlm_calls / max(1, s.pages_processed), 3),
                 "cost_per_page": s.cost_per_page,
@@ -142,6 +139,7 @@ def run_benchmark(
                 "needs_review_ratio": round(s.regions_by_status.get("needs_review", 0) / s.regions, 4) if s.regions else None,
                 "methods": s.regions_by_method,
                 "error": error,
+                "output": pred,  # kept so that the scores can be computed again (bench-rescore)
             }
         )
         print(f"[{number}/{len(docs)}] {rows[-1]['document']}: CER {rows[-1]['cer']}, "
@@ -150,6 +148,34 @@ def run_benchmark(
         if on_document is not None:  # e.g. save what is done so far
             on_document(build_report(rows, name))
     return build_report(rows, name)
+
+
+def text_scores(gt: str, pred: str) -> dict:
+    """Scores of one document's output against its ground truth (both Markdown)."""
+    gt_tables, pred_tables = markdown_tables(gt), markdown_tables(pred)
+    structure = [max((teds(ref, p, structure_only=True) for p in pred_tables), default=0.0) for ref in gt_tables]
+    gt_headings = markdown_headings(gt)
+    return {
+        "cer": round(cer(gt, pred), 4),
+        "cer_any_order": round(cer_any_order(gt, pred), 4),
+        "wer": round(wer(gt, pred), 4),
+        "word_f1": round(word_f1(gt, pred), 4),
+        "teds": _mean(best_match_teds(gt_tables, pred_tables)),
+        "teds_structure": _mean(structure),
+        # only where the ground truth marks headings: some sources do not annotate them
+        "heading_f1": round(heading_f1(gt_headings, markdown_headings(pred)), 4) if gt_headings else None,
+    }
+
+
+def rescore(report: dict, dataset: Path) -> dict:
+    """The report with every document scored again from its saved output (after a change of the
+    metrics or of a ground truth), without running the system again."""
+    rows = []
+    for row in report["documents"]:
+        doc = dataset / row["document"]
+        gt = doc.with_name(doc.stem + ".gt.md").read_text(encoding="utf-8")
+        rows.append({**row, **text_scores(gt, row.get("output", ""))})
+    return build_report(rows, report.get("system", "system"))
 
 
 def build_report(rows: list[dict], system: str) -> dict:

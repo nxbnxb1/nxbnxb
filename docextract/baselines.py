@@ -128,14 +128,14 @@ class TesseractSystem:
 
 class PPStructureSystem:
     """PP-StructureV3 on the same page images docextract works on (pages rendered at the
-    configured DPI, long side at most max_side). Left to render PDFs itself it made pictures of
-    large-format pages so big that it ran out of memory on a 16 GB runner on nearly every
-    document."""
+    configured DPI, long side at most max_side), text detection on the page scaled to at most
+    det_side pixels (its default runs it at full size and runs out of memory on a 16 GB runner)."""
 
     name = "ppstructure"
 
-    def __init__(self, lang: str, dpi: int = 200, min_side: int = 1200, max_side: int = 4000) -> None:
+    def __init__(self, lang: str, dpi: int = 200, min_side: int = 1200, max_side: int = 4000, det_side: int = 1920) -> None:
         self.lang = lang
+        self.det_side = det_side
         self.dpi = dpi
         self.min_side = min_side
         self.max_side = max_side
@@ -150,6 +150,10 @@ class PPStructureSystem:
                 use_doc_unwarping=False,
                 use_chart_recognition=False,  # needs a VLM; docextract is also measured without one
                 enable_mkldnn=False,
+                # its default detects text on the whole page at full size and asked for 20 GB on
+                # nearly every page of a 16 GB runner; docextract detects within cropped regions
+                text_det_limit_type="max",
+                text_det_limit_side_len=self.det_side,
             )
 
     def _pages(self, path: Path, pdf: bytes | None):

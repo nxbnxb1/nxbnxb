@@ -76,6 +76,12 @@ def test_cer_and_headings():
     assert heading_f1(["A", "B"], ["A"]) == 2 / 3
 
 
+def test_spaces_between_japanese_characters_are_not_errors():
+    assert cer("2026年3月期 決算短信", "2 0 2 6 年 3 月 期 決 算 短 信") > 0  # digits keep their spaces
+    assert cer("決算短信 連結業績", "決 算 短 信 連 結 業 績") == 0.0
+    assert cer("Annual report", "Annual  report") == 0.0
+
+
 def test_cer_any_order_ignores_reading_order_only():
     gt = "Doanh thu năm 2025 tăng 12%\nLợi nhuận sau thuế 1.234 tỷ đồng\nTiền cuối kỳ 567 tỷ"
     swapped = "Tiền cuối kỳ 567 tỷ\nDoanh thu năm 2025 tăng 12%\nLợi nhuận sau thuế 1.234 tỷ đồng"

@@ -13,6 +13,8 @@ _VI_LATIN1 = set("àáâãèéêìíòóôõùúýÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚ
 _COMMON_LATIN1_SYMBOLS = set("°±×÷©®§«»µ¼½¾²³¹¢£¥¤¦¬¯´·¸¿¡ªº")
 _LEGACY_FONT_PREFIXES = (".vn", "vni-", "vni_", "vn-", "abc")
 _CID_RE = re.compile(r"\(cid:\d+\)")
+_CJK = "\u3000-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff00-\uffef"
+_CJK_GAP = re.compile(f"(?<=[{_CJK}]) (?=[{_CJK}])")
 _NUMBER_RE = re.compile(r"(?<![0-9A-Za-z])[-+−]?\d+(?:[.,  ]\d+)*%?")
 _BULLET_RE = re.compile(r"^\s*(?:[-•●▪◦‣∙*+]|\d{1,3}[.)]|[a-zA-Z][.)]|[ivxIVX]{1,5}[.)])\s+")
 
@@ -327,4 +329,6 @@ def markdown_to_plain(text: str) -> str:
     text = re.sub(r"(\*\*|__|`{1,3}|\$\$)", "", text)
     text = re.sub(r"(?<!\w)[*_](?=\S)|(?<=\S)[*_](?!\w)", "", text)
     text = unicodedata.normalize("NFC", text)
-    return re.sub(r"\s+", " ", text).strip()
+    text = re.sub(r"\s+", " ", text).strip()
+    # Japanese is written without spaces: a space between two CJK characters is layout, not text
+    return _CJK_GAP.sub("", text)
