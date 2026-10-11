@@ -650,7 +650,7 @@ def keep_pages(sha: str, pages: int, limit: int) -> list[int]:
     return sorted(sorted(range(pages), key=lambda i: hashlib.sha1(f"{sha}:{i}".encode()).hexdigest())[:limit])
 
 
-INSPECTION = 3  # version of the description below; earlier entries are described again
+INSPECTION = 4  # version of the description below; earlier entries are described again
 
 # letters only Vietnamese uses (French or Spanish accents are not among them)
 _VI_ONLY = set("ăắằẳẵặơớờởỡợưứừửữựđạảấầẩẫậẹẻẽếềểễệỉịọỏốồổỗộụủỳỵỷỹ")
@@ -658,34 +658,50 @@ _EN_WORDS = frozenset("the and of to in for is on with by as at from that this a
 
 
 def confirmed_language(text: str) -> str:
-    """vi, en or ja when the text clearly is that language; "other" for anything else (French,
-    Spanish, Chinese, ...), which a choice among vi / en / ja alone would file under the nearest."""
-    from docextract.textutil import detect_language
-
+    """vi, en or ja when the text clearly is (mostly) that language; "other" for anything else
+    (French, Spanish, Chinese, ...), which a choice among vi / en / ja alone files under the
+    nearest. Each language has its own evidence: Vietnamese letters no other language uses,
+    English function words, Japanese kana; of the languages with evidence, the one with most
+    text wins (bilingual documents count as their larger language)."""
     text = unicodedata.normalize("NFC", text)
-    language = detect_language(text, ("vi", "en", "ja"))
-    if language is None:
-        return "unknown"
+    cjk = sum(1 for ch in text if 0x3040 <= ord(ch) <= 0x9FFF)
+    kana = sum(1 for ch in text if 0x3040 <= ord(ch) <= 0x30FF)
     latin = [ch for ch in text.lower() if ch.isalpha() and ord(ch) < 0x2E80]
-    if language == "vi":
-        ok = sum(ch in _VI_ONLY for ch in latin) >= 0.03 * len(latin)
-    elif language == "en":
-        words = re.findall(r"[a-z]+", text.lower())
-        ok = bool(words) and sum(w in _EN_WORDS for w in words) >= 0.05 * len(words)
-    else:  # kana: Japanese; kanji alone: Chinese
-        cjk = sum(1 for ch in text if 0x3040 <= ord(ch) <= 0x9FFF)
-        kana = sum(1 for ch in text if 0x3040 <= ord(ch) <= 0x30FF)
-        ok = kana >= 0.1 * cjk
-    return language if ok else "other"
+    if 2 * cjk + len(latin) < 12:
+        return "unknown"
+    words = re.findall(r"[a-z]+", text.lower())
+    vi_letters = sum(ch in _VI_ONLY for ch in latin)
+    en_words = sum(w in _EN_WORDS for w in words)
+    evidence = {
+        "ja": 2.0 * cjk if cjk and kana >= 0.05 * cjk else 0.0,  # kanji without kana: Chinese
+        "vi": vi_letters / 0.1 if vi_letters >= 0.02 * len(latin) else 0.0,  # letters of the Vietnamese part
+        "en": float(len(latin)) if words and en_words >= 0.02 * len(words) else 0.0,
+    }
+    if evidence["vi"] and evidence["en"]:  # both: the English part is what Vietnamese does not cover
+        evidence["en"] = max(0.0, len(latin) - evidence["vi"])
+    best = max(evidence, key=evidence.get)
+    return best if evidence[best] > 0 else "other"
 
 
-def language_of(pages) -> str:
-    """Language of the pages' text layers, from text that is not broken or legacy-encoded only:
-    a garbled text layer (wrong ToUnicode map, TCVN3/VNI fonts) can look like any language."""
-    from docextract.textutil import garbled_ratio
+def digital_page(page) -> bool:
+    """A page docextract would read from its text layer (at least 200 characters): not a scan
+    (with or without an OCR layer: image over most of the page), no broken, legacy-encoded or
+    foreign-script text."""
+    from docextract.config import Settings
+    from docextract.models import PageKind
+    from docextract.preprocessing.pdf import analyze_page
 
-    texts = [t for t in (p.get_text("text") for p in pages) if t.strip() and garbled_ratio(t) <= 0.02]
-    return confirmed_language(" ".join(texts)[:20000])
+    settings = Settings()
+    analysis = analyze_page(page, settings.min_text_chars, settings.pdf_text_max_garbled_ratio, False)
+    return analysis.kind == PageKind.DIGITAL and analysis.text_chars >= 200
+
+
+def describe(pages) -> tuple[str, str]:
+    """(kind, language) of a document from its first pages: digital / mixed / scan, and the
+    language of the digital pages' text (the text layer of a scan is somebody's OCR)."""
+    digital = [p for p in pages if digital_page(p)]
+    kind = "digital" if len(digital) >= max(1, len(pages) * 0.6) else ("scan" if not digital else "mixed")
+    return kind, confirmed_language(" ".join(p.get_text("text") for p in digital)[:20000])
 
 
 def store(data: bytes, sha: str, path: Path) -> dict:
@@ -696,11 +712,7 @@ def store(data: bytes, sha: str, path: Path) -> dict:
         if doc.needs_pass:
             raise ValueError("encrypted")
         total = doc.page_count
-        sample = [doc[i] for i in range(min(total, 8))]
-        chars = [len(p.get_text("text").strip()) for p in sample]
-        language = language_of(sample)
-        digital = sum(1 for n in chars if n >= 200)
-        kind = "digital" if digital >= max(1, len(chars) * 0.6) else ("scan" if digital == 0 else "mixed")
+        kind, language = describe([doc[i] for i in range(min(total, 8))])
         keep = keep_pages(sha, total, SCAN_PAGES if kind == "scan" else MAX_PAGES)
         if len(keep) < total:
             doc.select(keep)
@@ -753,9 +765,10 @@ def download(args: argparse.Namespace) -> None:
             continue
         if "source_pages" not in item:  # stored whole
             item.update(store(path.read_bytes(), item["sha256"], path))
-        elif item.get("inspected", 1) < INSPECTION:
+        elif item.get("inspected", 1) < INSPECTION:  # the pages are those already stored
             with pymupdf.open(path) as doc:
-                item.update(language=language_of([doc[i] for i in range(min(doc.page_count, 8))]), inspected=INSPECTION)
+                kind, language = describe([doc[i] for i in range(min(doc.page_count, 8))])
+            item.update(kind=kind, language=language, inspected=INSPECTION)
 
     candidates = [json.loads(line) for path in args.candidates if Path(path).exists()
                   for line in Path(path).read_text(encoding="utf-8").splitlines() if line]

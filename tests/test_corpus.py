@@ -81,3 +81,14 @@ def test_languages_outside_the_products_are_not_filed_under_the_nearest():
     assert cc.confirmed_language("Société Générale publie son rapport financier annuel. Les résultats sont présentés à l'assemblée.") == "other"
     assert cc.confirmed_language("Banco Santander presenta los resultados del año. La junta general de accionistas aprobó el dividendo.") == "other"
     assert cc.confirmed_language("河内嘉佩乐酒店概况介绍，酒店位于市中心，提供豪华客房和餐饮服务以及会议设施。") == "other"
+
+
+def test_bilingual_and_table_like_documents_keep_their_language():
+    vi_fs = "BẢNG CÂN ĐỐI KẾ TOÁN HỢP NHẤT Tại ngày 31 tháng 12 năm 2025 Mã số Thuyết minh Số cuối năm 1.234.567 Tài sản ngắn hạn 98.765 Tiền và các khoản tương đương tiền"
+    assert cc.confirmed_language(vi_fs) == "vi"
+    bilingual = vi_fs + " CONSOLIDATED BALANCE SHEET as at 31 December 2025 Code Notes Ending balance Current assets Cash and cash equivalents"
+    assert cc.confirmed_language(bilingual) == "vi"
+    en_mostly = "The Board of Directors approved the annual report and the dividend for the year. " * 6 + "Báo cáo thường niên"
+    assert cc.confirmed_language(en_mostly) == "en"
+    ja_table = "売上高 営業利益 経常利益 親会社株主に帰属する当期純利益 百万円 % 2026年3月期 第2四半期 連結業績 1,234 5.6 対前年同期増減率"
+    assert cc.confirmed_language(ja_table) == "ja"

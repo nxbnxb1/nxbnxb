@@ -110,3 +110,14 @@ def test_labels_and_cleanup():
     kept = clean_candidates([table, inner, dup, dup2], page_area=1e6, min_area_ratio=0.0)
     assert table in kept and dup in kept
     assert inner not in kept and dup2 not in kept
+
+
+def test_foreign_script_text_layer_counts_as_garbled():
+    from docextract.textutil import garbled_ratio
+
+    broken = "஦ᴗ➼ࡢࣜ ࢫࢡ ௨ୗࡢ㡯┠ࡣᙜ♫ࢢ࣮ࣝ ࣉࡢ஦ᴗᒎ㛤ୖࣜ ࢫࢡ࡜࡞ࡿྍ ⬟ᛶࡀ࠶ࡿ࡜⪃࠼ࡽࢀࡿ"
+    assert garbled_ratio(broken) > 0.5
+    for fine in ("2025年10月31日 日本ガイシ株式会社 業績概況(連結・中間期) 売上高 前年同期比",
+                 "Cộng hòa xã hội chủ nghĩa Việt Nam, báo cáo tài chính hợp nhất năm 2025",
+                 "The coefficients α and β of the model Δx = 0.5 for all samples in the study"):
+        assert garbled_ratio(fine) == 0.0

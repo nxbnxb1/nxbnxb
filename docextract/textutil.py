@@ -44,7 +44,29 @@ def garbled_ratio(text: str) -> float:
             letters += 1
     legacy = legacy_encoding_ratio(text)
     total = max(1, len(text))
-    return min(1.0, (bad + cid_chars) / total + legacy)
+    return min(1.0, (bad + cid_chars) / total + legacy + foreign_script_ratio(text))
+
+
+def _expected_letter(ch: str) -> bool:
+    code = ord(ch)
+    return (
+        code < 0x0250  # Latin (with Vietnamese and other accented letters)
+        or 0x0370 <= code <= 0x03FF  # Greek (formulas)
+        or 0x1E00 <= code <= 0x1EFF  # Latin extended additional (Vietnamese)
+        or 0x2100 <= code <= 0x214F  # letterlike symbols
+        or is_cjk(ch)
+    )
+
+
+def foreign_script_ratio(text: str) -> float:
+    """Share of letters from scripts none of the products reads (Syriac, Tamil, ...) beyond a
+    few: a text layer whose fonts map Japanese glyphs to such code points is garbage that no
+    broken-character check catches."""
+    letters = [ch for ch in text if ch.isalpha()]
+    if len(letters) < 20:
+        return 0.0
+    foreign = sum(1 for ch in letters if not _expected_letter(ch))
+    return foreign / len(letters) if foreign >= 0.05 * len(letters) else 0.0
 
 
 def legacy_encoding_ratio(text: str) -> float:
