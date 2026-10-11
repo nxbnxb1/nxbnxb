@@ -20,9 +20,9 @@ on:
         options: [none, local, api]
         default: none
       parts:
-        description: "documents and text lines, or one of them"
+        description: "accuracy on documents and text lines and speed on one runner, or one of them"
         type: choice
-        options: [all, documents, lines]
+        options: [all, documents, lines, speed]
         default: all
       systems:
         description: "systems to run: all, or a comma-separated subset (e.g. ppstructure,tesseract)"
@@ -46,8 +46,9 @@ jobs:
       split: ${{ inputs.split }}
       model_tag: ${{ inputs.model_tag }}
       vlm: ${{ inputs.vlm }}
-      documents: ${{ inputs.parts != 'lines' }}
-      lines: ${{ inputs.parts != 'documents' }}
+      documents: ${{ inputs.parts == 'all' || inputs.parts == 'documents' }}
+      lines: ${{ inputs.parts == 'all' || inputs.parts == 'lines' }}
+      speed: ${{ inputs.parts == 'all' || inputs.parts == 'speed' }}
       systems: ${{ inputs.systems }}
       shards: ${{ inputs.shards }}
     secrets: inherit

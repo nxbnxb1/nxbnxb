@@ -250,7 +250,8 @@ class IsolatedSystem:
         self.name = name
         self.product = product
         self.use_vlm = use_vlm
-        self.max_memory = max_memory or int(_memory_total() * 0.75) or 2**62
+        # most of the machine, leaving the system and the CI runner agent room to keep working
+        self.max_memory = max_memory or int(_memory_total() * 0.88) or 2**62
         self.timeout = timeout
         self.startup_timeout = startup_timeout
         self._proc = None

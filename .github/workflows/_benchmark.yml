@@ -55,6 +55,9 @@ on:
       lines:
         type: boolean
         default: true
+      speed:
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -96,7 +99,7 @@ jobs:
 
   dataset:
     needs: plan
-    if: inputs.documents && needs.plan.outputs.documents != '[]'
+    if: (inputs.documents || inputs.speed) && needs.plan.outputs.documents != '[]'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -154,6 +157,7 @@ jobs:
 
   documents:
     needs: [plan, dataset]
+    if: inputs.documents
     runs-on: ubuntu-latest
     timeout-minutes: 350
     strategy:
@@ -238,7 +242,7 @@ jobs:
 
   lines-data:
     needs: plan
-    if: inputs.lines && needs.plan.outputs.lines != '[]'
+    if: (inputs.lines || inputs.speed) && needs.plan.outputs.lines != '[]'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -269,6 +273,7 @@ jobs:
 
   lines:
     needs: [plan, lines-data]
+    if: inputs.lines
     runs-on: ubuntu-latest
     timeout-minutes: 120
     strategy:
@@ -329,7 +334,7 @@ jobs:
   # category, 200 lines of each set of real document lines).
   speed:
     needs: [plan, dataset, lines-data]
-    if: ${{ !cancelled() && (needs.dataset.result == 'success' || needs.lines-data.result == 'success') }}
+    if: ${{ !cancelled() && inputs.speed && (needs.dataset.result == 'success' || needs.lines-data.result == 'success') }}
     runs-on: ubuntu-latest
     timeout-minutes: 300
     steps:
@@ -376,10 +381,12 @@ jobs:
         if: needs.dataset.result == 'success'
         timeout-minutes: 200
         continue-on-error: true
+        env:
+          SYSTEMS: ${{ needs.plan.outputs.documents }}
         run: |
           split=()
           case "${{ inputs.split }}" in dev|test) split=(--split "${{ inputs.split }}") ;; esac
-          for system in $(python -c "import json; print(' '.join(json.loads('${{ needs.plan.outputs.documents }}')))"); do
+          for system in $(python -c 'import json, os; print(" ".join(json.loads(os.environ["SYSTEMS"])))'); do
             scripts/bench_system.sh "$system" bench_data "speed/documents/$system" "${split[@]}" --no-vlm \
               --categories enterprise --per-category 1 || echo "::warning::$system failed"
           done
@@ -388,9 +395,11 @@ jobs:
         if: needs.lines-data.result == 'success'
         timeout-minutes: 80
         continue-on-error: true
+        env:
+          SYSTEMS: ${{ needs.plan.outputs.lines }}
         run: |
           systems=()
-          for system in $(python -c "import json; print(' '.join(json.loads('${{ needs.plan.outputs.lines }}')))"); do
+          for system in $(python -c 'import json, os; print(" ".join(json.loads(os.environ["SYSTEMS"])))'); do
             spec="$(scripts/line_system_spec.sh "$system")"
             [ -n "$spec" ] && systems+=(--system "$spec")
           done

@@ -186,7 +186,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--name", help="display name of the system in reports")
     p.add_argument("--no-isolate", dest="isolate", action="store_false",
                    help="run in this process (default: a supervised worker process)")
-    p.add_argument("--max-memory-gb", type=float, help="worker memory limit (default: 75%% of the machine)")
+    p.add_argument("--max-memory-gb", type=float, help="worker memory limit (default: 88%% of the machine)")
     p.add_argument("--doc-timeout", type=float, default=1800, help="seconds per document before it counts as failed")
     p.add_argument("--shard", help="k/n: only the k-th of n parts of the documents (merge the parts with bench-merge)")
     p.add_argument("--per-category", type=int, default=0, help="only this many documents per category (fixed sample)")
