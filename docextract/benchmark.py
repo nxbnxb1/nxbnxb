@@ -14,6 +14,7 @@ per category and overall:
 
 from __future__ import annotations
 
+import hashlib
 import re
 import statistics
 import sys
@@ -63,9 +64,14 @@ METRICS = ("cer", "cer_any_order", "wer", "word_f1", "teds", "teds_structure", "
            "vlm_calls_per_page", "cost_per_page", "needs_review_ratio")
 
 
-def documents(dataset: Path, split: str | None = None):
-    """(document, ground truth, category, split) for every document with a ground truth."""
+def documents(dataset: Path, split: str | None = None, shard: str | None = None):
+    """(document, ground truth, category, split) for every document with a ground truth;
+    shard "k/n": only the k-th of n parts (chosen by a hash of the path, so the parts of several
+    runners together are the whole set)."""
+    k, n = (int(x) for x in shard.split("/")) if shard else (1, 1)
     for doc in sorted(dataset.rglob("*")):
+        if n > 1 and int(hashlib.sha1(doc.relative_to(dataset).as_posix().encode()).hexdigest(), 16) % n != k - 1:
+            continue
         if not doc.is_file() or doc.suffix.lower() not in _DOC_SUFFIXES:
             continue
         gt_path = doc.with_name(doc.stem + ".gt.md")
@@ -87,13 +93,16 @@ def run_benchmark(
     warmup: bool = True,
     system=None,
     system_name: str | None = None,
+    shard: str | None = None,
+    on_document=None,
 ) -> dict:
     """Score one conversion system (default: this pipeline) on every document with a ground truth."""
     from .baselines import Converted, DocextractSystem
 
     if system is None:
         system = DocextractSystem(Settings.from_env(), pipeline, use_vlm)
-    docs = list(documents(dataset, split))
+    docs = list(documents(dataset, split, shard))
+    name = system_name or getattr(system, "name", "system")
     if warmup:  # ms/page measures processing, not model loading
         system.warm_up()
     rows = []
@@ -138,15 +147,27 @@ def run_benchmark(
         print(f"[{number}/{len(docs)}] {rows[-1]['document']}: CER {rows[-1]['cer']}, "
               f"{rows[-1]['ms_per_page'] or '-'} ms/page" + (f", failed: {error}" if error else ""),
               file=sys.stderr, flush=True)
+        if on_document is not None:  # e.g. save what is done so far
+            on_document(build_report(rows, name))
+    return build_report(rows, name)
+
+
+def build_report(rows: list[dict], system: str) -> dict:
     summary = _summary(rows)
     categories = {c: _summary([r for r in rows if r["category"] == c]) for c in sorted({r["category"] for r in rows})}
     return {
-        "system": system_name or getattr(system, "name", "system"),
+        "system": system,
         "documents": rows,
         "summary": summary,
         "categories": categories,
         "markdown": _report(rows, summary, categories),
     }
+
+
+def merge_reports(reports: list[dict]) -> dict:
+    """One report from the reports of several shards of the same system."""
+    rows = sorted((row for r in reports for row in r["documents"]), key=lambda row: row["document"])
+    return build_report(rows, reports[0].get("system", "system") if reports else "system")
 
 
 def _page_count(path: Path) -> int:

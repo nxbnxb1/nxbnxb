@@ -46,6 +46,9 @@ on:
       systems:
         type: string
         default: all  # or a comma-separated subset, e.g. "ppstructure,tesseract"
+      shards:
+        type: string
+        default: "3"  # runners per system for the documents (each takes a part, results merged)
       lines:
         type: boolean
         default: true
@@ -66,10 +69,13 @@ jobs:
     outputs:
       documents: ${{ steps.plan.outputs.documents }}
       lines: ${{ steps.plan.outputs.lines }}
+      shards: ${{ steps.plan.outputs.shards }}
+      shard_count: ${{ steps.plan.outputs.shard_count }}
     steps:
       - id: plan
         env:
           SYSTEMS: ${{ inputs.systems }}
+          SHARDS: ${{ inputs.shards }}
         run: |
           python3 - <<'EOF' >> "$GITHUB_OUTPUT"
           import json, os
@@ -80,6 +86,9 @@ jobs:
               wanted = set(documents) | set(lines)
           print("documents=" + json.dumps([s for s in documents if s in wanted]))
           print("lines=" + json.dumps([s for s in lines if s in wanted]))
+          n = max(1, int(os.environ["SHARDS"] or 1))
+          print("shards=" + json.dumps(list(range(1, n + 1))))
+          print(f"shard_count={n}")
           EOF
 
   dataset:
@@ -143,11 +152,12 @@ jobs:
   documents:
     needs: [plan, dataset]
     runs-on: ubuntu-latest
-    timeout-minutes: 340
+    timeout-minutes: 350
     strategy:
       fail-fast: false
       matrix:
         system: ${{ fromJSON(needs.plan.outputs.documents) }}
+        shard: ${{ fromJSON(needs.plan.outputs.shards) }}
     steps:
       - uses: actions/checkout@v4
 
@@ -202,7 +212,9 @@ jobs:
           name: bench-data-${{ inputs.product }}
           path: bench_data
 
-      - name: Benchmark ${{ matrix.system }}
+      # results are saved after every document; the step limit leaves time to upload them
+      - name: Benchmark ${{ matrix.system }} (part ${{ matrix.shard }} of ${{ needs.plan.outputs.shard_count }})
+        timeout-minutes: 320
         env:
           DOCEXTRACT_VLM_BASE_URL: ${{ inputs.vlm == 'api' && secrets.DOCEXTRACT_VLM_BASE_URL || env.DOCEXTRACT_VLM_BASE_URL }}
           DOCEXTRACT_VLM_API_KEY: ${{ inputs.vlm == 'api' && secrets.DOCEXTRACT_VLM_API_KEY || '' }}
@@ -230,12 +242,13 @@ jobs:
             text_layer) args=(--system text_layer --name "text layer only, no OCR") ;;
           esac
           [ "${{ inputs.vlm }}" = none ] && args+=(--no-vlm)
-          python -m docextract bench bench_data "${split[@]}" "${args[@]}" -o "bench/${{ matrix.system }}"
+          python -m docextract bench bench_data "${split[@]}" "${args[@]}" -o "bench/${{ matrix.system }}" \
+            --shard "${{ matrix.shard }}/${{ needs.plan.outputs.shard_count }}"
 
       - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
+        if: ${{ always() }}
         with:
-          name: bench-docs-${{ inputs.product }}-${{ matrix.system }}
+          name: bench-docs-${{ inputs.product }}-${{ matrix.system }}-${{ matrix.shard }}
           path: bench/
           if-no-files-found: ignore
 
@@ -364,18 +377,29 @@ jobs:
 
       - name: One table for all systems
         run: |
-          mkdir -p report
+          mkdir -p report merged
           reports=()
           for system in fine-tuned stock ppocrv6 ppstructure tesseract text_layer; do
-            f="results/bench-docs-$PRODUCT-$system/$system/benchmark.json"
-            [ -f "$f" ] && reports+=("$f")
+            parts=(results/bench-docs-$PRODUCT-$system-*/$system/benchmark.json)
+            [ -f "${parts[0]}" ] || continue
+            python -m docextract bench-merge "${parts[@]}" -o "merged/$system"
+            reports+=("merged/$system/benchmark.json")
           done
           {
             echo "# $PRODUCT: product vs baselines (same documents, split ${{ inputs.split }}, VLM ${{ inputs.vlm }})"
             echo
             echo "## Documents"
             echo
-            if [ ${#reports[@]} -gt 0 ]; then python -m docextract compare "${reports[@]}"; else echo "(no document results)"; fi
+            if [ ${#reports[@]} -gt 0 ]; then
+              python -m docextract compare "${reports[@]}"
+              echo "Documents scored per system (a missing part of the documents shows here):"
+              echo
+              for f in "${reports[@]}"; do
+                python -c "import json,sys; r=json.load(open(sys.argv[1])); s=r['summary']; print(f\"- {r['system']}: {s['documents']} documents, {s.get('failed', 0)} failed\")" "$f"
+              done
+            else
+              echo "(no document results)"
+            fi
           } > report/documents.md
           lines=$(ls results/bench-lines-$PRODUCT-*/*.json 2>/dev/null || true)
           if [ -n "$lines" ]; then
@@ -391,4 +415,5 @@ jobs:
           name: benchmark-${{ inputs.product }}-${{ github.run_number }}
           path: |
             report/
+            merged/
             results/

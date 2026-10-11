@@ -133,6 +133,17 @@ def test_benchmark_and_cli(tmp_path, settings, monkeypatch):
     plain = run_benchmark(tmp_path, system=TextLayerSystem(), system_name="text layer")
     assert plain["system"] == "text layer" and plain["summary"]["word_f1"] > 0.9
 
+    # shards of the documents (several runners) merge into the report of the whole set
+    from docextract.benchmark import merge_reports
+
+    whole = run_benchmark(tmp_path / "eval", system=TextLayerSystem(), system_name="text layer")
+    parts = [run_benchmark(tmp_path / "eval", system=TextLayerSystem(), system_name="text layer", shard=f"{k}/3")
+             for k in (1, 2, 3)]
+    assert sum(len(part["documents"]) for part in parts) == len(whole["documents"]) == 2
+    merged = merge_reports(parts)
+    assert [r["document"] for r in merged["documents"]] == [r["document"] for r in whole["documents"]]
+    assert merged["summary"]["word_f1"] == whole["summary"]["word_f1"]
+
     # a document a system cannot convert scores as empty output instead of stopping the run
     class Crashing(TextLayerSystem):
         def convert(self, path):

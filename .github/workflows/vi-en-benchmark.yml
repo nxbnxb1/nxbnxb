@@ -27,6 +27,9 @@ on:
       systems:
         description: "systems to run: all, or a comma-separated subset (e.g. ppstructure,tesseract)"
         default: all
+      shards:
+        description: Runners per system for the documents (each takes a part; results are merged)
+        default: "3"
       model_tag:
         description: Release of the fine-tuned model (empty = newest vi_en model)
         default: ""
@@ -46,4 +49,5 @@ jobs:
       documents: ${{ inputs.parts != 'lines' }}
       lines: ${{ inputs.parts != 'documents' }}
       systems: ${{ inputs.systems }}
+      shards: ${{ inputs.shards }}
     secrets: inherit

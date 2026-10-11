@@ -110,16 +110,34 @@ def cmd_bench(args: argparse.Namespace) -> int:
     else:
         settings = Settings.from_env(product=args.product) if args.product else Settings.from_env()
         system = make_system(args.system, settings, use_vlm=not args.no_vlm)
+    out = Path(args.output)
+    out.mkdir(parents=True, exist_ok=True)
+
+    def save(report: dict) -> None:  # after every document: a run stopped from outside keeps what it did
+        (out / "benchmark.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+        (out / "benchmark.md").write_text(report["markdown"], encoding="utf-8")
+
     try:
-        report = run_benchmark(Path(args.dataset), split=args.split, system=system, system_name=args.name or args.system)
+        report = run_benchmark(Path(args.dataset), split=args.split, system=system, system_name=args.name or args.system,
+                               shard=args.shard, on_document=save)
     finally:
         if args.isolate:
             system.close()
+    save(report)
+    print(report["markdown"])
+    return 0
+
+
+def cmd_merge(args: argparse.Namespace) -> int:
+    from .benchmark import merge_reports
+
+    reports = [json.loads(Path(p).read_text(encoding="utf-8")) for p in args.reports]
+    report = merge_reports(reports)
     out = Path(args.output)
     out.mkdir(parents=True, exist_ok=True)
     (out / "benchmark.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     (out / "benchmark.md").write_text(report["markdown"], encoding="utf-8")
-    print(report["markdown"])
+    print(f"{len(report['documents'])} documents from {len(reports)} reports → {out}")
     return 0
 
 
@@ -157,7 +175,13 @@ def main(argv: list[str] | None = None) -> int:
                    help="run in this process (default: a supervised worker process)")
     p.add_argument("--max-memory-gb", type=float, help="worker memory limit (default: 75%% of the machine)")
     p.add_argument("--doc-timeout", type=float, default=1800, help="seconds per document before it counts as failed")
+    p.add_argument("--shard", help="k/n: only the k-th of n parts of the documents (merge the parts with bench-merge)")
     p.set_defaults(func=cmd_bench)
+
+    p = sub.add_parser("bench-merge", help="one benchmark.json from those of several shards of one system")
+    p.add_argument("reports", nargs="+")
+    p.add_argument("-o", "--output", required=True)
+    p.set_defaults(func=cmd_merge)
 
     p = sub.add_parser("compare", help="one table of several benchmark.json files (same documents)")
     p.add_argument("reports", nargs="+")
