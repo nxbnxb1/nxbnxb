@@ -12,8 +12,10 @@ from .textutil import is_cjk, markdown_to_plain, normalize
 
 try:  # rapidfuzz is optional but makes CER on whole documents fast
     from rapidfuzz.distance import Levenshtein as _RFLevenshtein
+    from rapidfuzz.fuzz import partial_ratio_alignment as _partial_alignment
 except ImportError:  # pragma: no cover - exercised only without rapidfuzz
     _RFLevenshtein = None
+    _partial_alignment = None
 
 
 def levenshtein(a: Sequence, b: Sequence) -> int:
@@ -45,6 +47,43 @@ def cer(reference: str, hypothesis: str, plain: bool = True) -> float:
     if not reference:
         return 0.0 if not hypothesis else 1.0
     return levenshtein(reference, hypothesis) / len(reference)
+
+
+def _best_window(line: str, text: str) -> tuple[int, int] | None:
+    """Span of ``text`` most similar to ``line`` (None if nothing is close)."""
+    if _partial_alignment is not None:
+        found = _partial_alignment(line, text, score_cutoff=50)
+        return (found.dest_start, found.dest_end) if found else None
+    import difflib  # pragma: no cover - only without rapidfuzz
+
+    blocks = [b for b in difflib.SequenceMatcher(None, line, text, autojunk=False).get_matching_blocks() if b.size]
+    if not blocks or sum(b.size for b in blocks) < len(line) / 2:
+        return None
+    start = max(0, blocks[0].b - blocks[0].a)
+    return start, min(len(text), start + len(line))
+
+
+def cer_any_order(reference: str, hypothesis: str) -> float:
+    """CER that does not depend on reading order: each reference line is compared with the
+    stretch of the output closest to it, wherever it is; output text no reference line accounts
+    for counts as insertions. For ground truths whose order is arbitrary (text layers of
+    multi-column pages, tables), where the plain CER mostly measures order."""
+    lines = [plain for plain in (markdown_to_plain(line) for line in reference.splitlines()) if plain]
+    total = sum(len(line) for line in lines)
+    remaining = markdown_to_plain(hypothesis)
+    if not total:
+        return 0.0 if not remaining else 1.0
+    errors = 0
+    for line in sorted(lines, key=len, reverse=True):
+        window = _best_window(line, remaining) if remaining else None
+        if window is None:
+            errors += len(line)
+            continue
+        start, end = window
+        errors += levenshtein(line, remaining[start:end])
+        remaining = remaining[:start] + "\x00" + remaining[end:]
+    errors += sum(1 for ch in remaining if ch not in " \x00")
+    return errors / total
 
 
 def wer(reference: str, hypothesis: str, plain: bool = True) -> float:

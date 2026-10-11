@@ -650,11 +650,21 @@ def keep_pages(sha: str, pages: int, limit: int) -> list[int]:
     return sorted(sorted(range(pages), key=lambda i: hashlib.sha1(f"{sha}:{i}".encode()).hexdigest())[:limit])
 
 
+INSPECTION = 2  # version of the description below; earlier entries are described again
+
+
+def language_of(pages) -> str:
+    """Language of the pages' text layers, from text that is not broken or legacy-encoded only:
+    a garbled text layer (wrong ToUnicode map, TCVN3/VNI fonts) can look like any language."""
+    from docextract.textutil import detect_language, garbled_ratio
+
+    texts = [t for t in (p.get_text("text") for p in pages) if t.strip() and garbled_ratio(t) <= 0.02]
+    return detect_language(" ".join(texts)[:20000], ("vi", "en", "ja")) or "unknown"
+
+
 def store(data: bytes, sha: str, path: Path) -> dict:
     """Write the document (at most MAX_PAGES / SCAN_PAGES pages of it) and describe it."""
     import pymupdf
-
-    from docextract.textutil import detect_language
 
     with pymupdf.open(stream=data, filetype="pdf") as doc:
         if doc.needs_pass:
@@ -662,7 +672,7 @@ def store(data: bytes, sha: str, path: Path) -> dict:
         total = doc.page_count
         sample = [doc[i] for i in range(min(total, 8))]
         chars = [len(p.get_text("text").strip()) for p in sample]
-        text = " ".join(p.get_text("text") for p in sample)[:20000]
+        language = language_of(sample)
         digital = sum(1 for n in chars if n >= 200)
         kind = "digital" if digital >= max(1, len(chars) * 0.6) else ("scan" if digital == 0 else "mixed")
         keep = keep_pages(sha, total, SCAN_PAGES if kind == "scan" else MAX_PAGES)
@@ -671,8 +681,7 @@ def store(data: bytes, sha: str, path: Path) -> dict:
             path.write_bytes(doc.tobytes(garbage=3, deflate=True))
         else:
             path.write_bytes(data)
-    info = {"pages": len(keep), "source_pages": total, "kind": kind,
-            "language": detect_language(text, ("vi", "en", "ja")) or "unknown"}
+    info = {"pages": len(keep), "source_pages": total, "kind": kind, "language": language, "inspected": INSPECTION}
     if len(keep) < total:
         info["kept_pages"] = keep
     return info
@@ -710,10 +719,17 @@ def download(args: argparse.Namespace) -> None:
     manifest = [i for i, ok in zip(previous, allowed) if ok]
     if len(manifest) < len(previous):
         print(f"{len(previous) - len(manifest)} earlier documents removed: robots.txt disallows them", flush=True)
-    for item in manifest:  # files stored whole by earlier versions
+    import pymupdf
+
+    for item in manifest:  # entries of earlier versions
         path = directory / item["file"]
-        if "source_pages" not in item and path.exists():
+        if not path.exists():
+            continue
+        if "source_pages" not in item:  # stored whole
             item.update(store(path.read_bytes(), item["sha256"], path))
+        elif item.get("inspected", 1) < INSPECTION:
+            with pymupdf.open(path) as doc:
+                item.update(language=language_of([doc[i] for i in range(min(doc.page_count, 8))]), inspected=INSPECTION)
 
     candidates = [json.loads(line) for path in args.candidates if Path(path).exists()
                   for line in Path(path).read_text(encoding="utf-8").splitlines() if line]

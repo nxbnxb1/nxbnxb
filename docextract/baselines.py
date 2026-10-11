@@ -4,7 +4,7 @@
                  recognition model follows the settings (product baseline, a fine-tuned model via
                  DOCEXTRACT_OCR_REC_MODEL_DIR, or another stock model via DOCEXTRACT_OCR_REC_MODEL)
     ppstructure  PP-StructureV3, PaddleOCR's own document parser (Markdown output), with the
-                 product's PaddleOCR language
+                 product's PaddleOCR language, on the same page images as docextract
     tesseract    Tesseract 5 OCR of every page (tessdata_best, the product's languages), plain text
     text_layer   text already in the file, no OCR: PDF text layer (PyMuPDF), DOCX paragraphs and
                  tables (python-docx); a scan or a picture gives nothing
@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import os
 import subprocess
-import tempfile
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -128,10 +127,18 @@ class TesseractSystem:
 
 
 class PPStructureSystem:
+    """PP-StructureV3 on the same page images docextract works on (pages rendered at the
+    configured DPI, long side at most max_side). Left to render PDFs itself it made pictures of
+    large-format pages so big that it ran out of memory on a 16 GB runner on nearly every
+    document."""
+
     name = "ppstructure"
 
-    def __init__(self, lang: str) -> None:
+    def __init__(self, lang: str, dpi: int = 200, min_side: int = 1200, max_side: int = 4000) -> None:
         self.lang = lang
+        self.dpi = dpi
+        self.min_side = min_side
+        self.max_side = max_side
         self._pipeline = None
 
     def warm_up(self) -> None:
@@ -145,22 +152,37 @@ class PPStructureSystem:
                 enable_mkldnn=False,
             )
 
+    def _pages(self, path: Path, pdf: bytes | None):
+        import numpy as np
+        from PIL import Image
+
+        from .preprocessing.image import normalize_resolution
+
+        if pdf is None:
+            images = [Image.open(path).convert("RGB")]
+        else:
+            import pymupdf
+
+            with pymupdf.open(stream=pdf, filetype="pdf") as doc:
+                images = []
+                for page in doc:
+                    pix = page.get_pixmap(dpi=self.dpi, alpha=False, colorspace=pymupdf.csRGB)
+                    images.append(Image.frombytes("RGB", (pix.width, pix.height), pix.samples))
+        for image in images:
+            image, _ = normalize_resolution(image, self.min_side, self.max_side)
+            yield np.asarray(image)[:, :, ::-1].copy()  # BGR, as PaddleOCR reads images
+
     def convert(self, path: Path) -> Converted:
         self.warm_up()
         pdf = _as_pdf(path)
-        with tempfile.TemporaryDirectory() as tmp:
-            source = path
-            if pdf is not None and path.suffix.lower() != ".pdf":
-                source = Path(tmp) / f"{path.stem}.pdf"
-                source.write_bytes(pdf)
-            start = time.perf_counter()
-            pages = [res.markdown for res in self._pipeline.predict(input=str(source))]
-            joined = self._pipeline.concatenate_markdown_pages(pages)
-            if isinstance(joined, tuple):  # some versions also return the images
-                joined = joined[0]
-            if isinstance(joined, dict):
-                joined = joined.get("markdown_texts", "")
-            return Converted(str(joined), _timed_stats(len(pages), start))
+        start = time.perf_counter()
+        pages = [res.markdown for image in self._pages(path, pdf) for res in self._pipeline.predict(input=image)]
+        joined = self._pipeline.concatenate_markdown_pages(pages)
+        if isinstance(joined, tuple):  # some versions also return the images
+            joined = joined[0]
+        if isinstance(joined, dict):
+            joined = joined.get("markdown_texts", "")
+        return Converted(str(joined), _timed_stats(len(pages), start))
 
 
 SYSTEMS = ("docextract", "ppstructure", "tesseract", "text_layer")
@@ -251,6 +273,12 @@ class IsolatedSystem:
         while True:
             if self._conn.poll(0.5):
                 kind, payload = self._conn.recv()
+                used = _rss(self._proc.pid)
+                if used > self.max_memory:  # done, but bloated: the next document gets a fresh worker
+                    self._stop()
+                    if kind == "ready":
+                        raise MemoryError(f"{self.name} used {used / 2**30:.1f} GB after loading its models "
+                                          f"(limit {self.max_memory / 2**30:.1f} GB)")
                 if kind == "error":
                     raise RuntimeError(payload)
                 return payload
@@ -292,7 +320,7 @@ def make_system(name: str, settings: Settings, use_vlm: bool = True, pipeline=No
     if name == "docextract":
         return DocextractSystem(settings, pipeline, use_vlm)
     if name == "ppstructure":
-        return PPStructureSystem(product.paddle_lang)
+        return PPStructureSystem(product.paddle_lang, settings.dpi, settings.min_image_side, settings.max_image_side)
     if name == "tesseract":
         return TesseractSystem(product.tesseract_langs)
     if name == "text_layer":

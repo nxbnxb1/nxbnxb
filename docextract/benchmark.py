@@ -20,7 +20,7 @@ import sys
 from pathlib import Path
 
 from .config import Settings
-from .metrics import best_match_teds, cer, heading_f1, teds, wer, word_f1
+from .metrics import best_match_teds, cer, cer_any_order, heading_f1, teds, wer, word_f1
 from .models import DocumentStats
 from .pipeline import DocumentPipeline, ExtractOptions
 from .tables import Table, parse_html_tables, parse_markdown_table
@@ -59,8 +59,8 @@ def _mean(values: list[float]) -> float | None:
 
 
 SPLITS = ("dev", "test")
-METRICS = ("cer", "wer", "word_f1", "teds", "teds_structure", "heading_f1", "ms_per_page", "vlm_calls_per_page",
-           "cost_per_page", "needs_review_ratio")
+METRICS = ("cer", "cer_any_order", "wer", "word_f1", "teds", "teds_structure", "heading_f1", "ms_per_page",
+           "vlm_calls_per_page", "cost_per_page", "needs_review_ratio")
 
 
 def documents(dataset: Path, split: str | None = None):
@@ -119,6 +119,7 @@ def run_benchmark(
                 "split": doc_split,
                 "pages": s.pages_processed,
                 "cer": round(cer(gt, pred), 4),
+                "cer_any_order": round(cer_any_order(gt, pred), 4),
                 "wer": round(wer(gt, pred), 4),
                 "word_f1": round(word_f1(gt, pred), 4),
                 "teds": _mean(table_scores),
@@ -172,13 +173,15 @@ def _cell(value) -> str:
 
 
 def _report(rows: list[dict], summary: dict, categories: dict[str, dict]) -> str:
-    cols = ["documents", "pages", "failed", "cer", "word_f1", "teds", "heading_f1", "ms_per_page", "vlm_calls_per_page",
+    cols = ["documents", "pages", "failed", "cer", "cer_any_order", "word_f1", "teds", "heading_f1", "ms_per_page",
+            "vlm_calls_per_page",
             "needs_review_ratio"]
     lines = ["| category | " + " | ".join(cols) + " |", "|" + "---|" * (len(cols) + 1)]
     for name, values in categories.items():
         lines.append(f"| {name} | " + " | ".join(_cell(values[c]) for c in cols) + " |")
     lines.append("| **all** | " + " | ".join(_cell(summary[c]) for c in cols) + " |")
-    cols = ["document", "pages", "cer", "wer", "word_f1", "teds", "heading_f1", "ms_per_page", "vlm_calls_per_page",
+    cols = ["document", "pages", "cer", "cer_any_order", "wer", "word_f1", "teds", "heading_f1", "ms_per_page",
+            "vlm_calls_per_page",
             "cost_per_page", "needs_review_ratio"]
     lines += ["", "<details><summary>Per document</summary>", "", "| " + " | ".join(cols) + " |", "|" + "---|" * len(cols)]
     for row in rows:
@@ -195,6 +198,7 @@ def _report(rows: list[dict], summary: dict, categories: dict[str, dict]) -> str
 # (key, label, higher is better)
 COMPARED = [
     ("cer", "CER", False),
+    ("cer_any_order", "CER (any order)", False),
     ("word_f1", "word F1", True),
     ("teds", "TEDS", True),
     ("heading_f1", "heading F1", True),
@@ -210,7 +214,8 @@ def compare_reports(reports: list[dict], names: list[str] | None = None) -> str:
     header = "| system | " + " | ".join(label for _, label, _ in COMPARED) + " |"
     rule = "|" + "---|" * (len(COMPARED) + 1)
     lines = [
-        "Lower is better for CER, ms/page, needs review and failed documents; higher for the rest. "
+        "Lower is better for CER, ms/page, needs review and failed documents; higher for the rest. CER (any order) "
+        "compares each line of the ground truth with the closest part of the output, so reading order does not count. "
         "Best value of each column in bold.",
         "",
     ]

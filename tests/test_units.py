@@ -1,6 +1,6 @@
 from docextract.layout.labels import Candidate, clean_candidates, normalize_label
 from docextract.layout.reading_order import reading_order
-from docextract.metrics import cer, heading_f1, teds
+from docextract.metrics import cer, cer_any_order, heading_f1, teds
 from docextract.models import BBox, RegionType
 from docextract.tables import parse_html_table, parse_markdown_table
 from docextract.textutil import (
@@ -74,6 +74,16 @@ def test_cer_and_headings():
     assert 0 < cer("Việt Nam", "Vit Nam") < 0.2
     assert heading_f1(["A", "B"], ["A", "B"]) == 1.0
     assert heading_f1(["A", "B"], ["A"]) == 2 / 3
+
+
+def test_cer_any_order_ignores_reading_order_only():
+    gt = "Doanh thu năm 2025 tăng 12%\nLợi nhuận sau thuế 1.234 tỷ đồng\nTiền cuối kỳ 567 tỷ"
+    swapped = "Tiền cuối kỳ 567 tỷ\nDoanh thu năm 2025 tăng 12%\nLợi nhuận sau thuế 1.234 tỷ đồng"
+    assert cer(gt, swapped) > 0.4 and cer_any_order(gt, swapped) == 0.0
+    assert 0 < cer_any_order(gt, swapped.replace("567", "561")) < 0.05  # a wrong digit still counts
+    assert cer_any_order(gt, "Doanh thu năm 2025 tăng 12%") > 0.5  # missing lines count
+    assert cer_any_order(gt, gt + "\nchữ thừa không có trong đáp án") > 0.3  # so does extra text
+    assert cer_any_order("Item 2024 2025\nRevenue 10 12", "| Item | 2024 | 2025 |\n|---|---|---|\n| Revenue | 10 | 12 |") == 0
 
 
 def test_reading_order_two_columns_with_spanning_title():

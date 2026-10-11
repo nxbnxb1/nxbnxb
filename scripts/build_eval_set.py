@@ -369,6 +369,24 @@ def _visible_text_page(page) -> bool:
     return total >= 200 and invisible / total < 0.2
 
 
+def _trusted_text_page(page) -> bool:
+    """Whether docextract itself would read this page from its text layer: no broken or
+    legacy-encoded (TCVN3/VNI) text in the page or in any block, no legacy Vietnamese font. A text
+    layer that does not say what the page shows cannot be the ground truth (docextract and
+    Tesseract read the pixels and would be scored against the wrong text)."""
+    from docextract.config import Settings
+    from docextract.models import PageKind
+    from docextract.preprocessing.pdf import analyze_page
+    from docextract.textutil import garbled_ratio
+
+    settings = Settings()
+    analysis = analyze_page(page, settings.min_text_chars, settings.pdf_text_max_garbled_ratio, False)
+    if analysis.kind != PageKind.DIGITAL or analysis.legacy_fonts:
+        return False
+    return all(garbled_ratio(block[4]) <= settings.pdf_text_max_garbled_ratio
+               for block in page.get_text("blocks") if block[6] == 0 and len(block[4].strip()) >= 20)
+
+
 def page_ground_truth(page) -> str:
     """Text of a digital page from its own text layer, block by block in reading order."""
     import unicodedata
@@ -387,8 +405,9 @@ def enterprise(args: argparse.Namespace) -> None:
     """Pages of enterprise documents of the companies held out for testing (and dev).
 
     Each chosen digital document gives a few pages, as the PDF itself (digital_pdf) and as a
-    scanned copy (scan); the ground truth is the page's own text layer. Real scans of these
-    companies have no ground truth and are not scored.
+    scanned copy (scan); the ground truth is the page's own text layer, used only where docextract
+    would trust it (_trusted_text_page). Real scans of these companies have no ground truth and
+    are not scored.
     """
     import pymupdf
 
@@ -409,7 +428,8 @@ def enterprise(args: argparse.Namespace) -> None:
                 with pymupdf.open(Path(args.files) / item["file"]) as doc:
                     doc_pages = doc.page_count
                     order = sorted(range(doc_pages), key=lambda n: digest(f"{item['sha256']}:{n}"))
-                    pages = [n for n in order if _visible_text_page(doc[n])][: args.pages_per_doc]
+                    usable = [n for n in order if _visible_text_page(doc[n]) and _trusted_text_page(doc[n])]
+                    pages = usable[: args.pages_per_doc]
                     if not pages:
                         continue
                     sub = pymupdf.open()

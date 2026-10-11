@@ -163,12 +163,15 @@ def test_isolated_system_survives_memory_exhaustion(tmp_path, monkeypatch):
 
     pdf = tmp_path / "report.pdf"
     pdf.write_bytes(make_digital_pdf())
-    system = IsolatedSystem("text_layer", timeout=120)
+    system = IsolatedSystem("text_layer", timeout=120, max_memory=2**30)
     try:
         assert "ACME Annual Report" in system.convert(pdf).markdown
+        # a worker above its memory limit is replaced; a finished document keeps its result
+        monkeypatch.setattr(baselines, "_rss", lambda pid: 10**12)
+        assert "ACME Annual Report" in system.convert(pdf).markdown
+        assert system._proc is None
+        # one that cannot even hold its models within the limit is an error the caller records
+        with pytest.raises(MemoryError):
+            system.convert(pdf)
     finally:
         system.close()
-    # a worker above its memory limit is stopped; the caller gets an error it can record
-    monkeypatch.setattr(baselines, "_rss", lambda pid: 10**12)
-    with pytest.raises(MemoryError):
-        IsolatedSystem("text_layer", max_memory=2**30).warm_up()
