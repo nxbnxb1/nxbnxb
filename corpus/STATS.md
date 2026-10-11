@@ -1,55 +1,37 @@
 # Enterprise document corpus
 
-Updated by run 38110409022 on 2026-10-11. Files are not stored in the repository:
+Updated by run 38111311592 on 2026-10-11. Files are not stored in the repository:
 `python scripts/collect_corpus.py fetch corpus/manifest.jsonl --dir corpus_files` downloads them
 from the companies' own websites (checksums verified, robots.txt honoured). Long documents are
 stored as at most 20 of their pages (scans: 5), the same pages on every fetch.
 
 | split | language | kind | documents | pages |
 |---|---|---|---|---|
-| dev | en | digital | 65 | 892 |
-| dev | en | mixed | 3 | 53 |
-| dev | ja | digital | 352 | 3519 |
-| dev | ja | mixed | 22 | 229 |
-| dev | ja | scan | 2 | 2 |
-| dev | other | digital | 12 | 173 |
-| dev | other | mixed | 1 | 3 |
-| dev | other | scan | 1 | 3 |
-| dev | unknown | digital | 2 | 13 |
-| dev | unknown | mixed | 1 | 20 |
-| dev | unknown | scan | 43 | 161 |
-| dev | vi | digital | 24 | 318 |
-| dev | vi | mixed | 3 | 46 |
-| dev | vi | scan | 2 | 4 |
-| test | en | digital | 81 | 1113 |
-| test | en | mixed | 1 | 8 |
-| test | en | scan | 1 | 5 |
-| test | ja | digital | 609 | 6462 |
-| test | ja | mixed | 28 | 389 |
-| test | ja | scan | 4 | 16 |
-| test | other | digital | 10 | 145 |
-| test | other | scan | 3 | 15 |
-| test | unknown | digital | 2 | 11 |
-| test | unknown | mixed | 2 | 40 |
-| test | unknown | scan | 95 | 345 |
-| test | vi | digital | 35 | 363 |
-| test | vi | mixed | 3 | 54 |
-| test | vi | scan | 5 | 18 |
-| train | en | digital | 333 | 4168 |
-| train | en | mixed | 15 | 228 |
-| train | en | scan | 2 | 10 |
-| train | ja | digital | 2165 | 22402 |
-| train | ja | mixed | 108 | 1603 |
-| train | ja | scan | 13 | 40 |
-| train | other | digital | 69 | 614 |
-| train | other | mixed | 6 | 66 |
-| train | other | scan | 6 | 20 |
-| train | unknown | digital | 16 | 126 |
-| train | unknown | mixed | 10 | 200 |
-| train | unknown | scan | 267 | 956 |
-| train | vi | digital | 127 | 1349 |
-| train | vi | mixed | 38 | 557 |
-| train | vi | scan | 18 | 65 |
+| dev | en | digital | 56 | 730 |
+| dev | en | mixed | 10 | 193 |
+| dev | ja | digital | 339 | 3340 |
+| dev | ja | mixed | 30 | 352 |
+| dev | other | digital | 4 | 28 |
+| dev | unknown | scan | 69 | 469 |
+| dev | vi | digital | 20 | 238 |
+| dev | vi | mixed | 5 | 86 |
+| test | en | digital | 74 | 955 |
+| test | en | mixed | 7 | 128 |
+| test | ja | digital | 585 | 6134 |
+| test | ja | mixed | 46 | 600 |
+| test | other | digital | 1 | 20 |
+| test | unknown | scan | 136 | 810 |
+| test | vi | digital | 25 | 263 |
+| test | vi | mixed | 5 | 74 |
+| train | en | digital | 311 | 3755 |
+| train | en | mixed | 25 | 427 |
+| train | ja | digital | 2041 | 20821 |
+| train | ja | mixed | 183 | 2638 |
+| train | other | digital | 6 | 39 |
+| train | other | mixed | 7 | 109 |
+| train | unknown | scan | 481 | 3011 |
+| train | vi | digital | 109 | 1200 |
+| train | vi | mixed | 30 | 404 |
 
 | country | companies | documents | pages stored |
 |---|---|---|---|
