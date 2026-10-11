@@ -18,6 +18,10 @@ on:
       max_gb:
         description: Size of all stored files in GB (Actions cache)
         default: "5"
+      crawl:
+        description: Crawl for new documents (off = only check robots.txt again and describe the documents again)
+        type: boolean
+        default: true
   schedule:
     - cron: "17 3 * * 1"  # Mondays
 
@@ -31,6 +35,7 @@ concurrency:
 
 jobs:
   crawl:
+    if: inputs.crawl != false  # the weekly run has no inputs: it crawls
     runs-on: ubuntu-latest
     timeout-minutes: 300
     strategy:
@@ -90,6 +95,7 @@ jobs:
       - run: pip install -e . httpx
 
       - uses: actions/download-artifact@v4
+        if: inputs.crawl != false
         with:
           pattern: corpus-candidates-${{ github.run_number }}-*
           path: candidates

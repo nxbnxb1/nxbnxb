@@ -72,3 +72,12 @@ def test_seeds_with_ticker_check(tmp_path):
                      "XYZ\tother\thttps://vinamilk.com.vn/\n", encoding="utf-8")
     read = cc.read_seeds([str(seeds)], "VN")
     assert [(s["id"], s["check"]) for s in read] == [("VNM", ""), ("HPG", "ticker")]  # same website once
+
+
+def test_languages_outside_the_products_are_not_filed_under_the_nearest():
+    assert cc.confirmed_language("Cộng hòa xã hội chủ nghĩa Việt Nam. Báo cáo tài chính hợp nhất năm 2025 đã được kiểm toán.") == "vi"
+    assert cc.confirmed_language("The Board of Directors approved the annual report and the dividend for the year.") == "en"
+    assert cc.confirmed_language("2026年3月期の決算短信について、当社は以下のとおりお知らせいたします。") == "ja"
+    assert cc.confirmed_language("Société Générale publie son rapport financier annuel. Les résultats sont présentés à l'assemblée.") == "other"
+    assert cc.confirmed_language("Banco Santander presenta los resultados del año. La junta general de accionistas aprobó el dividendo.") == "other"
+    assert cc.confirmed_language("河内嘉佩乐酒店概况介绍，酒店位于市中心，提供豪华客房和餐饮服务以及会议设施。") == "other"

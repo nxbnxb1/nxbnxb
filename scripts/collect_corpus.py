@@ -650,16 +650,42 @@ def keep_pages(sha: str, pages: int, limit: int) -> list[int]:
     return sorted(sorted(range(pages), key=lambda i: hashlib.sha1(f"{sha}:{i}".encode()).hexdigest())[:limit])
 
 
-INSPECTION = 2  # version of the description below; earlier entries are described again
+INSPECTION = 3  # version of the description below; earlier entries are described again
+
+# letters only Vietnamese uses (French or Spanish accents are not among them)
+_VI_ONLY = set("ăắằẳẵặơớờởỡợưứừửữựđạảấầẩẫậẹẻẽếềểễệỉịọỏốồổỗộụủỳỵỷỹ")
+_EN_WORDS = frozenset("the and of to in for is on with by as at from that this are be was our we or an it which".split())
+
+
+def confirmed_language(text: str) -> str:
+    """vi, en or ja when the text clearly is that language; "other" for anything else (French,
+    Spanish, Chinese, ...), which a choice among vi / en / ja alone would file under the nearest."""
+    from docextract.textutil import detect_language
+
+    text = unicodedata.normalize("NFC", text)
+    language = detect_language(text, ("vi", "en", "ja"))
+    if language is None:
+        return "unknown"
+    latin = [ch for ch in text.lower() if ch.isalpha() and ord(ch) < 0x2E80]
+    if language == "vi":
+        ok = sum(ch in _VI_ONLY for ch in latin) >= 0.03 * len(latin)
+    elif language == "en":
+        words = re.findall(r"[a-z]+", text.lower())
+        ok = bool(words) and sum(w in _EN_WORDS for w in words) >= 0.05 * len(words)
+    else:  # kana: Japanese; kanji alone: Chinese
+        cjk = sum(1 for ch in text if 0x3040 <= ord(ch) <= 0x9FFF)
+        kana = sum(1 for ch in text if 0x3040 <= ord(ch) <= 0x30FF)
+        ok = kana >= 0.1 * cjk
+    return language if ok else "other"
 
 
 def language_of(pages) -> str:
     """Language of the pages' text layers, from text that is not broken or legacy-encoded only:
     a garbled text layer (wrong ToUnicode map, TCVN3/VNI fonts) can look like any language."""
-    from docextract.textutil import detect_language, garbled_ratio
+    from docextract.textutil import garbled_ratio
 
     texts = [t for t in (p.get_text("text") for p in pages) if t.strip() and garbled_ratio(t) <= 0.02]
-    return detect_language(" ".join(texts)[:20000], ("vi", "en", "ja")) or "unknown"
+    return confirmed_language(" ".join(texts)[:20000])
 
 
 def store(data: bytes, sha: str, path: Path) -> dict:
