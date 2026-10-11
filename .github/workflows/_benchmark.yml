@@ -232,7 +232,7 @@ jobs:
           case "${{ matrix.system }}" in
             fine-tuned)
               if [ -z "${DOCEXTRACT_OCR_REC_MODEL_DIR:-}" ]; then echo "no fine-tuned model yet"; exit 0; fi
-              args=(--system docextract --name "docextract + fine-tuned model ($OCR_MODEL_TAG)") ;;
+              args=(--system docextract --name "PROPOSED: docextract + fine-tuned model ($OCR_MODEL_TAG)") ;;
             stock) args=(--system docextract --name "docextract + $BASE (stock, fine-tuning source)") ;;
             ppocrv6)
               export DOCEXTRACT_OCR_REC_MODEL=PP-OCRv6_medium_rec
@@ -337,7 +337,7 @@ jobs:
           case "${{ matrix.system }}" in
             fine-tuned)
               if [ -z "${DOCEXTRACT_OCR_REC_MODEL_DIR:-}" ]; then echo "no fine-tuned model yet"; exit 0; fi
-              system="fine-tuned ($OCR_MODEL_TAG)=paddle:$BASE@$DOCEXTRACT_OCR_REC_MODEL_DIR" ;;
+              system="PROPOSED: fine-tuned ($OCR_MODEL_TAG)=paddle:$BASE@$DOCEXTRACT_OCR_REC_MODEL_DIR" ;;
             stock) system="$BASE (stock, fine-tuning source)=paddle:$BASE" ;;
             server) system="PP-OCRv5_server_rec (stock)=paddle:PP-OCRv5_server_rec" ;;
             ppocrv6) system="PP-OCRv6_medium_rec (stock)=paddle:PP-OCRv6_medium_rec" ;;
