@@ -4,7 +4,8 @@
         --langs vi,en --count 12000 --seed 1001 [--shard 3/8]
 
 Only digital PDFs of companies in the training split (scripts/collect_corpus.py) are used, so no
-test company is ever trained on. Pages are sampled with the seed; every visible line of the
+test company is ever trained on. Pages are sampled with the seed, each language equally often
+(see page_draws); every visible line of the
 PDF's own text layer becomes a labelled crop of the page rendered at a random resolution, then
 degraded like the synthetic lines. Lines longer than the recogniser's limit are cut at word
 boundaries with the character boxes. Lines are skipped when they contain characters outside the
@@ -22,6 +23,7 @@ import json
 import random
 import sys
 import unicodedata
+from collections import defaultdict
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -126,6 +128,22 @@ def page_lines(path: str, page_no: int, seed: int, charset: frozenset[str], augm
     return out[: rng.randint(8, 40)]  # a few lines per page: more pages, more variety
 
 
+def page_draws(docs: list[tuple[str, int, str]], draws: int, rng: random.Random) -> list[tuple[str, int, int]]:
+    """Pages to cut lines from, as (path, page, seed). Each draw picks a language first, then one
+    of its documents, so every language gets about as many lines as the others: drawn by document,
+    the lines followed the corpus (82% Japanese, 12% English, 5% Vietnamese training documents)
+    and the vi_en_ja model learned Japanese but got worse than its baseline on real English."""
+    by_lang: dict[str, list[tuple[str, int]]] = defaultdict(list)
+    for path, pages, lang in docs:
+        by_lang[lang].append((path, pages))
+    langs = sorted(by_lang)
+    out = []
+    for _ in range(draws):
+        path, pages = rng.choice(by_lang[rng.choice(langs)])
+        out.append((path, rng.randrange(pages), rng.randrange(2**31)))
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("out")
@@ -155,14 +173,10 @@ def main() -> None:
             continue
         path = Path(args.files) / item["file"]
         if path.exists():
-            docs.append((str(path), item["pages"]))
+            docs.append((str(path), item["pages"], item["language"]))
     if not docs:
         sys.exit(f"no {args.split} documents in {args.langs} for shard {args.shard}")
-    rng = random.Random(args.seed)
-    tasks = []
-    for _ in range(args.count // 4 + 50):  # page draws; each gives several lines
-        path, pages = rng.choice(docs)
-        tasks.append((path, rng.randrange(pages), rng.randrange(2**31)))
+    tasks = page_draws(docs, args.count // 4 + 50, random.Random(args.seed))  # each page gives several lines
 
     out = Path(args.out)
     (out / "images").mkdir(parents=True, exist_ok=True)

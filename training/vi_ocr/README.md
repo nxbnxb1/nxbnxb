@@ -20,6 +20,7 @@ thể sinh ra các chữ đó nên **bỏ mất cả chữ** mà độ tin cậy
 | Bộ ký tự | `charset.py` | `vi_en`: số, chữ & dấu câu ASCII, 134 chữ Việt, ký hiệu. `vi_en_ja`: các ký tự của từ điển PP-OCRv5 thuộc bộ chữ chuẩn tiếng Nhật (CP932: kana, 6.221 kanji, ký tự toàn độ rộng) + chữ Việt; bỏ chữ Hán chỉ dùng trong tiếng Trung (18.383 → 6.973 lớp) |
 | Khởi tạo | `init_weights.py` | Chép trọng số của ký tự có sẵn; chữ mới lấy từ chữ gần nhất (`ộ ← ô ← o`) |
 | Dữ liệu | `synth.py` | Dòng chữ tổng hợp theo tần suất từ vựng Việt/Anh/Nhật, số liệu, ngày tháng, số hiệu văn bản; mọi font đủ ký tự và **vẽ đúng dấu**; làm xấu như ảnh scan. Mỗi runner, mỗi vòng sinh dòng mới (không lặp lại) |
+| Dòng thật | `doc_lines.py` | Một nửa dòng huấn luyện cắt từ PDF số của các công ty thuộc phần train của kho tài liệu, nhãn là lớp chữ của PDF; **mỗi ngôn ngữ một phần bằng nhau** (kho có 82% tài liệu tiếng Nhật: lấy theo tài liệu thì model `vi_en_ja` học tiếng Nhật nhưng kém baseline ở tiếng Anh thật) |
 | Huấn luyện | `run_training.sh`, `train_cpu.py` | Nhiều runner cùng lúc, theo vòng (xem dưới) |
 | Export | `train_cpu.py export` | Định dạng PaddleOCR 3.x (`inference.json/.pdiparams/.yml`), cùng kiến trúc với model gốc |
 | Đánh giá | `evaluate.py` | CER, độ chính xác dòng, tỷ lệ giữ chữ có dấu, ms/dòng — **baseline và model mới trên cùng runner, cùng dữ liệu** |

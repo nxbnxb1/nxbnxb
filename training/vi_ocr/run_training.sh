@@ -23,8 +23,8 @@
 #            PROBE=1 (speed measurement: keep nothing)
 #   corpus:  CORPUS_MANIFEST + CORPUS_FILES (enterprise documents, scripts/collect_corpus.py):
 #            training lines are then REAL_SHARE (default 0.5) real lines cut from documents of
-#            the training companies (doc_lines.py, documents of shard SHARD=k/n) and the rest
-#            synthetic; validation and evaluation also get real lines of the dev / test companies
+#            the training companies (doc_lines.py, documents of shard SHARD=k/n; every language
+#            gets the same share) and the rest synthetic; validation and evaluation also get real lines of the dev / test companies
 #            (evaluation: eval_real_<lang> per language, eval_real_long)
 #   loader:  LOADER_WORKERS (data loader processes, default 2)
 #   CPU:     THREADS (default: all cores), FUSE / FREEZE / GTC (see train_cpu.py)
