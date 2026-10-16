@@ -1,0 +1,65 @@
+name: "Publish OCR model"
+
+# Publish the model of a training run that the quality gate held back (kept as the artifact
+# "<product>-ocr-model-<run>", see _train.yml) as the product's Release "<product>-ocr-<run>",
+# when the repository owner decides to. The Extract and Benchmark workflows then use it.
+
+on:
+  workflow_dispatch:
+    inputs:
+      product:
+        type: choice
+        options: [vi_en, vi_en_ja]
+      run_id:
+        description: ID of the training run (the number in its Actions URL)
+        required: true
+      reason:
+        description: Why it is published although the gate held it back (goes into the release notes)
+        required: true
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PRODUCT: ${{ inputs.product }}
+      RUN_ID: ${{ inputs.run_id }}
+      REASON: ${{ inputs.reason }}
+    steps:
+      - name: Training run
+        id: run
+        run: |
+          [[ "$RUN_ID" =~ ^[0-9]+$ ]] || { echo "run_id must be a number"; exit 1; }
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" \
+            --jq '"number=\(.run_number)\nsha=\(.head_sha)\nworkflow=\(.name)"' >> "$GITHUB_OUTPUT"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.product }}-ocr-model-${{ steps.run.outputs.number }}
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ github.token }}
+          path: model
+
+      - name: Publish release
+        env:
+          NUMBER: ${{ steps.run.outputs.number }}
+          SHA: ${{ steps.run.outputs.sha }}
+          WORKFLOW: ${{ steps.run.outputs.workflow }}
+        run: |
+          {
+            echo "Product $PRODUCT: model of training run $RUN_ID ($WORKFLOW #$NUMBER)."
+            echo
+            echo "**Published by decision of the repository owner although the quality gate held it back:** $REASON"
+            echo
+            cat model/report.md
+            echo
+            cat model/gate.md
+          } > notes.md
+          gh release create "$PRODUCT-ocr-$NUMBER" model/dist/*.tar.gz model/report.md model/report.json \
+            --repo "$GITHUB_REPOSITORY" --target "$SHA" --title "$PRODUCT OCR model #$NUMBER" --notes-file notes.md
+          cat notes.md >> "$GITHUB_STEP_SUMMARY"
