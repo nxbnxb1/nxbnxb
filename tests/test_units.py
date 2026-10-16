@@ -127,3 +127,18 @@ def test_foreign_script_text_layer_counts_as_garbled():
                  "Cộng hòa xã hội chủ nghĩa Việt Nam, báo cáo tài chính hợp nhất năm 2025",
                  "The coefficients α and β of the model Δx = 0.5 for all samples in the study"):
         assert garbled_ratio(fine) == 0.0
+
+
+def test_paddle_cpu_options(monkeypatch):
+    import sys
+    import types
+
+    from docextract.engines import paddle as pe
+
+    for version, onednn in (("3.2.2", True), ("3.3.1", False)):  # 3.3 fails with oneDNN on detection
+        monkeypatch.setitem(sys.modules, "paddle", types.SimpleNamespace(__version__=version))
+        pe._onednn_broken.cache_clear()
+        options = pe.cpu_options()
+        assert options["enable_mkldnn"] is onednn and options["cpu_threads"] >= 1
+    assert pe.cpu_options(enable_mkldnn=False, cpu_threads=2) == {"enable_mkldnn": False, "cpu_threads": 2}
+    pe._onednn_broken.cache_clear()

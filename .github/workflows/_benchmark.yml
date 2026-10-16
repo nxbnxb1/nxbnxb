@@ -294,7 +294,7 @@ jobs:
           case "${{ matrix.system }}" in
             easyocr|vietocr)
               pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-              pip install "${{ matrix.system }}" ;;
+              pip install "${{ matrix.system }}" "setuptools<81" ;;  # VietOCR imports pkg_resources
             tesseract) ;;
             *) pip install -e ".[paddle]" ;;
           esac
@@ -349,7 +349,7 @@ jobs:
         run: |
           pip install -e ".[paddle]" rapidfuzz
           pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-          pip install easyocr vietocr
+          pip install easyocr vietocr "setuptools<81"  # VietOCR imports pkg_resources
           sudo apt-get update -qq
           sudo apt-get install -y -qq libreoffice-writer-nogui >/dev/null
           scripts/fetch_tessdata.sh "$(python -c "from docextract.products import PRODUCTS; print(PRODUCTS['$PRODUCT'].tesseract_langs)")"

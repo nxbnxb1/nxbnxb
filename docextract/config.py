@@ -59,7 +59,10 @@ class Settings(BaseModel):
     orientation_model: str = "PP-LCNet_x1_0_doc_ori"
     device: str | None = Field(None, description="Paddle device, e.g. 'cpu' or 'gpu:0'")
     paddle_enable_mkldnn: bool = Field(
-        False, description="oneDNN on CPU; off by default because PaddlePaddle 3.3 fails with it on some models"
+        True, description="oneDNN on CPU (5-15x faster); always off on PaddlePaddle 3.3.0/3.3.1, which fail with it"
+    )
+    paddle_cpu_threads: int | None = Field(
+        None, ge=1, description="Threads of each Paddle model on CPU; None = the machine's cores (PaddleOCR uses 10)"
     )
 
     # --- VLM (OpenAI-compatible endpoint, e.g. vLLM serving Qwen-VL) ------------

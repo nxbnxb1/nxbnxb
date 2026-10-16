@@ -21,8 +21,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Versions the GitHub workflows run with.
-paddle = ["paddlepaddle==3.3.1", "paddleocr[doc-parser]==3.7.0", "rapidfuzz>=3.0"]
+# Versions the GitHub workflows run with. PaddlePaddle 3.2: 3.3.0/3.3.1 cannot run text detection or
+# layout with oneDNN, without which every model is 5-15 times slower on CPU.
+paddle = ["paddlepaddle==3.2.2", "paddleocr[doc-parser]==3.7.0", "rapidfuzz>=3.0"]
 dev = ["pytest>=8.0", "rapidfuzz>=3.0"]
 
 [project.scripts]

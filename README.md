@@ -160,10 +160,13 @@ Mọi tham số trong [`docextract/config.py`](docextract/config.py) đặt đư
 | `DOCEXTRACT_CACHE_DIR` | — | Cache kết quả theo nội dung vùng cắt (SQLite) |
 | `DOCEXTRACT_ROUTE_LOG_PATH` | — | Log quyết định của Router (JSONL) |
 | `DOCEXTRACT_OUTPUT_LOCALE` | `vi` | Nhãn trong Markdown và ngôn ngữ mô tả hình không có chữ (một ngôn ngữ của sản phẩm) |
+| `DOCEXTRACT_PADDLE_ENABLE_MKLDNN` | `true` | oneDNN trên CPU: mọi model Paddle nhanh hơn 5–15 lần, kết quả giống hệt. Cần PaddlePaddle 3.2 (`pip install -e ".[paddle]"`); 3.3.0/3.3.1 lỗi với oneDNN nên khi đó tự tắt |
+| `DOCEXTRACT_PADDLE_CPU_THREADS` | số nhân CPU | Số luồng của mỗi model Paddle (PaddleOCR mặc định 10, quá số nhân của runner 4 nhân) |
 
 ## Baseline
 
-Mỗi sản phẩm được so với cùng một bộ baseline, trên cùng dữ liệu và cùng loại runner (model được nạp trước khi bấm giờ):
+Mỗi sản phẩm được so với cùng một bộ baseline, trên cùng dữ liệu và cùng loại runner (model được nạp trước khi bấm giờ;
+mọi hệ thống dùng Paddle chạy cùng tuỳ chọn CPU: oneDNN, mỗi model một luồng cố định, số luồng bằng số nhân):
 
 | Mức | Hệ thống so sánh |
 |---|---|

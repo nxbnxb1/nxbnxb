@@ -145,11 +145,13 @@ class PPStructureSystem:
         if self._pipeline is None:
             from paddleocr import PPStructureV3
 
+            from .engines.paddle import cpu_options
+
             self._pipeline = PPStructureV3(
                 lang=self.lang,
                 use_doc_unwarping=False,
                 use_chart_recognition=False,  # needs a VLM; docextract is also measured without one
-                enable_mkldnn=False,
+                **cpu_options(),  # the same CPU options as docextract
                 # its default detects text on the whole page at full size and asked for 20 GB on
                 # nearly every page of a 16 GB runner; docextract detects within cropped regions
                 text_det_limit_type="max",

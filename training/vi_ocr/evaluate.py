@@ -50,8 +50,10 @@ class Paddle:
     def __init__(self, arg: str, dataset: str) -> None:
         from paddleocr import TextRecognition
 
+        from docextract.engines.paddle import cpu_options
+
         name, _, directory = arg.partition("@")
-        kwargs = {"model_name": name, "enable_mkldnn": False}
+        kwargs = {"model_name": name, **cpu_options()}  # the same CPU options as docextract
         if directory:
             kwargs["model_dir"] = directory
         self.model = TextRecognition(**kwargs)

@@ -1,16 +1,18 @@
 """PaddleOCR 3.x adapters: PP-StructureV3 layout module, PP-OCR, table and formula recognition.
 
 Only the individual modules are used (not the full PP-StructureV3 pipeline) so that no
-region is processed twice. Models load lazily on first use; predictors are not
-thread-safe, so every call holds the adapter's lock.
+region is processed twice. Models load lazily on first use; each model is loaded and run
+on a thread of its own (predictors are not thread-safe, and with oneDNN they depend on it).
 """
 
 from __future__ import annotations
 
+import functools
 import importlib.util
 import logging
+import os
 import re
-import threading
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 
@@ -27,6 +29,29 @@ log = logging.getLogger(__name__)
 
 def paddle_available() -> bool:
     return importlib.util.find_spec("paddleocr") is not None
+
+
+@functools.cache
+def _onednn_broken() -> bool:
+    """PaddlePaddle 3.3.0/3.3.1 stop with "ConvertPirAttribute2RuntimeAttribute not support
+    ArrayAttribute<DoubleAttribute>" when oneDNN runs nearest_interp (text detection, layout)."""
+    try:
+        import paddle
+    except ImportError:
+        return False
+    if paddle.__version__.startswith("3.3."):
+        log.warning("PaddlePaddle %s cannot use oneDNN: models run 5-15x slower on CPU (use 3.2)", paddle.__version__)
+        return True
+    return False
+
+
+def cpu_options(enable_mkldnn: bool = True, cpu_threads: int | None = None) -> dict[str, Any]:
+    """CPU options of every Paddle model: oneDNN where the installed Paddle supports it, and one
+    thread per core (PaddleOCR's default of 10 oversubscribes a 4-core machine)."""
+    return {
+        "enable_mkldnn": enable_mkldnn and not _onednn_broken(),
+        "cpu_threads": cpu_threads or os.cpu_count() or 4,
+    }
 
 
 def to_bgr(image: Image.Image) -> np.ndarray:
@@ -75,10 +100,13 @@ class _PaddleAdapter:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self._model = None
-        self._lock = threading.Lock()
+        # The model is loaded and run on one thread of its own: a Paddle predictor with oneDNN
+        # fails ("std::exception") once the thread that last ran it has ended, and the executor's
+        # threads end with every document. One thread also serialises the calls.
+        self._thread = ThreadPoolExecutor(max_workers=1, thread_name_prefix="paddle")
 
     def _common(self) -> dict[str, Any]:
-        kwargs: dict[str, Any] = {"enable_mkldnn": self.settings.paddle_enable_mkldnn}
+        kwargs = cpu_options(self.settings.paddle_enable_mkldnn, self.settings.paddle_cpu_threads)
         if self.settings.device:
             kwargs["device"] = self.settings.device
         return kwargs
@@ -86,17 +114,18 @@ class _PaddleAdapter:
     def _load(self):  # pragma: no cover - implemented by subclasses
         raise NotImplementedError
 
+    def _loaded(self):
+        if self._model is None:
+            log.info("loading %s", self.name)
+            self._model = self._load()
+        return self._model
+
     def warm_up(self) -> None:
         """Load the model now instead of at the first prediction."""
-        with self._lock:
-            if self._model is None:
-                log.info("loading %s", self.name)
-                self._model = self._load()
+        self._thread.submit(self._loaded).result()
 
     def _predict(self, *args, **kwargs) -> list:
-        self.warm_up()
-        with self._lock:
-            return list(self._model.predict(*args, **kwargs))
+        return self._thread.submit(lambda: list(self._loaded().predict(*args, **kwargs))).result()
 
 
 class PaddleLayoutDetector(_PaddleAdapter):
