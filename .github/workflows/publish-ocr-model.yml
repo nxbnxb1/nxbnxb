@@ -52,7 +52,7 @@ jobs:
           WORKFLOW: ${{ steps.run.outputs.workflow }}
         run: |
           {
-            echo "Product $PRODUCT: model of training run $RUN_ID ($WORKFLOW #$NUMBER)."
+            echo "Product $PRODUCT: model of training run $RUN_ID ($WORKFLOW #$NUMBER, commit $SHA)."
             echo
             echo "**Published by decision of the repository owner although the quality gate held it back:** $REASON"
             echo
@@ -60,6 +60,8 @@ jobs:
             echo
             cat model/gate.md
           } > notes.md
+          # the tag is on the current commit: GITHUB_TOKEN may not create a tag on an older commit whose
+          # workflow files differ from the default branch (HTTP 403); the training commit is in the notes
           gh release create "$PRODUCT-ocr-$NUMBER" model/dist/*.tar.gz model/report.md model/report.json \
-            --repo "$GITHUB_REPOSITORY" --target "$SHA" --title "$PRODUCT OCR model #$NUMBER" --notes-file notes.md
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "$PRODUCT OCR model #$NUMBER" --notes-file notes.md
           cat notes.md >> "$GITHUB_STEP_SUMMARY"
