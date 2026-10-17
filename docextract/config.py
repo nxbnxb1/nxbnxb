@@ -48,10 +48,6 @@ class Settings(BaseModel):
     ocr_det_model: str | None = Field(None, description="Override text detection model name")
     ocr_rec_model: str | None = Field(None, description="Override text recognition model name (default: product baseline)")
     ocr_rec_model_dir: str | None = Field(None, description="Custom (e.g. fine-tuned Vietnamese) recognition model")
-    ocr_latin_rec_model_dir: str | None = Field(
-        None,
-        description="vi_en_ja: the vi_en product's fine-tuned model; lines without kana/kanji are read again with it",
-    )
     ocr_det_unclip_ratio: float | None = Field(
         None, description="Grow detected text boxes; larger keeps stacked Vietnamese diacritics inside the box"
     )

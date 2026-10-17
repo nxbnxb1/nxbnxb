@@ -36,7 +36,8 @@ và Release riêng ([`docextract/products.py`](docextract/products.py)):
 | Đưa tài liệu vào | `inputs/vi_en/` | `inputs/vi_en_ja/` |
 | Kết quả | `outputs/vi_en/` | `outputs/vi_en_ja/` |
 | Workflow | `Việt + Anh · Extract documents / Benchmark / Train OCR model` | `Việt + Anh + Nhật · Extract documents / Benchmark / Train OCR model` |
-| Release model | `vi_en-ocr-<số>` | `vi_en_ja-ocr-<số>` |
+| Release model (bản chốt, v1.0.0) | `vi_en-ocr-7` | `vi_en_ja-ocr-4` |
+| Nên dùng cho | tài liệu chỉ có tiếng Việt và/hoặc tiếng Anh | tài liệu có tiếng Nhật (đọc scan tiếng Anh kém hơn `vi_en`, xem [kết quả](docs/RESULTS.md)) |
 
 Baseline của mỗi sản phẩm là model PaddleOCR gốc mà model của sản phẩm đó được fine-tune từ. Khi chưa có Release,
 sản phẩm chạy bằng baseline. Benchmark và đánh giá khi huấn luyện chỉ so mỗi sản phẩm với baseline của chính nó.
@@ -152,7 +153,6 @@ Mọi tham số trong [`docextract/config.py`](docextract/config.py) đặt đư
 |---|---|---|
 | `DOCEXTRACT_PRODUCT` | `vi_en` | `vi_en` (Việt + Anh) hoặc `vi_en_ja` (Việt + Anh + Nhật) |
 | `DOCEXTRACT_OCR_REC_MODEL_DIR` | (Release được chốt của sản phẩm) | Model nhận dạng đã fine-tune; không có thì dùng baseline |
-| `DOCEXTRACT_OCR_LATIN_REC_MODEL_DIR` | (`vi_en_ja`: model của `vi_en`) | Dòng không có kana/kanji được đọc lại bằng model Việt + Anh, đọc tiếng Việt và tiếng Anh tốt hơn model `vi_en_ja` |
 | `DOCEXTRACT_FIGURE_POLICY` | `auto` | Giữ file hình: `auto` (theo quy tắc), `always`, `never` |
 | `DOCEXTRACT_LAYOUT_BACKEND` | `auto` | `paddle`, `heuristic` (nhanh, chỉ PDF có text) |
 | `DOCEXTRACT_DPI` | `200` | Độ phân giải render trang PDF |

@@ -15,7 +15,7 @@ on:
         description: Pages, e.g. 1-3,5 (empty = all)
         default: ""
       model_tag:
-        description: Release of the fine-tuned model (empty = the pinned one, vi_en_ja-ocr-4; latest = newest; Latin lines use the pinned vi_en model)
+        description: Release of the fine-tuned model (empty = the pinned one, vi_en_ja-ocr-4; latest = newest)
         default: ""
       demo:
         description: Convert the generated demo documents instead

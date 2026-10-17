@@ -17,7 +17,6 @@ class Product:
     paddle_lang: str  # PaddleOCR language code used with the baseline
     tesseract_langs: str  # Tesseract languages of the product (benchmark baseline)
     release: str  # GitHub Release of the fine-tuned model the product is pinned to
-    latin_product: str | None = None  # product whose model reads lines without kana/kanji
 
 
 PRODUCTS: dict[str, Product] = {
@@ -40,9 +39,6 @@ PRODUCTS: dict[str, Product] = {
         paddle_lang="japan",
         tesseract_langs="vie+eng+jpn",
         release="vi_en_ja-ocr-4",
-        # Vietnamese and English lines are read better by the vi_en model (scanned documents:
-        # English 93.9% vs 86.4% word F1, Vietnamese 88.8% vs 80.3%)
-        latin_product="vi_en",
     ),
 }
 
