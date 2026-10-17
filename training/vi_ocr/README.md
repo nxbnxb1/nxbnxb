@@ -1,60 +1,74 @@
 # Fine-tune model nhận dạng PaddleOCR cho hai sản phẩm
 
-Toàn bộ chạy trên GitHub Actions (runner CPU miễn phí), hai sản phẩm triển khai giống hệt nhau:
+Toàn bộ quá trình chạy trên GitHub Actions, dùng runner CPU miễn phí. Hai sản phẩm được triển khai theo cùng một quy
+trình:
 
 | Sản phẩm | Workflow | Model gốc (baseline) | Từ điển | Release |
 |---|---|---|---|---|
 | Việt + Anh (`vi_en`) | *Việt + Anh · Train OCR model* | `latin_PP-OCRv5_mobile_rec` | 281 ký tự | `vi_en-ocr-<số>` |
 | Việt + Anh + Nhật (`vi_en_ja`) | *Việt + Anh + Nhật · Train OCR model* | `PP-OCRv5_mobile_rec` | 6.973 ký tự | `vi_en_ja-ocr-<số>` |
 
-## Vì sao cần
+## Vấn đề
 
-Model gốc của PaddleOCR thiếu trong từ điển phần lớn chữ tiếng Việt có dấu chồng (ạ ả ấ ầ … ộ … ỹ). Bộ giải mã CTC không
-thể sinh ra các chữ đó nên **bỏ mất cả chữ** mà độ tin cậy vẫn cao: "Số: 4770/BC-UBND" → "S: 4770/BC-UBND",
-"Cộng hòa" → "Cng hòa".
+Từ điển của model gốc PaddleOCR thiếu phần lớn chữ tiếng Việt có dấu chồng (ạ ả ấ ầ … ộ … ỹ). Bộ giải mã CTC không
+thể sinh ra các chữ này, nên **bỏ mất cả chữ** trong khi độ tin cậy vẫn cao. Ví dụ: "Số: 4770/BC-UBND" thành
+"S: 4770/BC-UBND", "Cộng hòa" thành "Cng hòa".
 
 ## Các bước
 
 | Bước | File | Nội dung |
 |---|---|---|
-| Bộ ký tự | `charset.py` | `vi_en`: số, chữ & dấu câu ASCII, 134 chữ Việt, ký hiệu. `vi_en_ja`: các ký tự của từ điển PP-OCRv5 thuộc bộ chữ chuẩn tiếng Nhật (CP932: kana, 6.221 kanji, ký tự toàn độ rộng) + chữ Việt; bỏ chữ Hán chỉ dùng trong tiếng Trung (18.383 → 6.973 lớp) |
-| Khởi tạo | `init_weights.py` | Chép trọng số của ký tự có sẵn; chữ mới lấy từ chữ gần nhất (`ộ ← ô ← o`) |
-| Dữ liệu | `synth.py` | Dòng chữ tổng hợp theo tần suất từ vựng Việt/Anh/Nhật, số liệu, ngày tháng, số hiệu văn bản; mọi font đủ ký tự và **vẽ đúng dấu**; làm xấu như ảnh scan. Mỗi runner, mỗi vòng sinh dòng mới (không lặp lại) |
-| Dòng thật | `doc_lines.py` | Một nửa dòng huấn luyện cắt từ PDF số của các công ty thuộc phần train của kho tài liệu, nhãn là lớp chữ của PDF; **mỗi ngôn ngữ một phần bằng nhau** (kho có 82% tài liệu tiếng Nhật: lấy theo tài liệu thì model `vi_en_ja` học tiếng Nhật nhưng kém baseline ở tiếng Anh thật) |
-| Huấn luyện | `run_training.sh`, `train_cpu.py` | Nhiều runner cùng lúc, theo vòng (xem dưới) |
+| Bộ ký tự | `charset.py` | `vi_en`: chữ số, chữ cái và dấu câu ASCII, 134 chữ Việt, ký hiệu. `vi_en_ja`: các ký tự trong từ điển PP-OCRv5 thuộc bộ chữ chuẩn tiếng Nhật CP932 (kana, 6.221 kanji, ký tự toàn độ rộng), thêm chữ Việt; bỏ chữ Hán chỉ dùng trong tiếng Trung (18.383 → 6.973 lớp) |
+| Khởi tạo | `init_weights.py` | Ký tự có sẵn giữ trọng số; chữ mới lấy trọng số của chữ gần nhất (`ộ ← ô ← o`) |
+| Dòng tổng hợp | `synth.py` | Dòng chữ theo tần suất từ vựng Việt, Anh, Nhật, kèm số liệu, ngày tháng, số hiệu văn bản. Font được chọn sao cho có đủ ký tự và **vẽ đúng dấu**. Ảnh được làm xấu như ảnh scan. Dữ liệu được sinh mới ở mỗi vòng |
+| Dòng thật | `doc_lines.py` | Một nửa số dòng huấn luyện, cắt từ PDF số của các công ty thuộc phần train của kho tài liệu. Nhãn là lớp chữ của PDF. Mỗi ngôn ngữ được lấy một phần bằng nhau |
+| Huấn luyện | `run_training.sh`, `train_cpu.py` | Song song trên nhiều runner, theo vòng (xem dưới) |
 | Export | `train_cpu.py export` | Định dạng PaddleOCR 3.x (`inference.json/.pdiparams/.yml`), cùng kiến trúc với model gốc |
-| Đánh giá | `evaluate.py` | CER, độ chính xác dòng, tỷ lệ giữ chữ có dấu, ms/dòng — **baseline và model mới trên cùng runner, cùng dữ liệu** |
+| Đánh giá | `evaluate.py` | CER, độ chính xác dòng, tỷ lệ giữ chữ có dấu, ms/dòng. Model mới và model gốc chạy trên cùng runner, cùng dữ liệu |
+| Cổng chất lượng | `gate.py` | Điều kiện để phát hành Release (xem dưới) |
 
-## Huấn luyện trên nhiều runner (local SGD)
+## Huấn luyện song song (local SGD)
 
-Một runner GitHub có 4 nhân CPU, không GPU. Mỗi **vòng**: N runner bắt đầu từ cùng trọng số, mỗi runner huấn luyện trên
-dòng tổng hợp riêng trong `round_minutes` phút, rồi trọng số được **lấy trung bình**; vòng sau bắt đầu từ trung bình đó.
-Sau mỗi vòng có kiểm tra trên dòng validation (trong *Summary* của workflow). Vòng cuối được export, đánh giá với baseline
-trên mọi bộ đánh giá (tổng hợp theo ngôn ngữ, dòng dài 30–60 ký tự, dòng cắt từ tài liệu thật của các công ty dùng để test
-theo từng ngôn ngữ) và chỉ xuất bản Release khi qua chốt chất lượng `gate.py`: trên mọi bộ dòng của tài liệu thật, CER không
-cao hơn baseline quá 0,5 điểm % (dòng tổng hợp không quyết định: `vi_en_ja-ocr-2` tốt hơn baseline trên dòng tổng hợp nhưng
-kém hơn trên tài liệu thật). Không qua thì model chỉ được giữ làm artifact; chủ repo vẫn có thể quyết định xuất bản nó
-bằng workflow *Publish OCR model* (lý do được ghi vào Release). Mặc định: 8 runner × 4 vòng × 50 phút. Learning rate không đổi trong vòng, giảm theo cosine qua các
-vòng. Runner nào lỗi chỉ làm bớt một phần của trung bình.
+Mỗi vòng diễn ra như sau:
 
-Tham số workflow: `runners`, `rounds` (1–6), `round_minutes`, `lines` (dòng mới mỗi runner mỗi vòng), `resume_tag`
-(huấn luyện tiếp từ trọng số của một Release), `publish`.
+1. N runner bắt đầu từ cùng một bộ trọng số.
+2. Mỗi runner huấn luyện trên dữ liệu riêng trong `round_minutes` phút.
+3. Trọng số của các runner được lấy trung bình. Vòng sau bắt đầu từ trọng số trung bình này.
 
-## Tốc độ trên CPU (đo bằng workflow *OCR training · speed probe*)
+Cấu hình mặc định là 8 runner × 4 vòng × 50 phút. Learning rate không đổi trong một vòng và giảm theo hàm cosine
+qua các vòng. Tham số `resume_tag` cho phép huấn luyện tiếp từ trọng số của một Release.
 
-Mẫu/giây trên runner 4 nhân, lô 32:
+Model huấn luyện ở dạng dùng khi suy luận: các nhánh backbone được gộp và chỉ giữ nhánh CTC. Nhánh NRTR chỉ dùng
+khi huấn luyện. Bảng dưới là tốc độ huấn luyện, tính bằng mẫu/giây, trên runner 4 nhân với lô 32:
 
 | Cấu hình | vi_en | vi_en_ja |
 |---|---|---|
-| Như PaddleOCR huấn luyện (nhánh NRTR + backbone nhiều nhánh) | 1,0 | 0,8 |
-| Gộp nhánh backbone thành 1 conv như lúc suy luận (`FUSE=1`) | 2,4 | 1,6 |
-| Gộp + chỉ nhánh CTC (`GTC=0`) — **mặc định** | **8,8** | **7,1** |
-| Gộp + chỉ CTC + đóng băng tầng 1–4 | 10,1 | 5,9 |
+| Cấu hình huấn luyện gốc của PaddleOCR (CTC + NRTR, backbone nhiều nhánh) | 1,0 | 0,8 |
+| Gộp nhánh backbone | 2,4 | 1,6 |
+| Gộp nhánh backbone, chỉ nhánh CTC (**mặc định**) | **8,8** | **7,1** |
 
-Nhánh NRTR chỉ dùng khi huấn luyện (model suy luận chỉ có nhánh CTC) nhưng chiếm phần lớn thời gian trên CPU. Đóng băng
-tầng đầu lợi không đáng kể nên toàn bộ backbone vẫn được huấn luyện. oneDNN và static graph không cải thiện / không chạy được.
+## Đánh giá và cổng chất lượng
 
-## Thử nhanh
+Model của vòng cuối được export, rồi đánh giá cùng model gốc trên các bộ dòng sau:
 
-Bản thử 2 runner × 2 vòng × 8 phút (sản phẩm `vi_en`), trên dòng đánh giá tiếng Việt: CER 12,75% → 9,33%, độ chính xác
-dòng 15,7% → 27,8%, tỷ lệ giữ chữ có dấu 24% → 43%; tiếng Anh giữ nguyên (1,88% → 1,77%); tốc độ như nhau (~180 ms/dòng).
+- dòng tổng hợp theo từng ngôn ngữ;
+- dòng dài, 30–60 ký tự;
+- dòng cắt từ tài liệu thật của các công ty dùng để test: 1.000 dòng cho mỗi ngôn ngữ và 500 dòng dài.
+
+Model chỉ được phát hành thành Release khi qua cổng chất lượng: trên mọi bộ dòng của tài liệu thật, CER không cao
+hơn model gốc quá 0,5 điểm %. Nếu không qua, model chỉ được lưu làm artifact. Workflow *Publish OCR model* cho phép
+phát hành một model như vậy, kèm lý do được ghi vào Release.
+
+Kết quả đánh giá khi phát hành hai model của v1.0.0 (CER trên dòng của tài liệu thật):
+
+| Release | Bộ dòng | Model gốc | Model fine-tune |
+|---|---|---|---|
+| `vi_en-ocr-7` | tiếng Việt | 15,25% | **5,30%** |
+| | tiếng Anh | 6,71% | **5,74%** |
+| | dòng dài | 12,98% | **3,39%** |
+| `vi_en_ja-ocr-4` | tiếng Việt | 20,24% | **5,44%** |
+| | tiếng Anh | **5,22%** | 5,66% |
+| | tiếng Nhật | 13,06% | **9,36%** |
+| | dòng dài | 16,91% | **9,41%** |
+
+Kết quả so với các hệ thống OCR khác: [docs/RESULTS.md](../../docs/RESULTS.md).

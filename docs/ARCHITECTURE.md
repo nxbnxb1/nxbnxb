@@ -9,7 +9,7 @@
 > - **Không mất thông tin:** hình chỉ được thay bằng chữ khi chữ mang được toàn bộ nội dung; nếu không, giữ file hình
 >   (`docextract/figures.py`).
 > - Phương pháp áp dụng chung cho mọi loại tài liệu (quy tắc theo loại nội dung và mức kiểm chứng được), không tinh
->   chỉnh theo bộ test; benchmark báo cáo đúng kết quả, kể cả khi sai.
+>   chỉnh theo bộ test; benchmark báo cáo đầy đủ kết quả, kể cả khi kém hơn hệ thống khác.
 > - Toàn bộ chạy trên **GitHub Actions** (CI, huấn luyện model OCR, trích xuất tài liệu, benchmark).
 >
 > Hình minh họa: [tổng quan](images/pipeline_1_overview.svg) · [Router & kiểm tra](images/pipeline_2_router.svg) ·

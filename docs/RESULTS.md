@@ -90,11 +90,13 @@ Bảng đọc từng dòng chữ có thêm PP-OCRv5_server_rec, VietOCR và Easy
    Nó cũng nhận đúng tiêu đề ít hơn model gốc (74% so với 83%).
 2. **Chậm hơn Tesseract:** khoảng 26 giây cho một trang scan so với 6 giây của Tesseract
    (Việt + Anh), vì docextract còn tìm bố cục, bảng, tiêu đề và đọc từng vùng.
-3. **PDF số:** văn bản chuẩn lấy từ chính lớp chữ của PDF, nên "chỉ lấy chữ có sẵn" gần 100%. Cột này chủ yếu cho thấy
+3. **Cấu trúc bảng:** trên các tài liệu có bảng, TEDS của docextract là 0,47 (Việt + Anh) và 0,43 (Việt + Anh + Nhật),
+   của PP-StructureV3 là 0,70 và 0,69. Chênh lệch lớn nhất ở bảng trên trang scan.
+4. **PDF số:** văn bản chuẩn lấy từ chính lớp chữ của PDF, nên "chỉ lấy chữ có sẵn" gần 100%. Cột này chủ yếu cho thấy
    docextract không làm hỏng chữ có sẵn.
-4. **Phần mô tả hình và biểu đồ bằng VLM chưa được chấm** (benchmark chạy không có VLM).
-5. **Tập kiểm tra còn nhỏ:** 15 tài liệu doanh nghiệp cho mỗi loại. Chênh lệch vài điểm % giữa hai hệ thống chưa chắc
-   là thật; chênh lớn (như scan tiếng Việt 89% so với 52%) thì chắc chắn.
+5. **Phần mô tả hình và biểu đồ bằng VLM chưa được chấm** (benchmark chạy không có VLM).
+6. **Tập kiểm tra còn nhỏ:** 15 tài liệu doanh nghiệp cho mỗi loại. Chênh lệch vài điểm % giữa hai hệ thống chưa đủ
+   để kết luận; chênh lệch lớn (như scan tiếng Việt 89% so với 52%) nhất quán giữa hai sản phẩm và với kết quả từng dòng.
 
 ## Nguồn số liệu
 
