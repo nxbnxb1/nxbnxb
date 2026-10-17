@@ -177,6 +177,9 @@ mọi hệ thống dùng Paddle chạy cùng tuỳ chọn CPU: oneDNN, mỗi mod
 Ngôn ngữ của baseline theo sản phẩm: Tesseract `vie+eng` / `vie+eng+jpn`; EasyOCR `vi,en` / theo ngôn ngữ từng tập
 (EasyOCR không ghép được tiếng Việt với tiếng Nhật); PP-StructureV3 `lang=vi` / `lang=japan`.
 
+Kết quả của bản 1.0.0 (hai sản phẩm, mọi hệ thống trên cùng tài liệu, độ chính xác và tốc độ):
+[`docs/RESULTS.md`](docs/RESULTS.md).
+
 ## Kho tài liệu doanh nghiệp
 
 Dữ liệu huấn luyện và kiểm thử là tài liệu doanh nghiệp tự công bố trên website của chính họ (quan hệ cổ đông,
