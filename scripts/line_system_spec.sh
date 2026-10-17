@@ -3,7 +3,8 @@
 #
 #   scripts/line_system_spec.sh SYSTEM   (fine-tuned, stock, server, ppocrv6, tesseract, easyocr, vietocr)
 #
-# Env: PRODUCT; DOCEXTRACT_OCR_REC_MODEL_DIR / OCR_MODEL_TAG for "fine-tuned" (scripts/fetch_ocr_model.sh).
+# Env: PRODUCT; DOCEXTRACT_OCR_REC_MODEL_DIR / OCR_MODEL_TAG (and the Latin-line model of vi_en_ja)
+# for "fine-tuned" (scripts/fetch_ocr_model.sh).
 # Prints nothing for "fine-tuned" without a fine-tuned model.
 set -euo pipefail
 eval "$(python - <<'PY'
@@ -16,7 +17,11 @@ PY
 case "$1" in
   fine-tuned)
     [ -n "${DOCEXTRACT_OCR_REC_MODEL_DIR:-}" ] || exit 0
-    echo "PROPOSED: fine-tuned (${OCR_MODEL_TAG:-?})=paddle:$BASE@$DOCEXTRACT_OCR_REC_MODEL_DIR" ;;
+    if [ -n "${DOCEXTRACT_OCR_LATIN_REC_MODEL_DIR:-}" ]; then  # as docextract reads: Latin lines again
+      echo "PROPOSED: fine-tuned (${OCR_MODEL_TAG:-?}, Latin lines ${OCR_LATIN_MODEL_TAG:-?})=paddle-latin:$BASE@$DOCEXTRACT_OCR_REC_MODEL_DIR,latin_PP-OCRv5_mobile_rec@$DOCEXTRACT_OCR_LATIN_REC_MODEL_DIR"
+    else
+      echo "PROPOSED: fine-tuned (${OCR_MODEL_TAG:-?})=paddle:$BASE@$DOCEXTRACT_OCR_REC_MODEL_DIR"
+    fi ;;
   stock) echo "$BASE (stock, fine-tuning source)=paddle:$BASE" ;;
   server) echo "PP-OCRv5_server_rec (stock)=paddle:PP-OCRv5_server_rec" ;;
   ppocrv6) echo "PP-OCRv6_medium_rec (stock)=paddle:PP-OCRv6_medium_rec" ;;

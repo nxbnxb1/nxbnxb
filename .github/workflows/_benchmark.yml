@@ -4,7 +4,7 @@ name: _benchmark (reusable)
 # several reasonable baselines on the same data, each on its own runner, one table at the end.
 #
 # Documents (CER, word F1, table TEDS, heading F1, ms/page, needs review; per category):
-#   fine-tuned    docextract + the product's fine-tuned model (newest Release, or model_tag)
+#   fine-tuned    docextract + the product's fine-tuned model (pinned Release, or model_tag)
 #   stock         docextract + the stock PaddleOCR model the product is fine-tuned from
 #   ppocrv6       docextract + PP-OCRv6_medium_rec (newest PaddleOCR generation)
 #   ppstructure   PP-StructureV3, PaddleOCR's own document parser

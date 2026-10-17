@@ -15,7 +15,7 @@ on:
         description: Pages, e.g. 1-3,5 (empty = all)
         default: ""
       model_tag:
-        description: Release of the fine-tuned model (empty = newest vi_en model)
+        description: Release of the fine-tuned model (empty = the pinned one, vi_en-ocr-7; latest = newest)
         default: ""
       demo:
         description: Convert the generated demo documents instead

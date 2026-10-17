@@ -22,7 +22,8 @@ from PIL import Image, ImageOps
 from ..config import Settings
 from ..models import BBox
 from ..preprocessing.image import dark_on_light
-from ..textutil import Line, join_lines, normalize
+from ..products import PRODUCTS
+from ..textutil import Line, is_cjk, join_lines, normalize
 from .base import FormulaResult, LayoutBox, OcrResult, TableResult
 
 log = logging.getLogger(__name__)
@@ -166,7 +167,13 @@ class PaddleTextRecognizer(_PaddleAdapter):
         model = settings.ocr_rec_model or settings.product_info.baseline_model
         if settings.ocr_rec_model_dir:
             model = Path(settings.ocr_rec_model_dir).name
-        self.name = f"paddle:ocr:{settings.product}:{model}"
+        self.latin = LatinLineReader(settings) if settings.ocr_latin_rec_model_dir else None
+        self.name = f"paddle:ocr:{settings.product}:{model}" + (f"+{self.latin.name}" if self.latin else "")
+
+    def warm_up(self) -> None:
+        super().warm_up()
+        if self.latin is not None:
+            self.latin.warm_up()
 
     def _load(self):
         from paddleocr import PaddleOCR
@@ -194,8 +201,11 @@ class PaddleTextRecognizer(_PaddleAdapter):
     def recognize(self, images: list[Image.Image]) -> list[OcrResult]:
         if not images:
             return []
-        results = self._predict([to_bgr(_prepare_crop(im)) for im in images])
-        return [self._to_ocr_result(_res(r)) for r in results]
+        crops = [_prepare_crop(im) for im in images]
+        results = [self._to_ocr_result(_res(r)) for r in self._predict([to_bgr(im) for im in crops])]
+        if self.latin is not None:
+            results = self.latin.reread(crops, results)
+        return results
 
     @staticmethod
     def _to_ocr_result(res: dict) -> OcrResult:
@@ -209,6 +219,55 @@ class PaddleTextRecognizer(_PaddleAdapter):
             x0, y0, x1, y1 = (float(v) for v in list(box)[:4])
             lines.append(Line(text=normalize(str(text)), x0=x0, y0=y0, x1=x1, y1=y1, score=float(score)))
         return OcrResult(text=join_lines(lines), lines=lines)
+
+
+class LatinLineReader(_PaddleAdapter):
+    """vi_en_ja: lines its recogniser read without kana or kanji are read again with the vi_en
+    product's fine-tuned model, which reads Vietnamese and English better (scanned documents of
+    the benchmark: English 93.9% vs 86.4% word F1, Vietnamese 88.8% vs 80.3%), while Japanese
+    lines keep the vi_en_ja reading. Only the recogniser runs again, on the boxes already found."""
+
+    def __init__(self, settings: Settings) -> None:
+        super().__init__(settings)
+        self.model_dir = settings.ocr_latin_rec_model_dir
+        self.name = f"latin:{Path(self.model_dir).name}"
+
+    def _load(self):
+        from paddleocr import TextRecognition
+
+        return TextRecognition(model_name=PRODUCTS["vi_en"].baseline_model, model_dir=self.model_dir, **self._common())
+
+    def reread(self, crops: list[Image.Image], results: list[OcrResult]) -> list[OcrResult]:
+        todo = [(i, line) for i, result in enumerate(results) for line in result.lines if is_latin_line(line.text)]
+        if not todo:
+            return results
+        images = [to_bgr(_line_crop(crops[i], line)) for i, line in todo]
+        # lines of similar width share a batch: each batch is padded to its widest line
+        order = sorted(range(len(images)), key=lambda k: images[k].shape[1] / max(1, images[k].shape[0]))
+        texts = [None] * len(images)
+        for start in range(0, len(order), 16):
+            chunk = order[start : start + 16]
+            for k, res in zip(chunk, self._predict([images[k] for k in chunk], batch_size=len(chunk))):
+                texts[k] = res
+        for (_, line), res in zip(todo, texts):
+            data = _res(res)
+            text = normalize(str(data.get("rec_text", "")))
+            if text:
+                line.text, line.score = text, float(data.get("rec_score", line.score))
+        touched = {i for i, _ in todo}
+        return [OcrResult(text=join_lines(r.lines), lines=r.lines) if i in touched else r for i, r in enumerate(results)]
+
+
+def is_latin_line(text: str) -> bool:
+    """A line with letters and no kana/kanji: Vietnamese, English or digits with words."""
+    return any(ch.isalpha() for ch in text) and not any(is_cjk(ch) for ch in text)
+
+
+def _line_crop(image: Image.Image, line: Line) -> Image.Image:
+    pad_y = (line.y1 - line.y0) * 0.15
+    box = (max(0, int(line.x0 - 3)), max(0, int(line.y0 - pad_y)),
+           min(image.width, int(line.x1 + 3) + 1), min(image.height, int(line.y1 + pad_y) + 1))
+    return image.crop(box) if box[2] > box[0] and box[3] > box[1] else image
 
 
 def _poly_to_box(poly) -> list[float]:

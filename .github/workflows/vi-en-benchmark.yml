@@ -31,7 +31,7 @@ on:
         description: Runners per system for the documents (each takes a part; results are merged)
         default: "3"
       model_tag:
-        description: Release of the fine-tuned model (empty = newest vi_en model)
+        description: Release of the fine-tuned model (empty = the pinned one, vi_en-ocr-7; latest = newest)
         default: ""
 
 permissions:

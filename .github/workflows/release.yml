@@ -1,0 +1,77 @@
+name: "Release docextract"
+
+# The finished tool as one GitHub Release "v<version>" (version from pyproject.toml): the Python
+# package (wheel + source) and the fine-tuned recognition models the products are pinned to
+# (release in docextract/products.py; vi_en_ja also reads Latin lines with the vi_en model), with
+# docs/RESULTS.md (benchmark of both products) and the installation steps as notes.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Package
+        id: package
+        run: |
+          pip install build
+          python -m build
+          pip install -e .
+          echo "version=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")" >> "$GITHUB_OUTPUT"
+          ls -la dist
+
+      - name: Pinned models of both products
+        run: |
+          scripts/fetch_ocr_model.sh vi_en_ja  # also fetches the vi_en model (Latin lines)
+          ls -la models/*.tar.gz
+          [ "$(ls models/*.tar.gz | wc -l)" -eq 2 ] || { echo "both models are needed"; exit 1; }
+
+      - name: Release
+        env:
+          VERSION: ${{ steps.package.outputs.version }}
+        run: |
+          {
+            python - <<'EOF'
+          from docextract.products import PRODUCTS
+          print("docextract: PDF, Word and scans to Markdown + JSON. Text comes from the PDF text layer or OCR, never from the VLM.\n")
+          print("| product | languages | fine-tuned model (Release) |")
+          print("|---|---|---|")
+          for p in PRODUCTS.values():
+              latin = f"; lines without kana/kanji: {PRODUCTS[p.latin_product].model} ({PRODUCTS[p.latin_product].release})" if p.latin_product else ""
+              print(f"| {p.key} ({p.name}) | {', '.join(p.languages)} | {p.model} ({p.release}){latin} |")
+          EOF
+            echo
+            echo "## Install"
+            echo
+            echo '```bash'
+            echo "pip install \"./docextract-$VERSION-py3-none-any.whl[paddle]\"   # PaddlePaddle 3.2.2, PaddleOCR 3.7"
+            echo "tar -xzf vi_en_PP-OCRv5_mobile_rec.tar.gz && tar -xzf vi_en_ja_PP-OCRv5_mobile_rec.tar.gz"
+            echo "# Việt + Anh"
+            echo "DOCEXTRACT_PRODUCT=vi_en DOCEXTRACT_OCR_REC_MODEL_DIR=\$PWD/vi_en_PP-OCRv5_mobile_rec docextract extract report.pdf -o out/"
+            echo "# Việt + Anh + Nhật"
+            echo "DOCEXTRACT_PRODUCT=vi_en_ja DOCEXTRACT_OCR_REC_MODEL_DIR=\$PWD/vi_en_ja_PP-OCRv5_mobile_rec \\"
+            echo "  DOCEXTRACT_OCR_LATIN_REC_MODEL_DIR=\$PWD/vi_en_PP-OCRv5_mobile_rec docextract extract report.pdf -o out/"
+            echo '```'
+            echo
+            echo "On GitHub: Actions → Việt + Anh · Extract / Việt + Anh + Nhật · Extract (the same models)."
+            echo
+            cat docs/RESULTS.md
+          } > notes.md
+          # the tag is on this commit (GITHUB_TOKEN may not tag an older commit whose workflow files differ)
+          gh release create "v$VERSION" dist/* models/*.tar.gz --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "docextract $VERSION" --notes-file notes.md
+          cat notes.md >> "$GITHUB_STEP_SUMMARY"

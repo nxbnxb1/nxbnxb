@@ -167,3 +167,34 @@ def test_english_with_stray_ocr_marks_is_not_checked_as_vietnamese():
     assert not looks_vietnamese(noisy) and vietnamese_dropout_ratio(noisy) == 0.0
     assert looks_vietnamese("Cộng hòa xã hội chủ nghĩa Việt Nam")
     assert vietnamese_dropout_ratio("Cng hòa xã hi ch nghĩa Vit Nam, Báo cáo tài chính") > 0.08
+
+
+def test_vi_en_ja_reads_latin_lines_again_with_the_vi_en_model():
+    from PIL import Image
+
+    from docextract.config import Settings
+    from docextract.engines.base import OcrResult
+    from docextract.engines.paddle import LatinLineReader, is_latin_line
+    from docextract.textutil import Line
+
+    assert is_latin_line("Medium-Term Plan") and is_latin_line("Báo cáo tài chính")
+    assert not is_latin_line("売上高 1,234 百万円") and not is_latin_line("2025")
+
+    class Result:
+        def __init__(self, text):
+            self.json = {"res": {"rec_text": text, "rec_score": 0.99}}
+
+    reader = LatinLineReader(Settings(product="vi_en_ja", ocr_latin_rec_model_dir="/models/vi_en_PP-OCRv5_mobile_rec"))
+    seen = []
+    reader._predict = lambda images, **kw: [seen.append(im.shape) or Result("each Noteholder") for im in images]
+    lines = [Line("cach Notcholder", 0, 0, 200, 20, score=0.6), Line("売上高", 0, 30, 100, 50, score=0.9)]
+    out = reader.reread([Image.new("RGB", (220, 60), "white")], [OcrResult("cach Notcholder 売上高", lines)])
+    assert [ln.text for ln in out[0].lines] == ["each Noteholder", "売上高"] and len(seen) == 1
+    assert "each Noteholder" in out[0].text and out[0].lines[0].score == 0.99
+
+
+def test_products_are_pinned_to_their_model_releases():
+    from docextract.products import PRODUCTS
+
+    assert PRODUCTS["vi_en"].release == "vi_en-ocr-7" and PRODUCTS["vi_en_ja"].release == "vi_en_ja-ocr-4"
+    assert PRODUCTS["vi_en_ja"].latin_product == "vi_en" and PRODUCTS["vi_en"].latin_product is None

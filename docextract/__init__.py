@@ -1,7 +1,7 @@
 """docextract: PDF / Word / scanned images → Markdown + JSON, with per-region routing between
 PDF parsing, PaddleOCR (layout, OCR, tables, formulas) and a VLM for visual content."""
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 
 from .config import Settings  # noqa: E402
 from .models import DocumentResult  # noqa: E402

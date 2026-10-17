@@ -5,8 +5,9 @@
 #     SYSTEM: fine-tuned (the proposed system: docextract + the product's fine-tuned model),
 #             stock, ppocrv6, ppstructure, tesseract, text_layer
 #
-# Env: PRODUCT; the fine-tuned model from scripts/fetch_ocr_model.sh (DOCEXTRACT_OCR_REC_MODEL_DIR,
-# OCR_MODEL_TAG), used by "fine-tuned" only, so one job can score several systems in a row.
+# Env: PRODUCT; the fine-tuned model(s) from scripts/fetch_ocr_model.sh (DOCEXTRACT_OCR_REC_MODEL_DIR,
+# OCR_MODEL_TAG, and for vi_en_ja DOCEXTRACT_OCR_LATIN_REC_MODEL_DIR / OCR_LATIN_MODEL_TAG), used by
+# "fine-tuned" only, so one job can score several systems in a row.
 set -euo pipefail
 system="$1" dataset="$2" out="$3"
 shift 3
@@ -18,12 +19,18 @@ print(f"BASE='{p.baseline_model}' PADDLE_LANG='{p.paddle_lang}' TESS='{p.tessera
 EOF
 )"
 fine_tuned="${DOCEXTRACT_OCR_REC_MODEL_DIR:-}"
-unset DOCEXTRACT_OCR_REC_MODEL_DIR DOCEXTRACT_OCR_REC_MODEL
+latin="${DOCEXTRACT_OCR_LATIN_REC_MODEL_DIR:-}"
+unset DOCEXTRACT_OCR_REC_MODEL_DIR DOCEXTRACT_OCR_LATIN_REC_MODEL_DIR DOCEXTRACT_OCR_REC_MODEL
 case "$system" in
   fine-tuned)
     if [ -z "$fine_tuned" ]; then echo "no fine-tuned model yet"; exit 0; fi
     export DOCEXTRACT_OCR_REC_MODEL_DIR="$fine_tuned"
-    args=(--system docextract --name "PROPOSED: docextract + fine-tuned model (${OCR_MODEL_TAG:-?})") ;;
+    models="${OCR_MODEL_TAG:-?}"
+    if [ -n "$latin" ]; then
+      export DOCEXTRACT_OCR_LATIN_REC_MODEL_DIR="$latin"
+      models="$models, Latin lines ${OCR_LATIN_MODEL_TAG:-?}"
+    fi
+    args=(--system docextract --name "PROPOSED: docextract + fine-tuned model ($models)") ;;
   stock) args=(--system docextract --name "docextract + $BASE (stock, fine-tuning source)") ;;
   ppocrv6)
     export DOCEXTRACT_OCR_REC_MODEL=PP-OCRv6_medium_rec

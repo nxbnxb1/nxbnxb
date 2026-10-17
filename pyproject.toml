@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "docextract"
-version = "0.1.0"
-description = "PDF / Word / scanned images (Vietnamese + English) to Markdown + JSON with PaddleOCR and a VLM for visual content"
+version = "1.0.0"
+description = "PDF / Word / scanned images (Vietnamese + English, Vietnamese + English + Japanese) to Markdown + JSON with PaddleOCR and a VLM for visual content"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

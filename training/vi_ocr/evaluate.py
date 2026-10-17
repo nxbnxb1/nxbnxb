@@ -116,7 +116,25 @@ class VietOCR:
         return [_nfc(self.predictor.predict(Image.open(p).convert("RGB"))) for p in paths]
 
 
-ENGINES = {"paddle": Paddle, "tesseract": Tesseract, "easyocr": EasyOCR, "vietocr": VietOCR}
+class PaddleLatin:
+    """docextract's vi_en_ja reading: the first model, then lines without kana/kanji read again
+    with the second (the vi_en model). Argument: "NAME@DIR,NAME@DIR"."""
+
+    def __init__(self, arg: str, dataset: str) -> None:
+        first, second = arg.split(",", 1)
+        self.first, self.second = Paddle(first, dataset), Paddle(second, dataset)
+
+    def read(self, paths: list[Path]) -> list[str]:
+        from docextract.engines.paddle import is_latin_line
+
+        texts = self.first.read(paths)
+        latin = [i for i, text in enumerate(texts) if is_latin_line(text)]
+        for i, text in zip(latin, self.second.read([paths[i] for i in latin]) if latin else []):
+            texts[i] = text
+        return texts
+
+
+ENGINES = {"paddle": Paddle, "paddle-latin": PaddleLatin, "tesseract": Tesseract, "easyocr": EasyOCR, "vietocr": VietOCR}
 
 
 def recognise(spec: str, dataset: str, paths: list[Path], batch: int = 64) -> tuple[list[str], float]:

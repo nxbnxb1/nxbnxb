@@ -46,7 +46,7 @@ sản phẩm chạy bằng baseline. Benchmark và đánh giá khi huấn luyệ
 | Việc cần làm | Cách làm |
 |---|---|
 | Trích xuất tài liệu | Đẩy file vào `inputs/vi_en/` hoặc `inputs/vi_en_ja/` → workflow *Extract documents* của sản phẩm đó tự chạy, sinh `outputs/<sản phẩm>/<tên>.md`, `<tên>.json`, `<tên>_assets/*.png` (hình giữ lại), commit vào nhánh và đính kèm artifact. Hoặc *Actions → … · Extract documents → Run workflow* (chọn file/thư mục, trang, hoặc `demo`). |
-| Huấn luyện model OCR | *Actions → … · Train OCR model → Run workflow*: 8 runner GitHub cùng huấn luyện theo vòng, lấy trung bình trọng số sau mỗi vòng ([chi tiết](training/vi_ocr/README.md)). Model được đánh giá so với baseline của sản phẩm (độ chính xác và tốc độ, cùng runner) và chỉ được xuất bản thành Release nếu trên dòng chữ cắt từ tài liệu thật của các công ty dùng để test, ở từng ngôn ngữ, nó không kém baseline ([`gate.py`](training/vi_ocr/gate.py)); workflow Extract/Benchmark của sản phẩm tự tải bản mới nhất. |
+| Huấn luyện model OCR | *Actions → … · Train OCR model → Run workflow*: 8 runner GitHub cùng huấn luyện theo vòng, lấy trung bình trọng số sau mỗi vòng ([chi tiết](training/vi_ocr/README.md)). Model được đánh giá so với baseline của sản phẩm (độ chính xác và tốc độ, cùng runner) và chỉ được xuất bản thành Release nếu trên dòng chữ cắt từ tài liệu thật của các công ty dùng để test, ở từng ngôn ngữ, nó không kém baseline ([`gate.py`](training/vi_ocr/gate.py)). Workflow Extract/Benchmark dùng Release mà sản phẩm được chốt (`release` trong [`products.py`](docextract/products.py): `vi_en-ocr-7`, `vi_en_ja-ocr-4`); muốn dùng model mới thì sửa chỗ đó, hoặc nhập `model_tag` (`latest` = bản mới nhất). |
 | Đo chất lượng | *Actions → … · Benchmark*: sản phẩm và các baseline chạy song song, mỗi hệ thống một runner, trên cùng dữ liệu (mặc định: tập `test` của bộ đánh giá giữ riêng); một bảng chung theo từng loại tài liệu (xem *Baseline* dưới đây). |
 | Kiểm thử mã nguồn | Workflow **CI** chạy `pytest` ở mỗi lần push / pull request. |
 
@@ -151,7 +151,8 @@ Mọi tham số trong [`docextract/config.py`](docextract/config.py) đặt đư
 | Biến | Mặc định | Ý nghĩa |
 |---|---|---|
 | `DOCEXTRACT_PRODUCT` | `vi_en` | `vi_en` (Việt + Anh) hoặc `vi_en_ja` (Việt + Anh + Nhật) |
-| `DOCEXTRACT_OCR_REC_MODEL_DIR` | (Release mới nhất của sản phẩm) | Model nhận dạng đã fine-tune; không có thì dùng baseline |
+| `DOCEXTRACT_OCR_REC_MODEL_DIR` | (Release được chốt của sản phẩm) | Model nhận dạng đã fine-tune; không có thì dùng baseline |
+| `DOCEXTRACT_OCR_LATIN_REC_MODEL_DIR` | (`vi_en_ja`: model của `vi_en`) | Dòng không có kana/kanji được đọc lại bằng model Việt + Anh, đọc tiếng Việt và tiếng Anh tốt hơn model `vi_en_ja` |
 | `DOCEXTRACT_FIGURE_POLICY` | `auto` | Giữ file hình: `auto` (theo quy tắc), `always`, `never` |
 | `DOCEXTRACT_LAYOUT_BACKEND` | `auto` | `paddle`, `heuristic` (nhanh, chỉ PDF có text) |
 | `DOCEXTRACT_DPI` | `200` | Độ phân giải render trang PDF |
