@@ -80,6 +80,20 @@ def estimate_skew(image: Image.Image, max_angle: float = 5.0) -> float:
     return round(best, 2)
 
 
+def dark_on_light(image: Image.Image) -> Image.Image:
+    """Light text on a dark background (headings on coloured bars, reversed banners) turned into
+    dark text on a light one. Recognisers learn mostly dark-on-light text and a fine-tuned one can
+    lose reversed text altogether ("Medium-Term" read as "đeene"). The background is what covers
+    most of a crop and its border."""
+    gray = np.asarray(image.convert("L"))
+    if gray.size == 0:
+        return image
+    border = np.concatenate([gray[0], gray[-1], gray[:, 0], gray[:, -1]])
+    if np.median(gray) < 128 and np.median(border) < 128:
+        return ImageOps.invert(image.convert("RGB"))
+    return image
+
+
 def enhance(image: Image.Image) -> tuple[Image.Image, bool]:
     """Stretch contrast of faded scans; leaves good images untouched (models dislike binarisation)."""
     stat = ImageStat.Stat(image.convert("L"))

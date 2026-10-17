@@ -21,6 +21,7 @@ from PIL import Image, ImageOps
 
 from ..config import Settings
 from ..models import BBox
+from ..preprocessing.image import dark_on_light
 from ..textutil import Line, join_lines, normalize
 from .base import FormulaResult, LayoutBox, OcrResult, TableResult
 
@@ -86,8 +87,9 @@ def _rec_model(settings: Settings) -> dict[str, str]:
 
 
 def _prepare_crop(image: Image.Image, min_height: int = 48, pad: int = 12) -> Image.Image:
-    """Upscale tiny crops and add a white margin: the text detector misses text touching the border."""
-    image = image.convert("RGB")
+    """Dark text on light (reversed text turned round), tiny crops upscaled, and a white margin:
+    the text detector misses text touching the border."""
+    image = dark_on_light(image.convert("RGB"))
     if image.height < min_height:
         factor = min_height / max(1, image.height)
         image = image.resize((max(1, round(image.width * factor)), min_height), Image.Resampling.BICUBIC)

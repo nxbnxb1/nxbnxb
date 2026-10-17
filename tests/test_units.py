@@ -142,3 +142,28 @@ def test_paddle_cpu_options(monkeypatch):
         assert options["enable_mkldnn"] is onednn and options["cpu_threads"] >= 1
     assert pe.cpu_options(enable_mkldnn=False, cpu_threads=2) == {"enable_mkldnn": False, "cpu_threads": 2}
     pe._onednn_broken.cache_clear()
+
+
+def test_reversed_text_is_turned_dark_on_light():
+    from PIL import Image, ImageDraw
+
+    from docextract.preprocessing.image import dark_on_light
+
+    banner = Image.new("RGB", (300, 60), (20, 60, 120))  # white heading on a blue bar
+    ImageDraw.Draw(banner).text((10, 20), "Medium-Term Management Plan", fill="white")
+    turned = dark_on_light(banner)
+    assert turned.getpixel((2, 2))[0] > 200 and min(turned.convert("L").getdata()) < 60
+    page = Image.new("RGB", (300, 60), "white")
+    ImageDraw.Draw(page).text((10, 20), "Medium-Term Management Plan", fill="black")
+    assert dark_on_light(page) is page
+
+
+def test_english_with_stray_ocr_marks_is_not_checked_as_vietnamese():
+    from docextract.textutil import looks_vietnamese, vietnamese_dropout_ratio
+
+    english = ("Noteholders who hold Notes through a bank, securities broker or other intermediary should "
+               "check with that intermediary whether it would require to receive instructions earlier ") * 3
+    noisy = english.replace("hold ", "holđ ", 1).replace("Direct", "Đircct")
+    assert not looks_vietnamese(noisy) and vietnamese_dropout_ratio(noisy) == 0.0
+    assert looks_vietnamese("Cộng hòa xã hội chủ nghĩa Việt Nam")
+    assert vietnamese_dropout_ratio("Cng hòa xã hi ch nghĩa Vit Nam, Báo cáo tài chính") > 0.08

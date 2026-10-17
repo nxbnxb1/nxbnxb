@@ -100,9 +100,13 @@ _VI_TONES = {"\u0300", "\u0301", "\u0303", "\u0309", "\u0323"}  # grave, acute, 
 
 
 def looks_vietnamese(text: str) -> bool:
+    """Vietnamese letters or tone marks on at least 2% of the Latin letters (as detect_language):
+    Vietnamese has them on most syllables, while an English paragraph with two stray marks from
+    OCR noise ("holđ", "subịect") is still English and must not be checked for dropped letters."""
     decomposed = unicodedata.normalize("NFD", text)
     marks = sum(1 for ch in decomposed if ch in _VI_TONES) + sum(1 for ch in text if ch in _VI_MARKS)
-    return marks >= 2
+    letters = sum(1 for ch in text if ch.isalpha() and not is_cjk(ch))
+    return marks >= max(2, 0.02 * letters)
 
 
 def detect_language(text: str, languages: Sequence[str] = ("vi", "en", "ja"), min_letters: int = 12) -> str | None:

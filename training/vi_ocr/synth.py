@@ -23,7 +23,7 @@ from multiprocessing import Pool
 from pathlib import Path
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
 
 from charset import build_charset, read_dict, vietnamese_letters
 
@@ -282,6 +282,10 @@ def degrade(image: Image.Image, rng: random.Random, bg: tuple[int, int, int]) ->
         lo = rng.uniform(40, 110)
         arr = lo + arr * (255 - lo) / 255
         image = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8))
+    if rng.random() < 0.08:
+        # reversed text (white on a dark or coloured bar, about 4% of real document lines): a model
+        # fine-tuned without it read "Medium-Term" as "đeene" where its baseline read it right
+        image = ImageOps.invert(image.convert("RGB"))
     return image
 
 
