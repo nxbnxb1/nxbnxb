@@ -13,15 +13,15 @@
 <text x="600.0" y="226.0" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="400" fill="#475569" text-anchor="middle"><tspan x="600.0" dy="0">ộ ← ô ← o</tspan></text>
 <path d="M 390 208 L 448 208" fill="none" stroke="#475569" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m475569)"/>
 <rect x="840" y="170" width="300" height="76" rx="14" fill="#ccfbf1" stroke="#0d9488" stroke-width="1.6"/>
-<text x="990.0" y="204.0" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="700" fill="#115e59" text-anchor="middle"><tspan x="990.0" dy="0">Dữ liệu tổng hợp</tspan></text>
-<text x="990.0" y="226.0" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="400" fill="#475569" text-anchor="middle"><tspan x="990.0" dy="0">60–80 nghìn dòng chữ</tspan></text>
+<text x="990.0" y="204.0" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="700" fill="#115e59" text-anchor="middle"><tspan x="990.0" dy="0">Dữ liệu</tspan></text>
+<text x="990.0" y="226.0" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="400" fill="#475569" text-anchor="middle"><tspan x="990.0" dy="0">50% tổng hợp · 50% dòng thật</tspan></text>
 <path d="M 780 208 L 838 208" fill="none" stroke="#475569" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m475569)"/>
 <rect x="60" y="320" width="300" height="76" rx="14" fill="#dbeafe" stroke="#2563eb" stroke-width="1.6"/>
-<text x="210.0" y="354.0" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="700" fill="#1e40af" text-anchor="middle"><tspan x="210.0" dy="0">Fine-tune</tspan></text>
-<text x="210.0" y="376.0" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="400" fill="#475569" text-anchor="middle"><tspan x="210.0" dy="0">tối đa ~5 giờ</tspan></text>
+<text x="210.0" y="354.0" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="700" fill="#1e40af" text-anchor="middle"><tspan x="210.0" dy="0">Huấn luyện song song</tspan></text>
+<text x="210.0" y="376.0" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="400" fill="#475569" text-anchor="middle"><tspan x="210.0" dy="0">local SGD trên nhiều runner</tspan></text>
 <rect x="450" y="320" width="300" height="76" rx="14" fill="#dcfce7" stroke="#16a34a" stroke-width="1.6"/>
-<text x="600.0" y="354.0" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="700" fill="#166534" text-anchor="middle"><tspan x="600.0" dy="0">Đánh giá</tspan></text>
-<text x="600.0" y="376.0" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="400" fill="#475569" text-anchor="middle"><tspan x="600.0" dy="0">CER so với baseline</tspan></text>
+<text x="600.0" y="354.0" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="700" fill="#166534" text-anchor="middle"><tspan x="600.0" dy="0">Cổng chất lượng</tspan></text>
+<text x="600.0" y="376.0" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="400" fill="#475569" text-anchor="middle"><tspan x="600.0" dy="0">CER dòng thật ≤ model gốc + 0,5</tspan></text>
 <path d="M 390 358 L 448 358" fill="none" stroke="#475569" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m475569)"/>
 <rect x="840" y="320" width="300" height="76" rx="14" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.6"/>
 <text x="990.0" y="354.0" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="700" fill="#5b21b6" text-anchor="middle"><tspan x="990.0" dy="0">Release</tspan></text>

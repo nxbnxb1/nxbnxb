@@ -267,8 +267,9 @@ def figures() -> Path:
     s.text(1010, 240, ["VD: lưu đồ, biểu đồ có in số"], size=14, color=MUTED)
     s.text(1010, 466, ["VD: ảnh chụp, bản đồ, chữ ký, logo"], size=14, color=MUTED)
     s.text(1010, 488, ["chưa có VLM → luôn giữ hình"], size=14, color=MUTED)
-    s.text(300, 410, ["Thay khi đủ cả 3:"], size=15, weight=700, color=INK, anchor="start")
-    s.text(300, 438, ["① hình mang tính văn bản", "② mô tả không mất thông tin", "③ chữ và số đọc được bằng OCR"],
+    s.text(300, 400, ["Thay khi đủ cả 5:"], size=15, weight=700, color=INK, anchor="start")
+    s.text(300, 428, ["① có mô tả hợp lệ", "② hình mang tính văn bản", "③ VLM xác nhận không mất thông tin",
+                      "④ chữ trong hình đã được đọc", "⑤ biểu đồ: mọi số liệu in trong hình"],
            size=14.5, color=INK, anchor="start", line_height=24)
     return s.save("pipeline_3_figures.svg")
 
@@ -280,9 +281,9 @@ def training() -> Path:
     s = Svg(1200, 530, "Hình 4. Huấn luyện model OCR cho từng sản phẩm", "Chạy trên GitHub Actions")
     s.chip(250, 92, 700, 44, "Model gốc thiếu chữ có dấu chồng:  “Cộng hòa” → “Cng hòa”", "warn", size=15)
     top = [("Model gốc", "baseline của sản phẩm", "input"), ("Thêm chữ tiếng Việt", "ộ ← ô ← o", "pre"),
-           ("Dữ liệu tổng hợp", "60–80 nghìn dòng chữ", "layout")]
-    bottom = [("Fine-tune", "tối đa ~5 giờ", "text"), ("Đánh giá", "CER so với baseline", "check"),
-              ("Release", "pipeline tự tải về", "out")]
+           ("Dữ liệu", "50% tổng hợp · 50% dòng thật", "layout")]
+    bottom = [("Huấn luyện song song", "local SGD trên nhiều runner", "text"),
+              ("Cổng chất lượng", "CER dòng thật ≤ model gốc + 0,5", "check"), ("Release", "pipeline tự tải về", "out")]
     for row, items in ((170, top), (320, bottom)):
         x = 60
         for i, (title, sub, theme) in enumerate(items):
