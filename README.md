@@ -134,6 +134,9 @@ model như sau:
 
 ## Đầu ra
 
+Ví dụ đầu ra trên các tài liệu mẫu (PDF số, bản scan, Word, trang có hình): [`outputs/vi_en/`](outputs/vi_en/),
+[`outputs/vi_en_ja/`](outputs/vi_en_ja/).
+
 `outputs/<tên>.md` là Markdown theo thứ tự đọc, gồm:
 
 - tiêu đề `#`;
