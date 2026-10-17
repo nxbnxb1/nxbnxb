@@ -4,6 +4,7 @@ name: "Release docextract"
 # package (wheel + source) and the fine-tuned recognition model of each product (the release it
 # is pinned to in docextract/products.py). The two products are independent: each runs on its own
 # model only. Notes: the products, the installation steps and docs/RESULTS.md (benchmark).
+# Run again for a version that is already released: only its notes are refreshed.
 
 on:
   workflow_dispatch:
@@ -74,7 +75,12 @@ jobs:
             echo
             cat docs/RESULTS.md
           } > notes.md
-          # the tag is on this commit (GITHUB_TOKEN may not tag an older commit whose workflow files differ)
-          gh release create "v$VERSION" dist/* models/*.tar.gz --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
-            --title "docextract $VERSION" --notes-file notes.md
+          if gh release view "v$VERSION" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            # already released: only the notes are refreshed, the published files stay as they are
+            gh release edit "v$VERSION" --repo "$GITHUB_REPOSITORY" --notes-file notes.md
+          else
+            # the tag is on this commit (GITHUB_TOKEN may not tag an older commit whose workflow files differ)
+            gh release create "v$VERSION" dist/* models/*.tar.gz --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+              --title "docextract $VERSION" --notes-file notes.md
+          fi
           cat notes.md >> "$GITHUB_STEP_SUMMARY"
