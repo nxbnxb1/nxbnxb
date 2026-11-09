@@ -1,6 +1,6 @@
 # Enterprise document corpus
 
-Updated by run 41433903252 on 2026-11-02. Files are not stored in the repository:
+Updated by run 42609490817 on 2026-11-09. Files are not stored in the repository:
 `python scripts/collect_corpus.py fetch corpus/manifest.jsonl --dir corpus_files` downloads them
 from the companies' own websites (checksums verified, robots.txt honoured). Long documents are
 stored as at most 20 of their pages (scans: 5), the same pages on every fetch.
